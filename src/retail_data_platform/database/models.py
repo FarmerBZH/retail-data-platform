@@ -3,8 +3,21 @@ from __future__ import annotations
 import enum
 import uuid
 from datetime import datetime
+from decimal import Decimal
 
-from sqlalchemy import CHAR, CheckConstraint, DateTime, Index, String, Text, Uuid, text
+from sqlalchemy import (
+    CHAR,
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    Index,
+    Numeric,
+    String,
+    Text,
+    UniqueConstraint,
+    Uuid,
+    text,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from retail_data_platform.database.base import Base
@@ -54,3 +67,55 @@ class ImportRun(Base):
         server_default=text("now()"),
     )
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class Product(Base):
+    __tablename__ = "products"
+    __table_args__ = (
+        UniqueConstraint("gtin", name="uq_products_gtin"),
+        UniqueConstraint("erp_code", name="uq_products_erp_code"),
+        CheckConstraint(
+            "gtin ~ '^[0-9]+$' AND length(gtin) IN (8, 12, 13, 14)",
+            name="ck_products_gtin_format",
+        ),
+        CheckConstraint(
+            "content_quantity IS NULL OR content_quantity >= 0",
+            name="ck_products_nonnegative_content_quantity",
+        ),
+        CheckConstraint(
+            "average_price IS NULL OR average_price >= 0",
+            name="ck_products_nonnegative_average_price",
+        ),
+        CheckConstraint(
+            "(average_price IS NULL) = (average_price_currency IS NULL)",
+            name="ck_products_price_pair",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid,
+        primary_key=True,
+        server_default=text("uuidv7()"),
+    )
+    gtin: Mapped[str] = mapped_column(String(14))
+    erp_code: Mapped[str | None] = mapped_column(String(32))
+    internal_code: Mapped[str] = mapped_column(String(64))
+    name: Mapped[str] = mapped_column(String(255))
+    brand: Mapped[str] = mapped_column(String(128))
+    market: Mapped[str] = mapped_column(String(128))
+    category: Mapped[str] = mapped_column(String(128))
+    segment: Mapped[str | None] = mapped_column(String(128))
+    content_quantity: Mapped[Decimal | None] = mapped_column(Numeric(12, 3))
+    content_unit: Mapped[str | None] = mapped_column(String(32))
+    average_price: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+    average_price_currency: Mapped[str | None] = mapped_column(CHAR(3))
+    category_code: Mapped[str] = mapped_column(String(32))
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default=text("true"))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=text("now()"),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=text("now()"),
+    )

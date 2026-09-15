@@ -10,9 +10,13 @@ dependencies = [
     "sqlalchemy>=2.0,<3",
 ]
 
+[project.scripts]
+retail-data = "retail_data_platform.cli:main"
+
 [dependency-groups]
 dev = [
     "mypy>=1.18,<2",
+    "pytest>=8.4,<9",
     "ruff>=0.13,<0.14",
 ]
 
@@ -23,6 +27,9 @@ build-backend = "uv_build"
 [tool.mypy]
 python_version = "3.13"
 strict = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
 
 [tool.ruff]
 line-length = 100

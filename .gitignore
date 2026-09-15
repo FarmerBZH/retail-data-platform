@@ -1,6 +1,11 @@
 # Private source data
 /data/raw/
 
+# Local environment
+.env
+.env.*
+!.env.example
+
 # Python
 .venv/
 __pycache__/

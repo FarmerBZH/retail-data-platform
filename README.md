@@ -16,3 +16,11 @@ uv run ruff check .
 uv run ruff format --check .
 uv run mypy src
 ```
+
+Start the local database and apply its migrations:
+
+```bash
+cp .env.example .env
+docker compose up -d database
+uv run alembic upgrade head
+```

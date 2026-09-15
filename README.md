@@ -21,6 +21,8 @@ Start the local database and apply its migrations:
 
 ```bash
 cp .env.example .env
-docker compose up -d database
+docker compose up -d database database_admin
 uv run alembic upgrade head
 ```
+
+Browse the local database at [http://127.0.0.1:8080](http://127.0.0.1:8080).

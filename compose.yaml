@@ -16,5 +16,16 @@ services:
       timeout: 5s
       retries: 10
 
+  database_admin:
+    image: adminer:5.5.0-standalone
+    restart: unless-stopped
+    environment:
+      ADMINER_DEFAULT_SERVER: database
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      database:
+        condition: service_healthy
+
 volumes:
   postgres_data:

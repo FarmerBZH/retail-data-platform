@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from retail_data_platform.importers.products import import_products
+from retail_data_platform.importers.stores import import_stores
 
 
 def main() -> int:
@@ -14,17 +15,33 @@ def main() -> int:
     datasets = import_command.add_subparsers(dest="dataset", required=True)
     products = datasets.add_parser("products", help="Import the product catalog")
     products.add_argument("--source-dir", type=Path, required=True)
+    stores = datasets.add_parser("stores", help="Import the store catalog")
+    stores.add_argument("--source-dir", type=Path, required=True)
     args = parser.parse_args()
 
     if args.command == "import" and args.dataset == "products":
-        summary = import_products(args.source_dir)
+        product_summary = import_products(args.source_dir)
         print(
             json.dumps(
                 {
                     "dataset": "products",
-                    "rows_read": summary.rows_read,
-                    "rows_loaded": summary.rows_loaded,
-                    "skipped": summary.skipped,
+                    "rows_read": product_summary.rows_read,
+                    "rows_loaded": product_summary.rows_loaded,
+                    "skipped": product_summary.skipped,
+                }
+            )
+        )
+        return 0
+
+    if args.command == "import" and args.dataset == "stores":
+        store_summary = import_stores(args.source_dir)
+        print(
+            json.dumps(
+                {
+                    "dataset": "stores",
+                    "rows_read": store_summary.rows_read,
+                    "rows_loaded": store_summary.rows_loaded,
+                    "skipped": store_summary.skipped,
                 }
             )
         )

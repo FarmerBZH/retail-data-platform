@@ -121,3 +121,106 @@ class Product(Base):
         DateTime(timezone=True),
         server_default=text("now()"),
     )
+
+
+class Store(Base):
+    __tablename__ = "stores"
+    __table_args__ = (
+        UniqueConstraint("source_key", name="uq_stores_source_key"),
+        UniqueConstraint("external_network_code", name="uq_stores_external_network_code"),
+        UniqueConstraint("crm_code", name="uq_stores_crm_code"),
+        UniqueConstraint("erp_code", name="uq_stores_erp_code"),
+        UniqueConstraint("legacy_store_id", name="uq_stores_legacy_store_id"),
+        CheckConstraint(
+            "sales_area_sqm IS NULL OR sales_area_sqm >= 0", name="ck_stores_sales_area"
+        ),
+        CheckConstraint(
+            "checkout_count IS NULL OR checkout_count >= 0", name="ck_stores_checkout_count"
+        ),
+        CheckConstraint(
+            "(survey_validity_days IS NULL OR survey_validity_days >= 0) AND "
+            "(planned_sales_visits IS NULL OR planned_sales_visits >= 0) AND "
+            "(sales_visit_minutes IS NULL OR sales_visit_minutes >= 0) AND "
+            "(planned_promoter_visits IS NULL OR planned_promoter_visits >= 0) AND "
+            "(promoter_visit_minutes IS NULL OR promoter_visit_minutes >= 0) AND "
+            "(planned_total_visits IS NULL OR planned_total_visits >= 0)",
+            name="ck_stores_nonnegative_visit_planning",
+        ),
+        CheckConstraint(
+            "annual_turnover_2025_millions IS NULL OR annual_turnover_2025_millions >= 0",
+            name="ck_stores_turnover_2025",
+        ),
+        CheckConstraint(
+            "annual_turnover_2024_millions IS NULL OR annual_turnover_2024_millions >= 0",
+            name="ck_stores_turnover_2024",
+        ),
+        CheckConstraint(
+            "annual_turnover_2023_millions IS NULL OR annual_turnover_2023_millions >= 0",
+            name="ck_stores_turnover_2023",
+        ),
+        CheckConstraint(
+            "october_2023_turnover_millions IS NULL OR october_2023_turnover_millions >= 0",
+            name="ck_stores_turnover_october_2023",
+        ),
+        Index("ix_stores_retail_panel_code", "retail_panel_code"),
+        Index("ix_stores_data_sharing_code", "data_sharing_code"),
+        Index("ix_stores_retailer_code", "retailer_code"),
+        Index("ix_stores_postal_code", "postal_code"),
+        Index("ix_stores_sales_representative_code", "sales_representative_code"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid,
+        primary_key=True,
+        server_default=text("uuidv7()"),
+    )
+    source_key: Mapped[str] = mapped_column(String(128))
+    external_network_code: Mapped[str | None] = mapped_column(String(64))
+    crm_code: Mapped[str | None] = mapped_column(String(64))
+    erp_code: Mapped[str | None] = mapped_column(String(32))
+    legacy_store_id: Mapped[str | None] = mapped_column(String(64))
+    retail_panel_code: Mapped[str | None] = mapped_column(String(32))
+    data_sharing_code: Mapped[str | None] = mapped_column(String(64))
+    name: Mapped[str | None] = mapped_column(String(255))
+    legal_name: Mapped[str | None] = mapped_column(String(255))
+    address_line_1: Mapped[str | None] = mapped_column(String(255))
+    address_line_2: Mapped[str | None] = mapped_column(String(255))
+    department_code: Mapped[str | None] = mapped_column(String(8))
+    postal_code: Mapped[str | None] = mapped_column(String(16))
+    city: Mapped[str | None] = mapped_column(String(128))
+    retailer_code: Mapped[str | None] = mapped_column(String(32))
+    retailer_name: Mapped[str | None] = mapped_column(String(128))
+    store_format: Mapped[str | None] = mapped_column(String(64))
+    region_code: Mapped[str | None] = mapped_column(String(32))
+    region_name: Mapped[str | None] = mapped_column(String(128))
+    sales_representative_code: Mapped[str | None] = mapped_column(String(32))
+    sales_representative_name: Mapped[str | None] = mapped_column(String(128))
+    promoter_code: Mapped[str | None] = mapped_column(String(32))
+    promoter_name: Mapped[str | None] = mapped_column(String(128))
+    secondary_representative_code: Mapped[str | None] = mapped_column(String(32))
+    secondary_representative_name: Mapped[str | None] = mapped_column(String(128))
+    sales_area_sqm: Mapped[int | None]
+    classification: Mapped[str | None] = mapped_column(String(64))
+    segmentation: Mapped[str | None] = mapped_column(String(64))
+    distribution_model: Mapped[str | None] = mapped_column(String(64))
+    has_direct_sales_potential: Mapped[bool | None]
+    survey_validity_days: Mapped[int | None]
+    planned_sales_visits: Mapped[int | None]
+    sales_visit_minutes: Mapped[int | None]
+    planned_promoter_visits: Mapped[int | None]
+    promoter_visit_minutes: Mapped[int | None]
+    planned_total_visits: Mapped[int | None]
+    checkout_count: Mapped[int | None]
+    annual_turnover_2025_millions: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+    annual_turnover_2024_millions: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+    annual_turnover_2023_millions: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+    october_2023_turnover_millions: Mapped[Decimal | None] = mapped_column(Numeric(12, 2))
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default=text("true"))
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=text("now()"),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=text("now()"),
+    )

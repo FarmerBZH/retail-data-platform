@@ -13,11 +13,11 @@ def main() -> int:
     import_command = commands.add_parser("import", help="Import a dataset")
     datasets = import_command.add_subparsers(dest="dataset", required=True)
     products = datasets.add_parser("products", help="Import the product catalog")
-    products.add_argument("--source", type=Path, required=True)
+    products.add_argument("--source-dir", type=Path, required=True)
     args = parser.parse_args()
 
     if args.command == "import" and args.dataset == "products":
-        summary = import_products(args.source)
+        summary = import_products(args.source_dir)
         print(
             json.dumps(
                 {

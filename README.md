@@ -27,8 +27,8 @@ uv run alembic upgrade head
 
 Browse the local database at [http://127.0.0.1:8080](http://127.0.0.1:8080).
 
-Import a product catalog:
+Import the product source bundle:
 
 ```bash
-uv run retail-data import products --source /path/to/products.csv
+uv run retail-data import products --source-dir /path/to/product-sources
 ```

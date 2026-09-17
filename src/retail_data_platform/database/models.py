@@ -90,6 +90,8 @@ class Product(Base):
             "(average_price IS NULL) = (average_price_currency IS NULL)",
             name="ck_products_price_pair",
         ),
+        Index("ix_products_legacy_erp_code", "legacy_erp_code"),
+        Index("ix_products_legacy_internal_code", "legacy_internal_code"),
     )
 
     id: Mapped[uuid.UUID] = mapped_column(

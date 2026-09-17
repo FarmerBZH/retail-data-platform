@@ -4,6 +4,7 @@ import argparse
 import json
 from pathlib import Path
 
+from retail_data_platform.importers.assortments import import_assortments
 from retail_data_platform.importers.products import import_products
 from retail_data_platform.importers.stores import import_stores
 from retail_data_platform.importers.typologies import import_typologies
@@ -20,6 +21,8 @@ def main() -> int:
     stores.add_argument("--source-dir", type=Path, required=True)
     typologies = datasets.add_parser("typologies", help="Import monthly store typologies")
     typologies.add_argument("--source-dir", type=Path, required=True)
+    assortments = datasets.add_parser("assortments", help="Import monthly assortments")
+    assortments.add_argument("--source-dir", type=Path, required=True)
     args = parser.parse_args()
 
     if args.command == "import" and args.dataset == "products":
@@ -59,6 +62,20 @@ def main() -> int:
                     "rows_read": typology_summary.rows_read,
                     "rows_loaded": typology_summary.rows_loaded,
                     "skipped": typology_summary.skipped,
+                }
+            )
+        )
+        return 0
+
+    if args.command == "import" and args.dataset == "assortments":
+        assortment_summary = import_assortments(args.source_dir)
+        print(
+            json.dumps(
+                {
+                    "dataset": "assortments",
+                    "rows_read": assortment_summary.rows_read,
+                    "rows_loaded": assortment_summary.rows_loaded,
+                    "skipped": assortment_summary.skipped,
                 }
             )
         )

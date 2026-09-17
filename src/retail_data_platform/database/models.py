@@ -309,3 +309,79 @@ class TypologyMappingRule(Base):
     mapped_category_code: Mapped[str | None] = mapped_column(String(32))
     mapped_typology_value: Mapped[str | None] = mapped_column(String(128))
     has_source_error: Mapped[bool] = mapped_column(Boolean)
+
+
+class Assortment(Base):
+    __tablename__ = "assortments"
+    __table_args__ = (
+        UniqueConstraint("source_key", name="uq_assortments_source_key"),
+        CheckConstraint(
+            "gtin ~ '^[0-9]+$' AND length(gtin) IN (8, 12, 13, 14)",
+            name="ck_assortments_gtin_format",
+        ),
+        CheckConstraint(
+            "product_match_status IN ('matched', 'unresolved', 'conflict')",
+            name="ck_assortments_product_match_status",
+        ),
+        CheckConstraint(
+            "(product_match_status = 'matched') = (product_id IS NOT NULL)",
+            name="ck_assortments_product_match_relation",
+        ),
+        CheckConstraint(
+            "typology_match_status IN "
+            "('unsegmented', 'unmapped', 'mapping_conflict', 'mapping_source_error', "
+            "'rank_missing', 'rank_conflict', 'matched')",
+            name="ck_assortments_typology_match_status",
+        ),
+        CheckConstraint(
+            "(typology_match_status = 'matched') = (typology_rank_rule_id IS NOT NULL)",
+            name="ck_assortments_rank_match_relation",
+        ),
+        CheckConstraint(
+            "typology_mapping_rule_id IS NULL OR typology_match_status IN "
+            "('mapping_source_error', 'rank_missing', 'rank_conflict', 'matched')",
+            name="ck_assortments_mapping_match_relation",
+        ),
+        CheckConstraint(
+            "(typology_match_status = 'matched') = (typology_match_method IS NOT NULL)",
+            name="ck_assortments_typology_match_method_relation",
+        ),
+        CheckConstraint(
+            "typology_match_method IS NULL OR "
+            "typology_match_method IN ('mapping_rule', 'product_category')",
+            name="ck_assortments_typology_match_method",
+        ),
+        CheckConstraint(
+            "(typology_match_status = 'unsegmented') = (source_typology_value IS NULL)",
+            name="ck_assortments_source_typology_relation",
+        ),
+        Index("ix_assortments_period", "period"),
+        Index("ix_assortments_product_period", "product_id", "period"),
+        Index("ix_assortments_typology_period", "typology_rank_rule_id", "period"),
+        Index(
+            "ix_assortments_reconciliation",
+            "product_match_status",
+            "typology_match_status",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    source_key: Mapped[str] = mapped_column(CHAR(64))
+    period: Mapped[date] = mapped_column(Date)
+    product_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("products.id", ondelete="SET NULL")
+    )
+    product_match_status: Mapped[str] = mapped_column(String(16))
+    typology_mapping_rule_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("typology_mapping_rules.id", ondelete="SET NULL")
+    )
+    typology_rank_rule_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("typology_rank_rules.id", ondelete="SET NULL")
+    )
+    typology_match_status: Mapped[str] = mapped_column(String(32))
+    typology_match_method: Mapped[str | None] = mapped_column(String(32))
+    source_retailer_name: Mapped[str] = mapped_column(String(128))
+    source_category_name: Mapped[str] = mapped_column(String(128))
+    source_product_name: Mapped[str] = mapped_column(String(255))
+    gtin: Mapped[str] = mapped_column(String(14))
+    source_typology_value: Mapped[str | None] = mapped_column(String(128))

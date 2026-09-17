@@ -33,4 +33,5 @@ Import the product source bundle:
 uv run retail-data import products --source-dir /path/to/product-sources
 uv run retail-data import stores --source-dir /path/to/store-sources
 uv run retail-data import typologies --source-dir /path/to/monthly-typology-sources
+uv run retail-data import assortments --source-dir /path/to/monthly-assortment-sources
 ```

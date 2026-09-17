@@ -2,14 +2,16 @@ from __future__ import annotations
 
 import enum
 import uuid
-from datetime import datetime
+from datetime import date, datetime
 from decimal import Decimal
 
 from sqlalchemy import (
     CHAR,
     Boolean,
     CheckConstraint,
+    Date,
     DateTime,
+    ForeignKey,
     Index,
     Numeric,
     String,
@@ -226,3 +228,84 @@ class Store(Base):
         DateTime(timezone=True),
         server_default=text("now()"),
     )
+
+
+class TypologySnapshot(Base):
+    __tablename__ = "typology_snapshots"
+    __table_args__ = (
+        UniqueConstraint("source_key", name="uq_typology_snapshots_source_key"),
+        CheckConstraint(
+            "store_match_status IN ('matched', 'unresolved', 'conflict')",
+            name="ck_typology_snapshots_match_status",
+        ),
+        Index("ix_typology_snapshots_period", "period"),
+        Index("ix_typology_snapshots_store_period", "store_id", "period"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    source_key: Mapped[str] = mapped_column(CHAR(64))
+    period: Mapped[date] = mapped_column(Date)
+    store_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("stores.id", ondelete="SET NULL"))
+    store_match_status: Mapped[str] = mapped_column(String(16))
+    store_match_method: Mapped[str | None] = mapped_column(String(128))
+    retail_panel_code: Mapped[str | None] = mapped_column(String(32))
+    source_customer_code: Mapped[str | None] = mapped_column(String(64))
+    point_of_sale_id: Mapped[str | None] = mapped_column(String(64))
+    region_code: Mapped[str | None] = mapped_column(String(32))
+    sales_representative_code: Mapped[str | None] = mapped_column(String(32))
+    retailer_name: Mapped[str | None] = mapped_column(String(128))
+    source_info: Mapped[str | None] = mapped_column(String(255))
+    postal_code: Mapped[str | None] = mapped_column(String(16))
+
+
+class StoreTypologyValue(Base):
+    __tablename__ = "store_typology_values"
+    __table_args__ = (
+        UniqueConstraint(
+            "snapshot_id", "category_key", name="uq_store_typology_values_snapshot_category"
+        ),
+        Index("ix_store_typology_values_category", "category_key", "typology_value"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    snapshot_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("typology_snapshots.id", ondelete="CASCADE")
+    )
+    category_key: Mapped[str] = mapped_column(String(128))
+    category_name: Mapped[str] = mapped_column(String(128))
+    typology_value: Mapped[str] = mapped_column(String(128))
+
+
+class TypologyRankRule(Base):
+    __tablename__ = "typology_rank_rules"
+    __table_args__ = (
+        UniqueConstraint(
+            "retailer_name",
+            "category_code",
+            "rank",
+            name="uq_typology_rank_rules_retailer_category_rank",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    retailer_name: Mapped[str] = mapped_column(String(128))
+    category_name: Mapped[str] = mapped_column(String(128))
+    category_code: Mapped[str] = mapped_column(String(32))
+    rank: Mapped[int]
+    typology_value: Mapped[str] = mapped_column(String(128))
+
+
+class TypologyMappingRule(Base):
+    __tablename__ = "typology_mapping_rules"
+    __table_args__ = (UniqueConstraint("source_key", name="uq_typology_mapping_rules_source_key"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    source_key: Mapped[str] = mapped_column(CHAR(64))
+    raw_retailer_name: Mapped[str] = mapped_column(String(128))
+    raw_category_name: Mapped[str] = mapped_column(String(128))
+    raw_category_code: Mapped[str | None] = mapped_column(String(32))
+    raw_typology_value: Mapped[str] = mapped_column(String(128))
+    mapped_retailer_name: Mapped[str | None] = mapped_column(String(128))
+    mapped_category_code: Mapped[str | None] = mapped_column(String(32))
+    mapped_typology_value: Mapped[str | None] = mapped_column(String(128))
+    has_source_error: Mapped[bool] = mapped_column(Boolean)

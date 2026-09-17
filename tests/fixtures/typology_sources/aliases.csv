@@ -1,0 +1,3 @@
+category,normalized_id,raw_values,sources,Correspondance avec le fichier Magasin (codeSAP) ou produits (EAN)
+client,LEGACYCODE,LEGACY-CODE,CPAL,1002
+product,DEMO,DEMO,OTHER,9990000000012

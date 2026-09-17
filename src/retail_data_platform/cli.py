@@ -6,6 +6,7 @@ from pathlib import Path
 
 from retail_data_platform.importers.products import import_products
 from retail_data_platform.importers.stores import import_stores
+from retail_data_platform.importers.typologies import import_typologies
 
 
 def main() -> int:
@@ -17,6 +18,8 @@ def main() -> int:
     products.add_argument("--source-dir", type=Path, required=True)
     stores = datasets.add_parser("stores", help="Import the store catalog")
     stores.add_argument("--source-dir", type=Path, required=True)
+    typologies = datasets.add_parser("typologies", help="Import monthly store typologies")
+    typologies.add_argument("--source-dir", type=Path, required=True)
     args = parser.parse_args()
 
     if args.command == "import" and args.dataset == "products":
@@ -42,6 +45,20 @@ def main() -> int:
                     "rows_read": store_summary.rows_read,
                     "rows_loaded": store_summary.rows_loaded,
                     "skipped": store_summary.skipped,
+                }
+            )
+        )
+        return 0
+
+    if args.command == "import" and args.dataset == "typologies":
+        typology_summary = import_typologies(args.source_dir)
+        print(
+            json.dumps(
+                {
+                    "dataset": "typologies",
+                    "rows_read": typology_summary.rows_read,
+                    "rows_loaded": typology_summary.rows_loaded,
+                    "skipped": typology_summary.skipped,
                 }
             )
         )

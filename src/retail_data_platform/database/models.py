@@ -385,3 +385,57 @@ class Assortment(Base):
     source_product_name: Mapped[str] = mapped_column(String(255))
     gtin: Mapped[str] = mapped_column(String(14))
     source_typology_value: Mapped[str | None] = mapped_column(String(128))
+
+
+class StoreActivityMetric(Base):
+    __tablename__ = "store_activity_metrics"
+    __table_args__ = (
+        UniqueConstraint("source_key", name="uq_store_activity_metrics_source_key"),
+        CheckConstraint(
+            "activity_type IN ('calls', 'crowdsourced_visits', 'field_visits')",
+            name="ck_store_activity_metrics_type",
+        ),
+        CheckConstraint(
+            "activity_count >= 0",
+            name="ck_store_activity_metrics_nonnegative_count",
+        ),
+        CheckConstraint(
+            "store_match_status IN ('matched', 'unresolved', 'conflict')",
+            name="ck_store_activity_metrics_match_status",
+        ),
+        CheckConstraint(
+            "(store_match_status = 'matched') = (store_id IS NOT NULL)",
+            name="ck_store_activity_metrics_store_relation",
+        ),
+        CheckConstraint(
+            "(store_match_status = 'unresolved') = (store_match_method IS NULL)",
+            name="ck_store_activity_metrics_method_relation",
+        ),
+        CheckConstraint(
+            "date_trunc('month', period)::date = period",
+            name="ck_store_activity_metrics_month_period",
+        ),
+        Index("ix_store_activity_metrics_period", "period"),
+        Index(
+            "ix_store_activity_metrics_store_period",
+            "store_id",
+            "period",
+            "activity_type",
+        ),
+        Index(
+            "ix_store_activity_metrics_reconciliation",
+            "store_match_status",
+            "activity_type",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    source_key: Mapped[str] = mapped_column(CHAR(64))
+    period: Mapped[date] = mapped_column(Date)
+    store_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("stores.id", ondelete="SET NULL"))
+    store_match_status: Mapped[str] = mapped_column(String(16))
+    store_match_method: Mapped[str | None] = mapped_column(String(128))
+    activity_type: Mapped[str] = mapped_column(String(32))
+    activity_count: Mapped[int]
+    source_store_reference: Mapped[str] = mapped_column(String(128))
+    source_store_label: Mapped[str] = mapped_column(String(512))

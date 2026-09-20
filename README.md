@@ -1,7 +1,7 @@
 # Retail Data Platform
 
-A portfolio project for building a reliable data platform from CSV and XLSX
-sources.
+A portfolio project for building a reliable data platform from heterogeneous
+tabular sources.
 
 The project will be developed incrementally, starting with data ingestion and
 validation before adding an API and a web application.
@@ -34,4 +34,9 @@ uv run retail-data import products --source-dir /path/to/product-sources
 uv run retail-data import stores --source-dir /path/to/store-sources
 uv run retail-data import typologies --source-dir /path/to/monthly-typology-sources
 uv run retail-data import assortments --source-dir /path/to/monthly-assortment-sources
+uv run retail-data import visits \
+  --calls-dir /path/to/monthly-call-sources \
+  --crowdsourced-dir /path/to/monthly-crowdsourced-visit-sources \
+  --field-dir /path/to/monthly-field-visit-sources \
+  --aliases-file /path/to/store-aliases.csv
 ```

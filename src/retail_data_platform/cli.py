@@ -8,6 +8,7 @@ from retail_data_platform.importers.assortments import import_assortments
 from retail_data_platform.importers.products import import_products
 from retail_data_platform.importers.stores import import_stores
 from retail_data_platform.importers.typologies import import_typologies
+from retail_data_platform.importers.visits import import_visits
 
 
 def main() -> int:
@@ -23,6 +24,11 @@ def main() -> int:
     typologies.add_argument("--source-dir", type=Path, required=True)
     assortments = datasets.add_parser("assortments", help="Import monthly assortments")
     assortments.add_argument("--source-dir", type=Path, required=True)
+    visits = datasets.add_parser("visits", help="Import monthly store activity metrics")
+    visits.add_argument("--calls-dir", type=Path, required=True)
+    visits.add_argument("--crowdsourced-dir", type=Path, required=True)
+    visits.add_argument("--field-dir", type=Path, required=True)
+    visits.add_argument("--aliases-file", type=Path, required=True)
     args = parser.parse_args()
 
     if args.command == "import" and args.dataset == "products":
@@ -76,6 +82,25 @@ def main() -> int:
                     "rows_read": assortment_summary.rows_read,
                     "rows_loaded": assortment_summary.rows_loaded,
                     "skipped": assortment_summary.skipped,
+                }
+            )
+        )
+        return 0
+
+    if args.command == "import" and args.dataset == "visits":
+        visit_summary = import_visits(
+            args.calls_dir,
+            args.crowdsourced_dir,
+            args.field_dir,
+            args.aliases_file,
+        )
+        print(
+            json.dumps(
+                {
+                    "dataset": "store_activity_metrics",
+                    "rows_read": visit_summary.rows_read,
+                    "rows_loaded": visit_summary.rows_loaded,
+                    "skipped": visit_summary.skipped,
                 }
             )
         )

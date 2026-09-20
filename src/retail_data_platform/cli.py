@@ -5,6 +5,7 @@ import json
 from pathlib import Path
 
 from retail_data_platform.importers.assortments import import_assortments
+from retail_data_platform.importers.numeric_distribution import import_numeric_distribution
 from retail_data_platform.importers.products import import_products
 from retail_data_platform.importers.stores import import_stores
 from retail_data_platform.importers.typologies import import_typologies
@@ -29,6 +30,12 @@ def main() -> int:
     visits.add_argument("--crowdsourced-dir", type=Path, required=True)
     visits.add_argument("--field-dir", type=Path, required=True)
     visits.add_argument("--aliases-file", type=Path, required=True)
+    distribution = datasets.add_parser(
+        "numeric-distribution",
+        help="Import monthly product presence observations",
+    )
+    distribution.add_argument("--source-dir", type=Path, required=True)
+    distribution.add_argument("--aliases-file", type=Path, required=True)
     args = parser.parse_args()
 
     if args.command == "import" and args.dataset == "products":
@@ -101,6 +108,24 @@ def main() -> int:
                     "rows_read": visit_summary.rows_read,
                     "rows_loaded": visit_summary.rows_loaded,
                     "skipped": visit_summary.skipped,
+                }
+            )
+        )
+        return 0
+
+    if args.command == "import" and args.dataset == "numeric-distribution":
+        distribution_summary = import_numeric_distribution(
+            args.source_dir,
+            args.aliases_file,
+        )
+        print(
+            json.dumps(
+                {
+                    "dataset": "numeric_distribution",
+                    "rows_read": distribution_summary.rows_read,
+                    "rows_loaded": distribution_summary.rows_loaded,
+                    "rows_rejected": distribution_summary.rows_rejected,
+                    "skipped": distribution_summary.skipped,
                 }
             )
         )

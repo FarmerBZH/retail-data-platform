@@ -39,4 +39,7 @@ uv run retail-data import visits \
   --crowdsourced-dir /path/to/monthly-crowdsourced-visit-sources \
   --field-dir /path/to/monthly-field-visit-sources \
   --aliases-file /path/to/store-aliases.csv
+uv run retail-data import numeric-distribution \
+  --source-dir /path/to/monthly-distribution-sources \
+  --aliases-file /path/to/store-and-product-aliases.csv
 ```

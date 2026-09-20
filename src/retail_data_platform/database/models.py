@@ -14,6 +14,7 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Numeric,
+    SmallInteger,
     String,
     Text,
     UniqueConstraint,
@@ -439,3 +440,90 @@ class StoreActivityMetric(Base):
     activity_count: Mapped[int]
     source_store_reference: Mapped[str] = mapped_column(String(128))
     source_store_label: Mapped[str] = mapped_column(String(512))
+
+
+class NumericDistributionObservation(Base):
+    __tablename__ = "numeric_distribution_observations"
+    __table_args__ = (
+        UniqueConstraint(
+            "source_key",
+            name="uq_numeric_distribution_observations_source_key",
+        ),
+        CheckConstraint(
+            "presence_value IN (0, 1)",
+            name="ck_numeric_distribution_observations_binary_value",
+        ),
+        CheckConstraint(
+            "value_origin IN ('reported', 'inferred_absence')",
+            name="ck_numeric_distribution_observations_value_origin",
+        ),
+        CheckConstraint(
+            "value_origin != 'inferred_absence' OR presence_value = 0",
+            name="ck_numeric_distribution_observations_inferred_value",
+        ),
+        CheckConstraint(
+            "store_match_status IN ('matched', 'unresolved', 'conflict')",
+            name="ck_numeric_distribution_observations_store_status",
+        ),
+        CheckConstraint(
+            "product_match_status IN ('matched', 'unresolved', 'conflict')",
+            name="ck_numeric_distribution_observations_product_status",
+        ),
+        CheckConstraint(
+            "(store_match_status = 'matched') = (store_id IS NOT NULL)",
+            name="ck_numeric_distribution_observations_store_relation",
+        ),
+        CheckConstraint(
+            "(product_match_status = 'matched') = (product_id IS NOT NULL)",
+            name="ck_numeric_distribution_observations_product_relation",
+        ),
+        CheckConstraint(
+            "(store_match_status = 'unresolved') = (store_match_method IS NULL)",
+            name="ck_numeric_distribution_observations_store_method",
+        ),
+        CheckConstraint(
+            "(product_match_status = 'unresolved') = (product_match_method IS NULL)",
+            name="ck_numeric_distribution_observations_product_method",
+        ),
+        CheckConstraint(
+            "date_trunc('month', period)::date = period",
+            name="ck_numeric_distribution_observations_month_period",
+        ),
+        Index("ix_numeric_distribution_observations_period", "period"),
+        Index(
+            "ix_numeric_distribution_observations_category_period",
+            "category_code",
+            "period",
+        ),
+        Index(
+            "ix_numeric_distribution_observations_store_product_period",
+            "store_id",
+            "product_id",
+            "period",
+        ),
+        Index(
+            "ix_numeric_distribution_observations_reconciliation",
+            "store_match_status",
+            "product_match_status",
+        ),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    source_key: Mapped[str] = mapped_column(CHAR(64))
+    period: Mapped[date] = mapped_column(Date)
+    category_code: Mapped[str] = mapped_column(String(32))
+    store_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("stores.id", ondelete="SET NULL"))
+    store_match_status: Mapped[str] = mapped_column(String(16))
+    store_match_method: Mapped[str | None] = mapped_column(String(128))
+    product_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("products.id", ondelete="SET NULL")
+    )
+    product_match_status: Mapped[str] = mapped_column(String(16))
+    product_match_method: Mapped[str | None] = mapped_column(String(128))
+    presence_value: Mapped[int] = mapped_column(SmallInteger)
+    value_origin: Mapped[str] = mapped_column(String(24))
+    source_category_name: Mapped[str] = mapped_column(String(128))
+    source_store_reference: Mapped[str] = mapped_column(String(128))
+    source_store_label: Mapped[str] = mapped_column(String(512))
+    source_product_reference: Mapped[str] = mapped_column(String(128))
+    source_product_label: Mapped[str] = mapped_column(String(512))

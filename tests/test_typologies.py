@@ -64,6 +64,69 @@ def test_marks_conflicting_store_identifiers(tmp_path: Path) -> None:
     assert dataset.snapshots[0].store_match_status == "conflict"
 
 
+def test_reconciles_unresolved_store_from_reference_and_observed_history(
+    tmp_path: Path,
+) -> None:
+    monthly = copy_sources(tmp_path)
+    source = monthly / "202501_typologies.csv"
+    source.write_text(
+        source.read_text()
+        .replace("Example Retail||01000", "Example Retail|Sample Central|01000", 1)
+        .replace("Unknown Retail||03000", "Unknown Retail|Sample Central|01000", 1),
+        encoding="utf-8",
+    )
+    stores = store_identities()
+    stores[0] = StoreIdentity(
+        uuid.UUID(int=1),
+        "NET-001",
+        "CRM-001",
+        "1001",
+        None,
+        "700001",
+        None,
+        "Sample Central",
+        None,
+        "01000",
+    )
+
+    dataset = read_typology_dataset(monthly, stores)
+
+    assert dataset.snapshots[2].store_id == uuid.UUID(int=1)
+    assert dataset.snapshots[2].store_match_status == "matched"
+    assert dataset.snapshots[2].store_match_method == "historical_name_postal"
+
+
+def test_keeps_unresolved_store_when_observed_history_disagrees_with_reference(
+    tmp_path: Path,
+) -> None:
+    monthly = copy_sources(tmp_path)
+    source = monthly / "202501_typologies.csv"
+    source.write_text(
+        source.read_text()
+        .replace("Example Retail||01000", "Example Retail|Sample Central|01000", 1)
+        .replace("Unknown Retail||03000", "Unknown Retail|Sample Central|01000", 1),
+        encoding="utf-8",
+    )
+    stores = store_identities()
+    stores[1] = StoreIdentity(
+        uuid.UUID(int=2),
+        "NET-002",
+        "CRM-002",
+        "1002",
+        None,
+        "700002",
+        None,
+        "Sample Central",
+        None,
+        "01000",
+    )
+
+    dataset = read_typology_dataset(monthly, stores)
+
+    assert dataset.snapshots[2].store_id is None
+    assert dataset.snapshots[2].store_match_status == "unresolved"
+
+
 def test_rejects_duplicate_month_partition(tmp_path: Path) -> None:
     monthly = copy_sources(tmp_path)
     (monthly / "202501_duplicate.csv").write_text(

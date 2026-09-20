@@ -6,16 +6,17 @@ import re
 import unicodedata
 import uuid
 from collections import defaultdict
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import Engine, delete, select, text, update
+from sqlalchemy import Engine, delete, or_, select, text, update
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
 from retail_data_platform.database.models import (
+    Assortment,
     ImportRun,
     ImportStatus,
     Store,
@@ -28,6 +29,7 @@ from retail_data_platform.database.session import create_database_engine
 
 DATASET = "typologies"
 SOURCE_BUNDLE_NAME = "typology source bundle"
+IMPORT_CONTRACT_VERSION = "2"
 MAX_SOURCE_BYTES = 5_000_000
 DATABASE_BATCH_SIZE = 1_000
 UUID_NAMESPACE = uuid.UUID("7413ef73-3c68-4cb1-a89e-10b64a75ce57")
@@ -95,6 +97,9 @@ class StoreIdentity:
     legacy_store_id: str | None
     retail_panel_code: str | None
     data_sharing_code: str | None
+    name: str | None = None
+    legal_name: str | None = None
+    postal_code: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -257,6 +262,7 @@ def discover_typology_sources(monthly_directory: Path) -> TypologySources:
 
 def source_bundle_sha256(sources: TypologySources) -> str:
     digest = hashlib.sha256()
+    digest.update(f"contract:{IMPORT_CONTRACT_VERSION}".encode())
     entries = [
         *((f"monthly:{period.isoformat()}", path) for period, path in sources.monthly),
         ("aliases", sources.aliases),
@@ -284,6 +290,7 @@ def read_typology_dataset(monthly_directory: Path, stores: list[StoreIdentity]) 
         snapshots.extend(file_snapshots)
         values.extend(file_values)
         monthly_rows += len(file_snapshots)
+    snapshots = _reconcile_from_observed_store_identity(snapshots, stores)
     rank_rules, rank_rows = _read_rank_rules(sources.rank_rules)
     mapping_rules, mapping_rows = _read_mapping_rules(sources.mapping_rules)
     return TypologyDataset(
@@ -320,6 +327,9 @@ def import_typologies(monthly_directory: Path, engine: Engine | None = None) -> 
                     Store.legacy_store_id,
                     Store.retail_panel_code,
                     Store.data_sharing_code,
+                    Store.name,
+                    Store.legal_name,
+                    Store.postal_code,
                 )
             ).all()
         ]
@@ -394,6 +404,53 @@ class _StoreResolver:
         if len(resolved) == 1:
             return next(iter(resolved)), "matched", "+".join(sorted(set(methods)))
         return None, "conflict", "+".join(sorted(set(methods)))
+
+
+def _reconcile_from_observed_store_identity(
+    snapshots: list[SnapshotRecord], stores: list[StoreIdentity]
+) -> list[SnapshotRecord]:
+    reference_candidates: dict[tuple[str, str], set[uuid.UUID]] = defaultdict(set)
+    for store in stores:
+        postal_key = normalize_key(store.postal_code)
+        if not postal_key:
+            continue
+        for name in (store.name, store.legal_name):
+            name_key = normalize_key(name)
+            if name_key:
+                reference_candidates[(name_key, postal_key)].add(store.id)
+
+    observed_candidates: dict[tuple[str, str], set[uuid.UUID]] = defaultdict(set)
+    for snapshot in snapshots:
+        if snapshot.store_match_status != "matched" or snapshot.store_id is None:
+            continue
+        source_info_key = normalize_key(snapshot.source_info)
+        postal_key = normalize_key(snapshot.postal_code)
+        if source_info_key and postal_key:
+            observed_candidates[(source_info_key, postal_key)].add(snapshot.store_id)
+
+    reconciled: list[SnapshotRecord] = []
+    for snapshot in snapshots:
+        if snapshot.store_match_status != "unresolved":
+            reconciled.append(snapshot)
+            continue
+        identity_key = (normalize_key(snapshot.source_info), normalize_key(snapshot.postal_code))
+        if not all(identity_key):
+            reconciled.append(snapshot)
+            continue
+        reference_ids = reference_candidates.get(identity_key, set())
+        observed_ids = observed_candidates.get(identity_key, set())
+        if len(reference_ids) == 1 and reference_ids == observed_ids:
+            reconciled.append(
+                replace(
+                    snapshot,
+                    store_id=next(iter(reference_ids)),
+                    store_match_status="matched",
+                    store_match_method="historical_name_postal",
+                )
+            )
+        else:
+            reconciled.append(snapshot)
+    return reconciled
 
 
 def _read_month(
@@ -603,14 +660,70 @@ def _publish_typologies(engine: Engine, run_id: uuid.UUID, dataset: TypologyData
             {"dataset": DATASET},
         )
         session.execute(select(ImportRun.id).where(ImportRun.id == run_id).with_for_update())
+        rank_rule_ids = [record.id for record in dataset.rank_rules]
+        mapping_rule_ids = [record.id for record in dataset.mapping_rules]
+        stale_rank_rule_ids = list(
+            session.scalars(
+                select(TypologyRankRule.id).where(TypologyRankRule.id.not_in(rank_rule_ids))
+            )
+        )
+        stale_mapping_rule_ids = list(
+            session.scalars(
+                select(TypologyMappingRule.id).where(
+                    TypologyMappingRule.id.not_in(mapping_rule_ids)
+                )
+            )
+        )
+        if stale_rank_rule_ids or stale_mapping_rule_ids:
+            referenced_rule = session.scalar(
+                select(Assortment.id)
+                .where(
+                    or_(
+                        Assortment.typology_rank_rule_id.in_(stale_rank_rule_ids),
+                        Assortment.typology_mapping_rule_id.in_(stale_mapping_rule_ids),
+                    )
+                )
+                .limit(1)
+            )
+            if referenced_rule is not None:
+                raise TypologySourceError(
+                    "Typology rules removed from the source are still referenced by assortments"
+                )
         session.execute(delete(StoreTypologyValue))
         session.execute(delete(TypologySnapshot))
-        session.execute(delete(TypologyRankRule))
-        session.execute(delete(TypologyMappingRule))
         _insert_batches(session, TypologySnapshot, dataset.snapshots)
         _insert_batches(session, StoreTypologyValue, dataset.values)
-        _insert_batches(session, TypologyRankRule, dataset.rank_rules)
-        _insert_batches(session, TypologyMappingRule, dataset.mapping_rules)
+        _upsert_batches(
+            session,
+            TypologyRankRule,
+            dataset.rank_rules,
+            ("retailer_name", "category_name", "category_code", "rank", "typology_value"),
+        )
+        _upsert_batches(
+            session,
+            TypologyMappingRule,
+            dataset.mapping_rules,
+            (
+                "raw_retailer_name",
+                "raw_category_name",
+                "raw_category_code",
+                "raw_typology_value",
+                "mapped_retailer_name",
+                "mapped_category_code",
+                "mapped_typology_value",
+                "has_source_error",
+            ),
+        )
+        if stale_rank_rule_ids:
+            session.execute(
+                delete(TypologyRankRule).where(TypologyRankRule.id.in_(stale_rank_rule_ids))
+            )
+        if stale_mapping_rule_ids:
+            session.execute(
+                delete(TypologyMappingRule).where(
+                    TypologyMappingRule.id.in_(stale_mapping_rule_ids)
+                )
+            )
         session.execute(
             update(ImportRun)
             .where(ImportRun.id == run_id)
@@ -628,6 +741,23 @@ def _insert_batches(session: Session, model: Any, records: tuple[Any, ...]) -> N
     for offset in range(0, len(records), DATABASE_BATCH_SIZE):
         session.execute(
             insert(model),
+            [asdict(record) for record in records[offset : offset + DATABASE_BATCH_SIZE]],
+        )
+
+
+def _upsert_batches(
+    session: Session,
+    model: Any,
+    records: tuple[Any, ...],
+    update_columns: tuple[str, ...],
+) -> None:
+    for offset in range(0, len(records), DATABASE_BATCH_SIZE):
+        statement = insert(model)
+        session.execute(
+            statement.on_conflict_do_update(
+                index_elements=["id"],
+                set_={column: getattr(statement.excluded, column) for column in update_columns},
+            ),
             [asdict(record) for record in records[offset : offset + DATABASE_BATCH_SIZE]],
         )
 

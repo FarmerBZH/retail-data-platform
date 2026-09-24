@@ -527,3 +527,56 @@ class NumericDistributionObservation(Base):
     source_store_label: Mapped[str] = mapped_column(String(512))
     source_product_reference: Mapped[str] = mapped_column(String(128))
     source_product_label: Mapped[str] = mapped_column(String(512))
+
+
+class ShelfShareObservation(Base):
+    __tablename__ = "shelf_share_observations"
+    __table_args__ = (
+        UniqueConstraint("source_key", name="uq_shelf_share_observations_source_key"),
+        CheckConstraint(
+            "store_match_status IN ('matched', 'unresolved', 'conflict')",
+            name="ck_shelf_share_observations_store_status",
+        ),
+        CheckConstraint(
+            "(store_match_status = 'matched') = (store_id IS NOT NULL)",
+            name="ck_shelf_share_observations_store_relation",
+        ),
+        CheckConstraint(
+            "(store_match_status = 'unresolved') = (store_match_method IS NULL)",
+            name="ck_shelf_share_observations_method_relation",
+        ),
+        CheckConstraint(
+            "company_value >= 0 AND total_value >= 0",
+            name="ck_shelf_share_observations_nonnegative_values",
+        ),
+        CheckConstraint(
+            "(total_value = 0) = (share IS NULL)",
+            name="ck_shelf_share_observations_share_relation",
+        ),
+        CheckConstraint(
+            "source_row_count > 0",
+            name="ck_shelf_share_observations_source_row_count",
+        ),
+        CheckConstraint(
+            "date_trunc('month', period)::date = period",
+            name="ck_shelf_share_observations_month_period",
+        ),
+        Index("ix_shelf_share_observations_period_category", "period", "category_code"),
+        Index("ix_shelf_share_observations_store_period", "store_id", "period"),
+        Index("ix_shelf_share_observations_reconciliation", "store_match_status"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    source_key: Mapped[str] = mapped_column(CHAR(64))
+    period: Mapped[date] = mapped_column(Date)
+    category_code: Mapped[str] = mapped_column(String(32))
+    store_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("stores.id", ondelete="SET NULL"))
+    store_match_status: Mapped[str] = mapped_column(String(16))
+    store_match_method: Mapped[str | None] = mapped_column(String(128))
+    company_value: Mapped[Decimal] = mapped_column(Numeric(18, 2))
+    total_value: Mapped[Decimal] = mapped_column(Numeric(18, 2))
+    share: Mapped[Decimal | None] = mapped_column(Numeric(12, 8))
+    source_row_count: Mapped[int]
+    source_category_name: Mapped[str] = mapped_column(String(128))
+    source_store_reference: Mapped[str] = mapped_column(String(128))
+    source_store_label: Mapped[str] = mapped_column(String(512))

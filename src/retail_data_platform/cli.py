@@ -7,6 +7,7 @@ from pathlib import Path
 from retail_data_platform.importers.assortments import import_assortments
 from retail_data_platform.importers.numeric_distribution import import_numeric_distribution
 from retail_data_platform.importers.products import import_products
+from retail_data_platform.importers.shelf_share import import_shelf_share
 from retail_data_platform.importers.stores import import_stores
 from retail_data_platform.importers.typologies import import_typologies
 from retail_data_platform.importers.visits import import_visits
@@ -36,6 +37,9 @@ def main() -> int:
     )
     distribution.add_argument("--source-dir", type=Path, required=True)
     distribution.add_argument("--aliases-file", type=Path, required=True)
+    shelf_share = datasets.add_parser("shelf-share", help="Import monthly shelf share observations")
+    shelf_share.add_argument("--source-dir", type=Path, required=True)
+    shelf_share.add_argument("--aliases-file", type=Path, required=True)
     args = parser.parse_args()
 
     if args.command == "import" and args.dataset == "products":
@@ -126,6 +130,21 @@ def main() -> int:
                     "rows_loaded": distribution_summary.rows_loaded,
                     "rows_rejected": distribution_summary.rows_rejected,
                     "skipped": distribution_summary.skipped,
+                }
+            )
+        )
+        return 0
+
+    if args.command == "import" and args.dataset == "shelf-share":
+        shelf_share_summary = import_shelf_share(args.source_dir, args.aliases_file)
+        print(
+            json.dumps(
+                {
+                    "dataset": "shelf_share",
+                    "rows_read": shelf_share_summary.rows_read,
+                    "rows_loaded": shelf_share_summary.rows_loaded,
+                    "rows_aggregated": shelf_share_summary.rows_aggregated,
+                    "skipped": shelf_share_summary.skipped,
                 }
             )
         )

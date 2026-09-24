@@ -42,4 +42,7 @@ uv run retail-data import visits \
 uv run retail-data import numeric-distribution \
   --source-dir /path/to/monthly-distribution-sources \
   --aliases-file /path/to/store-and-product-aliases.csv
+uv run retail-data import shelf-share \
+  --source-dir /path/to/monthly-shelf-share-sources \
+  --aliases-file /path/to/store-aliases.csv
 ```

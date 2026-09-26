@@ -7,6 +7,7 @@ from pathlib import Path
 from retail_data_platform.importers.assortments import import_assortments
 from retail_data_platform.importers.numeric_distribution import import_numeric_distribution
 from retail_data_platform.importers.products import import_products
+from retail_data_platform.importers.register import import_register
 from retail_data_platform.importers.shelf_share import import_shelf_share
 from retail_data_platform.importers.stores import import_stores
 from retail_data_platform.importers.typologies import import_typologies
@@ -40,6 +41,8 @@ def main() -> int:
     shelf_share = datasets.add_parser("shelf-share", help="Import monthly shelf share observations")
     shelf_share.add_argument("--source-dir", type=Path, required=True)
     shelf_share.add_argument("--aliases-file", type=Path, required=True)
+    register = datasets.add_parser("register", help="Import monthly register observations")
+    register.add_argument("--source-dir", type=Path, required=True)
     args = parser.parse_args()
 
     if args.command == "import" and args.dataset == "products":
@@ -145,6 +148,21 @@ def main() -> int:
                     "rows_loaded": shelf_share_summary.rows_loaded,
                     "rows_aggregated": shelf_share_summary.rows_aggregated,
                     "skipped": shelf_share_summary.skipped,
+                }
+            )
+        )
+        return 0
+
+    if args.command == "import" and args.dataset == "register":
+        register_summary = import_register(args.source_dir)
+        print(
+            json.dumps(
+                {
+                    "dataset": "register",
+                    "rows_read": register_summary.rows_read,
+                    "rows_loaded": register_summary.rows_loaded,
+                    "rows_excluded_totals": register_summary.rows_excluded_totals,
+                    "skipped": register_summary.skipped,
                 }
             )
         )

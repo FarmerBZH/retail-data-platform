@@ -7,6 +7,7 @@ from decimal import Decimal
 
 from sqlalchemy import (
     CHAR,
+    BigInteger,
     Boolean,
     CheckConstraint,
     Date,
@@ -580,3 +581,70 @@ class ShelfShareObservation(Base):
     source_category_name: Mapped[str] = mapped_column(String(128))
     source_store_reference: Mapped[str] = mapped_column(String(128))
     source_store_label: Mapped[str] = mapped_column(String(512))
+
+
+class RegisterObservation(Base):
+    __tablename__ = "register_observations"
+    __table_args__ = (
+        CheckConstraint(
+            "source_kind IN ('monthly', 'supplement')",
+            name="ck_register_observations_source_kind",
+        ),
+        CheckConstraint(
+            "store_match_status IN ('matched', 'unresolved', 'conflict')",
+            name="ck_register_observations_store_match_status",
+        ),
+        CheckConstraint(
+            "(store_match_status = 'matched') = (store_id IS NOT NULL)",
+            name="ck_register_observations_store_relation",
+        ),
+        CheckConstraint(
+            "(store_match_status = 'unresolved') = (store_match_method IS NULL)",
+            name="ck_register_observations_store_method_relation",
+        ),
+        CheckConstraint(
+            "product_match_status IN ('matched', 'unresolved')",
+            name="ck_register_observations_product_match_status",
+        ),
+        CheckConstraint(
+            "(product_match_status = 'matched') = (product_id IS NOT NULL)",
+            name="ck_register_observations_product_relation",
+        ),
+        CheckConstraint(
+            "source_gtin ~ '^[0-9]+$' AND length(source_gtin) IN (8, 12, 13, 14)",
+            name="ck_register_observations_gtin_format",
+        ),
+        CheckConstraint(
+            "date_trunc('month', period)::date = period",
+            name="ck_register_observations_month_period",
+        ),
+        Index("ix_register_observations_period_kind", "period", "source_kind"),
+        Index("ix_register_observations_store_period", "store_id", "period"),
+        Index("ix_register_observations_product_period", "product_id", "period"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    period: Mapped[date] = mapped_column(Date)
+    source_kind: Mapped[str] = mapped_column(String(16))
+    source_store_reference: Mapped[str] = mapped_column(String(64))
+    source_store_secondary_reference: Mapped[str | None] = mapped_column(String(64))
+    source_store_label: Mapped[str | None] = mapped_column(String(255))
+    store_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("stores.id", ondelete="SET NULL"))
+    store_match_status: Mapped[str] = mapped_column(String(16))
+    store_match_method: Mapped[str | None] = mapped_column(String(64))
+    source_gtin: Mapped[str] = mapped_column(String(14))
+    source_product_label: Mapped[str | None] = mapped_column(String(255))
+    source_brand: Mapped[str | None] = mapped_column(String(128))
+    source_family: Mapped[str | None] = mapped_column(String(128))
+    product_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("products.id", ondelete="SET NULL")
+    )
+    product_match_status: Mapped[str] = mapped_column(String(16))
+    revenue_value: Mapped[Decimal | None] = mapped_column(Numeric(20, 2))
+    revenue_change_ratio: Mapped[Decimal | None] = mapped_column(Numeric(20, 8))
+    units_sold: Mapped[int | None] = mapped_column(BigInteger)
+    units_change_ratio: Mapped[Decimal | None] = mapped_column(Numeric(20, 8))
+    average_unit_price: Mapped[Decimal | None] = mapped_column(Numeric(20, 6))
+    average_price_change_ratio: Mapped[Decimal | None] = mapped_column(Numeric(20, 8))
+    volume_value: Mapped[Decimal | None] = mapped_column(Numeric(20, 6))
+    volume_change_ratio: Mapped[Decimal | None] = mapped_column(Numeric(20, 8))

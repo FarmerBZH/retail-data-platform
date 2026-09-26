@@ -45,4 +45,6 @@ uv run retail-data import numeric-distribution \
 uv run retail-data import shelf-share \
   --source-dir /path/to/monthly-shelf-share-sources \
   --aliases-file /path/to/store-aliases.csv
+uv run retail-data import register \
+  --source-dir /path/to/monthly-register-sources
 ```

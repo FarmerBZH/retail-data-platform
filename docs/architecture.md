@@ -42,9 +42,11 @@ lifecycle is:
 2. Check file boundaries such as type, size, encoding and identifying headers.
 3. Hash the ordered source bundle and check for a previous successful run.
 4. Record a running import in `import_runs`.
-5. Parse, normalise, reconcile and validate all rows in memory.
+5. Parse, normalise, reconcile and validate rows for the smaller adapters.
 6. Acquire a dataset-scoped PostgreSQL advisory lock.
-7. Publish domain rows and mark the run successful in one transaction.
+7. Publish domain rows and mark the run successful in one transaction. The large
+   register adapter parses and validates one file at a time inside this
+   transaction after acquiring the lock.
 8. If processing fails, roll back publication and record a failed run separately.
 
 An identical bundle that already has a successful run is skipped. The database
@@ -65,12 +67,13 @@ in the command layer.
 Each adapter owns its source contract and the transformations needed to produce
 domain records. Discovery does not depend on organisation-specific filenames;
 it uses headers and, where relevant, a generic period format. Parsing and
-validation happen before publication so that a malformed bundle cannot produce
-a partially refreshed domain dataset.
+validation finish before the publication transaction commits so that a malformed
+bundle cannot produce a partially refreshed domain dataset.
 
-Adapters reject ambiguous identity matches, conflicting sources and duplicate
-business keys. Expected validation messages describe the role, row and field
-without echoing the rejected value.
+Adapters never choose an arbitrary winner for ambiguous identities: they reject
+the conflict or retain the source observation with an unresolved relationship.
+Duplicate source business keys are rejected. Expected validation messages
+describe the role, row and field without echoing the rejected value.
 
 ### Persistence
 
@@ -122,8 +125,10 @@ stable and reviewable.
 
 ## Deliberate limitations
 
-- Importers currently validate complete source bundles in memory; this is not a
-  streaming or warehouse-scale ingestion design.
+- Most adapters validate complete source bundles in memory. The large register
+  adapter processes one source file at a time and streams records into a single
+  PostgreSQL transaction; it is still a local ingestion design, not a
+  warehouse-scale ingestion service.
 - Idempotency is based on byte-level bundle hashes. Semantically equivalent files
   with different bytes are distinct inputs.
 - Failed-run recording is best-effort after the publication transaction fails;

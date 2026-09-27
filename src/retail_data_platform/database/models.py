@@ -22,6 +22,7 @@ from sqlalchemy import (
     Uuid,
     text,
 )
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import Mapped, mapped_column
 
 from retail_data_platform.database.base import Base
@@ -31,6 +32,33 @@ class ImportStatus(enum.StrEnum):
     RUNNING = "running"
     SUCCEEDED = "succeeded"
     FAILED = "failed"
+
+
+class AnalyticsRefreshRun(Base):
+    __tablename__ = "analytics_refresh_runs"
+    __table_args__ = (
+        CheckConstraint(
+            "status IN ('running', 'succeeded', 'failed')", name="ck_analytics_refresh_status"
+        ),
+        CheckConstraint(
+            "(status = 'running') = (completed_at IS NULL)",
+            name="ck_analytics_refresh_completion",
+        ),
+        CheckConstraint(
+            "status <> 'succeeded' OR (source_snapshot_at IS NOT NULL "
+            "AND source_run_ids IS NOT NULL AND error_message IS NULL)",
+            name="ck_analytics_refresh_success",
+        ),
+        Index("ix_analytics_refresh_started", "started_at"),
+    )
+
+    id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    status: Mapped[str] = mapped_column(String(16))
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    source_snapshot_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    source_run_ids: Mapped[list[uuid.UUID] | None] = mapped_column(ARRAY(Uuid))
+    error_message: Mapped[str | None] = mapped_column(Text)
 
 
 class ImportRun(Base):

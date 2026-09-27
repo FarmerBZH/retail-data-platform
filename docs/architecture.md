@@ -135,3 +135,27 @@ stable and reviewable.
   it is audit information, not a distributed workflow engine.
 - The local database credentials and inspection UI are development conveniences,
   not a production security model.
+
+## Analytical read boundary
+
+Versioned PostgreSQL materialized views provide a dense store-month calendar with independently
+aggregated sales, activity, category and typology information. Companion views
+retain product/source grain, explicit attribution failures and conservative
+assortment candidates. Ambiguous facts are not silently summed, missing measures
+remain distinct from zero, and current master attributes are labeled separately
+from observed historical attributes.
+
+The analytical refresh command calculates dependencies in order from one
+repeatable-read snapshot and publishes all results and a success audit atomically.
+Subsequent refreshes permit concurrent readers of the previous snapshot. Unique
+indexes enforce analytical grains. Freshness is checked against successful import
+run identities; manual source edits are outside this guarantee. Imports can opt
+in to a post-publication refresh or a bundle can refresh once after its final
+import. A refresh failure preserves the prior analytical snapshot and does not
+undo a completed source import.
+
+SQLAlchemy view mappings use separate metadata from the base tables. The refresh
+audit is a normal mapped table. Migration lifecycle, analytical contracts,
+concurrent readers, source snapshot consistency and failure rollback are verified
+on synthetic PostgreSQL data. See [Monthly store analytics](monthly-analytics.md)
+for grains, joins, refresh operations and temporal limitations.

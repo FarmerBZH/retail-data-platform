@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from alembic import context
-from sqlalchemy import create_engine
+from sqlalchemy import Connection, create_engine
 from sqlalchemy.pool import NullPool
 
 import retail_data_platform.database.models  # noqa: F401
@@ -24,13 +24,20 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
+    supplied_connection = context.config.attributes.get("connection")
+    if supplied_connection is not None:
+        run_with_connection(supplied_connection)
+        return
     engine = create_engine(database_url_from_env(), poolclass=NullPool)
 
     with engine.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        run_with_connection(connection)
 
-        with context.begin_transaction():
-            context.run_migrations()
+
+def run_with_connection(connection: Connection) -> None:
+    context.configure(connection=connection, target_metadata=target_metadata)
+    with context.begin_transaction():
+        context.run_migrations()
 
 
 if context.is_offline_mode():

@@ -48,3 +48,14 @@ uv run retail-data import shelf-share \
 uv run retail-data import register \
   --source-dir /path/to/monthly-register-sources
 ```
+
+After the final import, publish the indexed analytical snapshot:
+
+```bash
+uv run retail-data analytics refresh
+uv run retail-data analytics status
+```
+
+An import can also opt in with `--refresh-analytics`. See
+[monthly analytics](docs/monthly-analytics.md) for the store-month contract,
+freshness checks and refresh behavior.

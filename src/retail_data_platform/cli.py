@@ -4,6 +4,11 @@ import argparse
 import json
 from pathlib import Path
 
+from retail_data_platform.analytics import (
+    AnalyticsRefreshError,
+    analytics_status,
+    refresh_analytics,
+)
 from retail_data_platform.importers.assortments import import_assortments
 from retail_data_platform.importers.numeric_distribution import import_numeric_distribution
 from retail_data_platform.importers.products import import_products
@@ -43,7 +48,32 @@ def main() -> int:
     shelf_share.add_argument("--aliases-file", type=Path, required=True)
     register = datasets.add_parser("register", help="Import monthly register observations")
     register.add_argument("--source-dir", type=Path, required=True)
+    for dataset_parser in (
+        products,
+        stores,
+        typologies,
+        assortments,
+        visits,
+        distribution,
+        shelf_share,
+        register,
+    ):
+        dataset_parser.add_argument(
+            "--refresh-analytics",
+            action="store_true",
+            help="Refresh all analytical results after a successful import (including a skip)",
+        )
+    analytics = commands.add_parser("analytics", help="Manage materialized analytical results")
+    actions = analytics.add_subparsers(dest="action", required=True)
+    actions.add_parser("refresh", help="Atomically refresh all analytical results")
+    actions.add_parser("status", help="Check analytical freshness against successful imports")
     args = parser.parse_args()
+
+    if args.command == "analytics":
+        if args.action == "refresh":
+            return _after_import(True)
+        print(json.dumps(analytics_status()))
+        return 0
 
     if args.command == "import" and args.dataset == "products":
         product_summary = import_products(args.source_dir)
@@ -57,7 +87,7 @@ def main() -> int:
                 }
             )
         )
-        return 0
+        return _after_import(args.refresh_analytics)
 
     if args.command == "import" and args.dataset == "stores":
         store_summary = import_stores(args.source_dir)
@@ -71,7 +101,7 @@ def main() -> int:
                 }
             )
         )
-        return 0
+        return _after_import(args.refresh_analytics)
 
     if args.command == "import" and args.dataset == "typologies":
         typology_summary = import_typologies(args.source_dir)
@@ -85,7 +115,7 @@ def main() -> int:
                 }
             )
         )
-        return 0
+        return _after_import(args.refresh_analytics)
 
     if args.command == "import" and args.dataset == "assortments":
         assortment_summary = import_assortments(args.source_dir)
@@ -99,7 +129,7 @@ def main() -> int:
                 }
             )
         )
-        return 0
+        return _after_import(args.refresh_analytics)
 
     if args.command == "import" and args.dataset == "visits":
         visit_summary = import_visits(
@@ -118,7 +148,7 @@ def main() -> int:
                 }
             )
         )
-        return 0
+        return _after_import(args.refresh_analytics)
 
     if args.command == "import" and args.dataset == "numeric-distribution":
         distribution_summary = import_numeric_distribution(
@@ -136,7 +166,7 @@ def main() -> int:
                 }
             )
         )
-        return 0
+        return _after_import(args.refresh_analytics)
 
     if args.command == "import" and args.dataset == "shelf-share":
         shelf_share_summary = import_shelf_share(args.source_dir, args.aliases_file)
@@ -151,7 +181,7 @@ def main() -> int:
                 }
             )
         )
-        return 0
+        return _after_import(args.refresh_analytics)
 
     if args.command == "import" and args.dataset == "register":
         register_summary = import_register(args.source_dir)
@@ -166,7 +196,23 @@ def main() -> int:
                 }
             )
         )
-        return 0
+        return _after_import(args.refresh_analytics)
 
     parser.error("Unsupported command")
     return 2
+
+
+def _after_import(refresh: bool) -> int:
+    if not refresh:
+        return 0
+    try:
+        refresh_analytics(progress=lambda view: print(json.dumps({"refreshing": view}), flush=True))
+    except AnalyticsRefreshError as error:
+        print(json.dumps({"status": "failed", "error": str(error)}), flush=True)
+        return 1
+    print(json.dumps({"status": "succeeded", **analytics_status()}), flush=True)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

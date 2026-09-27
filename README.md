@@ -1,7 +1,61 @@
 # Retail Data Platform
 
-A portfolio project for building a reliable data platform from CSV and XLSX
-sources.
+A portfolio project for building a reliable data platform from heterogeneous
+tabular sources.
 
 The project will be developed incrementally, starting with data ingestion and
 validation before adding an API and a web application.
+
+## Development
+
+The project requires Python 3.13 and [uv](https://docs.astral.sh/uv/).
+
+```bash
+uv sync
+uv run ruff check .
+uv run ruff format --check .
+uv run mypy src
+```
+
+Start the local database and apply its migrations:
+
+```bash
+cp .env.example .env
+docker compose up -d database database_admin
+uv run alembic upgrade head
+```
+
+Browse the local database at [http://127.0.0.1:8080](http://127.0.0.1:8080).
+
+Import the product source bundle:
+
+```bash
+uv run retail-data import products --source-dir /path/to/product-sources
+uv run retail-data import stores --source-dir /path/to/store-sources
+uv run retail-data import typologies --source-dir /path/to/monthly-typology-sources
+uv run retail-data import assortments --source-dir /path/to/monthly-assortment-sources
+uv run retail-data import visits \
+  --calls-dir /path/to/monthly-call-sources \
+  --crowdsourced-dir /path/to/monthly-crowdsourced-visit-sources \
+  --field-dir /path/to/monthly-field-visit-sources \
+  --aliases-file /path/to/store-aliases.csv
+uv run retail-data import numeric-distribution \
+  --source-dir /path/to/monthly-distribution-sources \
+  --aliases-file /path/to/store-and-product-aliases.csv
+uv run retail-data import shelf-share \
+  --source-dir /path/to/monthly-shelf-share-sources \
+  --aliases-file /path/to/store-aliases.csv
+uv run retail-data import register \
+  --source-dir /path/to/monthly-register-sources
+```
+
+After the final import, publish the indexed analytical snapshot:
+
+```bash
+uv run retail-data analytics refresh
+uv run retail-data analytics status
+```
+
+An import can also opt in with `--refresh-analytics`. See
+[monthly analytics](docs/monthly-analytics.md) for the store-month contract,
+freshness checks and refresh behavior.

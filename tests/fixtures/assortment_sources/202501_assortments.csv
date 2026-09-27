@@ -1,0 +1,4 @@
+Nom de l'enseigne|Libellé catégorie|Libellé produit|EAN|Nom strate
+Example Retail|Category A|Demo Product A|1234567890123|Tier 1
+Example Retail|Category A|Demo Product B|1234567890124|
+Unmapped Retail|Category B|Demo Product C|1234567890125|Unknown Tier

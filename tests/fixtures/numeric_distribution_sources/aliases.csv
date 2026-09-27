@@ -1,0 +1,3 @@
+category,normalized_id,raw_values,sources,Correspondance avec le fichier Magasin (codeSAP) ou produits (EAN)
+CLIENT,SYNTHETIC-S2,ALIAS-S2,category-a,ERP-200
+PRODUCT,SYNTHETIC-A2,ALIAS-A2,category-a,1000000000002

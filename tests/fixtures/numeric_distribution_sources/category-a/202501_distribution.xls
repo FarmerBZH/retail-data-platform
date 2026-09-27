@@ -1,0 +1,7 @@
+<!DOCTYPE html>
+<html><body><table>
+<tr><th>Client</th><th>Product</th></tr>
+<tr><th>[Synthetic] [CRM-100]</th><th>[Synthetic] [Item] [PRODUIT] [1000000000001]</th><td>1</td></tr>
+<tr><th>[Synthetic] [CRM-100]</th><th>[Synthetic] [Item] [PRODUIT] [ALIAS-A2]</th><td>1</td></tr>
+<tr><th>[Synthetic] [ALIAS-S2]</th><th>[Synthetic] [Item] [PRODUIT] [1000000000001]</th><td>1</td></tr>
+</table></body></html>

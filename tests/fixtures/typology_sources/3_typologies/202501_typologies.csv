@@ -1,0 +1,4 @@
+TDLINX|Id du point de vente|CODE CLIENT SOURCE|DR|CDS|Nom de l'enseigne|Info comp.|CP|Boissons à infuser|Boissons à infuser BIO|Capillaire Femme|Coloration|Compléments Alimentaires|Couches Bébé|Crèmes mains/pieds|Dentaire|Déodorants Femme|Douche Femme|Hygiène et Lingettes Bébé|Hygiène Intime|Parapharmacie|Savons/ Gels Lavants mains Bio|Soins du corps Femme|Soins du visage|Univers Homme
+700001|POS-1|NET-001|R1|S1|Example Retail||01000|T1||||S2||||||||||||
+||LEGACY-CODE|R2|S2|Example Retail||02000|||T2||||||||||||||
+799999||UNKNOWN|R3|S3|Unknown Retail||03000|||||ZERO||||||||||||

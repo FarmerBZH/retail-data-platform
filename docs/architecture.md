@@ -2,14 +2,14 @@
 
 ## Scope and status
 
-This document describes the implemented data-foundation boundary of Retail Data
-Platform. It is intentionally narrower than the long-term product: no API,
-authentication layer, multi-tenant model, or web application exists in the
-current architecture.
+This document describes the implemented ingestion, analytical and authenticated
+read API boundaries of Retail Data Platform. A web application, production identity
+deployment and multi-tenant authorization are outside the current architecture.
+Authorized API readers have global access; store selection is a query filter.
 
-The goal of this phase is to turn heterogeneous tabular source bundles into a
-validated, traceable PostgreSQL dataset without placing operational data in the
-public repository.
+The platform turns heterogeneous tabular source bundles into a validated,
+traceable PostgreSQL dataset and exposes bounded authenticated reads without
+placing operational data in the public repository.
 
 ## Context
 
@@ -21,8 +21,9 @@ source ----> | dataset import adapter   | ----> PostgreSQL
 bundle       | synthetic test fixtures  |         |
              +--------------------------+         +--> local inspection UI
 
-                                                    future boundary
-                                             PostgreSQL --> API --> web UI
+                                             PostgreSQL --> read API
+                                                               |
+                                                authorized clients (external)
 ```
 
 Private sources remain outside the repository and are supplied to the command
@@ -105,9 +106,9 @@ For the implemented adapters, the design aims to preserve these invariants:
 - durable identity and value rules are enforced by PostgreSQL where practical;
 - tests rely only on synthetic data.
 
-These guarantees apply to the local ingestion boundary. They do not yet cover
-distributed workers, remote object storage, asynchronous orchestration, API
-availability, user authorisation, or production observability.
+These ingestion guarantees do not cover distributed workers, remote object storage
+or asynchronous orchestration. The separate read API boundary is described below;
+production availability and deployment observability remain environment concerns.
 
 ## Verification
 
@@ -159,3 +160,80 @@ audit is a normal mapped table. Migration lifecycle, analytical contracts,
 concurrent readers, source snapshot consistency and failure rollback are verified
 on synthetic PostgreSQL data. See [Monthly store analytics](monthly-analytics.md)
 for grains, joins, refresh operations and temporal limitations.
+
+## Authenticated read API boundary
+
+The FastAPI resource server exposes explicit projections of all 13 application
+tables and 11 analytical views through versioned, typed collection routes. A
+checked-in registry fixes allowed columns. Nested analytical objects are validated
+against explicit models, so additional database fields are not published implicitly.
+Operational audit collections require an additional scope and exclude source
+filenames, source hashes and failure messages, including at the SQL grant boundary.
+
+JWT access tokens require an exact configured HTTPS issuer, a dedicated audience,
+RS256 signature validation against configured JWKS, access-token type, lifetime
+checks and the data:read scope. Credentials are issued externally. Authentication
+and query validation precede database queries; no user, password or token-issuance
+store was added. Access is global: there is no per-store or tenant isolation claim.
+
+SQLAlchemy queries use explicit columns, bound filters and primary-key keyset
+pagination. Every primary-key column is filterable for exact row selection; store
+filters cover store-linked observations and analytics. Page length, response size,
+pool size, concurrency in the local runner and statement duration are bounded.
+A bounded per-process subject rate limiter
+supplements mandatory ingress limits. No HTTP writes, arbitrary SQL, joins supplied
+by clients, or refresh operations exist. Typology-value store filtering follows the
+snapshot relationship. Analytical semantics and freshness remain those documented
+in monthly-analytics.md. Separate pages are separate snapshots, not frozen exports.
+
+A dedicated PostgreSQL login has explicit column SELECT grants. Startup checks
+role flags, memberships, ownership, schema creation, write permissions and column
+grants; importer/owner credentials are rejected. Every query transaction is read-only.
+Provisioning privileges is an explicit administrator operation. No database schema
+change or migration was introduced by the API.
+
+Synthetic tests verify signatures and claim failures, protected discovery/OpenAPI,
+query rejection, authorization, all resource routes, primary-key lookup,
+composite pagination, exact serialization, nested-field exclusion, database failures,
+size/rate limits and real
+PostgreSQL write denial. Existing migration/import/analytics tests also run against
+PostgreSQL. Swagger UI is available through a public authentication shell at `/docs`; fetching
+the schema and executing API requests still require a valid token. Tokens are held
+only in tab memory, and pinned CDN assets are checked with SRI.
+An optional local Keycloak service has passed login and role-denial smoke checks
+with disposable synthetic users. Production ingress and production-scale load
+have not been exercised. Encoded response limits do not bound memory for a single
+large nested database row. No production latency or availability guarantee is implied.
+
+See [read API design](read-api-design.md), [operations and client contract](read-api-operations.md)
+and [agent guide](api-agent-guide.md). The operations document records deployment
+requirements and explicit limits; it is not a claim that deployment is complete.
+
+## Personal authentication client
+
+The `retail-auth` CLI and `PersonalClient` library implement interactive personal
+access for local scripts and notebooks. Authorization Code with PKCE S256, random
+state and callback issuer verification protect the loopback login handoff. Every
+login requests `prompt=login` and `max_age=0`. The provider must enforce actual
+credential entry and issue trusted authentication-time claims. Refresh-token
+responses are rejected, and there is no renewal or client-credentials
+implementation. An optional local Keycloak deployment is documented separately;
+its application realm and client are provisioned locally. No personal user is
+created by the provisioning script.
+
+The API now requires `azp` to match its configured personal client and verifies the
+signed `auth_time`. Tokens must be issued within 60 seconds of authentication, live
+at most 86400 seconds and remain within 86400 seconds of authentication. The client
+uses the same validation and stores only the access token and effective deadline
+in an explicitly selected native OS vault. Plaintext fallback backends are not used.
+Expired/missing credentials and HTTP 401 stop scripts with a new-login requirement;
+requests never automatically open a browser or follow HTTP redirects with a token.
+Local logout removes the saved credential without claiming to revoke copied JWTs.
+
+Synthetic tests exercise the code exchange, callback state/issuer protections,
+loopback HTTP flow, expiry, rejection of refresh tokens and nonpersonal claims,
+request destinations, session deletion and CLI exit codes. Vault tests use an
+in-memory substitute, not the user's credentials. Local Keycloak login was also
+tested with disposable synthetic users; native-vault integration remains an
+environment-specific check. See
+[personal authentication](personal-authentication.md) for setup and usage.

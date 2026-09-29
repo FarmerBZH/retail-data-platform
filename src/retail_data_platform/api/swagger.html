@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Retail read API — Swagger UI</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.33.0/swagger-ui.css"
+        integrity="sha384-Ov4/wv3j2bmct8cDc5X4ngJZohVPzEmc6uDPH8WeljUxO5vtoykvMEfbu9Vh6RaW" crossorigin="anonymous">
+</head>
+<body>
+  <main>
+    <h1>Retail read API</h1>
+    <p>Enter an API access token to load Swagger. The token stays in this tab's memory.</p>
+    <form id="connect" autocomplete="off">
+      <label for="token">Access token (without the Bearer prefix)</label>
+      <input id="token" type="password" required maxlength="8192" autocomplete="off" spellcheck="false">
+      <button type="submit">Load Swagger</button>
+      <button id="disconnect" type="button">Clear session</button>
+    </form>
+    <p id="status" role="status" aria-live="polite"></p>
+    <div id="swagger-ui"></div>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.33.0/swagger-ui-bundle.js"
+          integrity="sha384-YDALVcy8kj8yltLBVi1vBiBAUqdxvus673gM8XKwiy6aDUJFXivF/KCufekjYbVf" crossorigin="anonymous"></script>
+  <script nonce="__NONCE__">
+    const form = document.getElementById("connect");
+    const input = document.getElementById("token");
+    const status = document.getElementById("status");
+    const base = new URL(".", window.location.href);
+    document.getElementById("disconnect").addEventListener("click", () => window.location.reload());
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const token = input.value.trim();
+      input.value = "";
+      status.textContent = "Loading protected API documentation…";
+      document.getElementById("swagger-ui").replaceChildren();
+      try {
+        const response = await fetch(new URL("v1/openapi.json", base), {
+          headers: {Authorization: "Bearer " + token}, credentials: "omit", cache: "no-store",
+          redirect: "error"
+        });
+        if (!response.ok) {
+          status.textContent = "Unable to load documentation (HTTP " + response.status + "). Check your token and permissions.";
+          return;
+        }
+        const spec = await response.json();
+        spec.servers = [{url: base.href.replace(/\/$/, "")}];
+        const ui = SwaggerUIBundle({
+          spec, dom_id: "#swagger-ui", deepLinking: false,
+          persistAuthorization: false, queryConfigEnabled: false, validatorUrl: null,
+          supportedSubmitMethods: ["get"],
+          requestInterceptor: (request) => {
+            const target = new URL(request.url, base);
+            if (target.origin !== base.origin || !target.pathname.startsWith(base.pathname + "v1/")) {
+              throw new Error("Only this API can receive requests.");
+            }
+            request.credentials = "omit";
+            return request;
+          },
+          onComplete: () => ui.preauthorizeApiKey("HTTPBearer", token)
+        });
+        status.textContent = "Authenticated documentation loaded. Use Try it out to read data. Clear session when finished.";
+      } catch {
+        status.textContent = "Unable to load Swagger. Check connectivity and try again.";
+      }
+    });
+  </script>
+</body>
+</html>

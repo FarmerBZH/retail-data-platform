@@ -1,0 +1,447 @@
+{
+  "analytics_activity_month": {
+    "columns": [
+      "store_id",
+      "period",
+      "activity_type",
+      "source_row_count",
+      "ambiguous",
+      "activity_count",
+      "observation_ids"
+    ],
+    "operations": false
+  },
+  "analytics_assortment_candidates": {
+    "columns": [
+      "store_id",
+      "period",
+      "assortment_id",
+      "product_id",
+      "gtin",
+      "typology_rank_rule_id",
+      "typology_value_ids"
+    ],
+    "operations": false
+  },
+  "analytics_distribution_product_month": {
+    "columns": [
+      "store_id",
+      "period",
+      "category_code",
+      "product_key",
+      "product_id",
+      "source_row_count",
+      "ambiguous",
+      "presence_value",
+      "inferred_absence_rows",
+      "observation_ids"
+    ],
+    "operations": false
+  },
+  "analytics_monthly_link_quality": {
+    "columns": [
+      "dataset",
+      "period",
+      "store_match_status",
+      "source_row_count"
+    ],
+    "operations": false
+  },
+  "analytics_refresh_runs": {
+    "columns": [
+      "id",
+      "status",
+      "started_at",
+      "source_snapshot_at",
+      "completed_at",
+      "source_run_ids"
+    ],
+    "operations": true
+  },
+  "analytics_register_product_month": {
+    "columns": [
+      "store_id",
+      "period",
+      "source_gtin",
+      "product_id",
+      "source_row_count",
+      "ambiguous",
+      "unmatched_product_rows",
+      "observation_ids",
+      "source_kinds",
+      "revenue",
+      "units",
+      "volume",
+      "revenue_reported_rows",
+      "units_reported_rows"
+    ],
+    "operations": false
+  },
+  "analytics_retailer_assortment_month": {
+    "columns": [
+      "store_id",
+      "period",
+      "assortment_id",
+      "product_id",
+      "gtin",
+      "product_match_status",
+      "typology_match_status"
+    ],
+    "operations": false
+  },
+  "analytics_shelf_category_month": {
+    "columns": [
+      "store_id",
+      "period",
+      "category_code",
+      "source_row_count",
+      "ambiguous",
+      "company_value",
+      "total_value",
+      "shelf_share",
+      "observation_ids"
+    ],
+    "operations": false
+  },
+  "analytics_store_category_month": {
+    "columns": [
+      "store_id",
+      "period",
+      "category_code",
+      "distribution_product_count",
+      "distribution_ambiguous_products",
+      "distribution_unmatched_products",
+      "inferred_absence_rows",
+      "present_products",
+      "observed_presence_rate",
+      "shelf_source_row_count",
+      "shelf_ambiguous",
+      "shelf_company_value",
+      "shelf_total_value",
+      "shelf_share",
+      "exact_assortment_candidate_count"
+    ],
+    "operations": false
+  },
+  "analytics_store_month": {
+    "columns": [
+      "store_id",
+      "period",
+      "current_store_name",
+      "current_retailer_name",
+      "current_store_format",
+      "current_region_code",
+      "current_is_active",
+      "current_store",
+      "register_product_count",
+      "register_source_row_count",
+      "register_ambiguous_products",
+      "register_unmatched_product_rows",
+      "register_revenue_product_count",
+      "register_units_product_count",
+      "revenue",
+      "units",
+      "revenue_per_unit",
+      "unambiguous_reported_revenue",
+      "unambiguous_reported_units",
+      "calls",
+      "field_visits",
+      "crowdsourced_visits",
+      "activity_ambiguous_types",
+      "activity_details",
+      "category_details",
+      "typology_details",
+      "typology_snapshot_count",
+      "typology_snapshot_ids",
+      "has_register",
+      "has_activity",
+      "has_category_data",
+      "has_typology"
+    ],
+    "operations": false
+  },
+  "analytics_store_month_changes": {
+    "columns": [
+      "store_id",
+      "period",
+      "revenue",
+      "units",
+      "calls",
+      "field_visits",
+      "crowdsourced_visits",
+      "revenue_previous_month",
+      "revenue_previous_year",
+      "units_previous_month",
+      "calls_previous_month",
+      "field_visits_previous_month",
+      "crowdsourced_visits_previous_month",
+      "revenue_month_change",
+      "revenue_month_change_ratio",
+      "revenue_year_change_ratio"
+    ],
+    "operations": false
+  },
+  "analytics_typology_month": {
+    "columns": [
+      "store_id",
+      "period",
+      "typology_value_id",
+      "snapshot_id",
+      "retailer_name",
+      "region_code",
+      "sales_representative_code",
+      "category_key",
+      "category_name",
+      "typology_value",
+      "rank_rule_ids",
+      "rank_candidate_count",
+      "mapping_issue"
+    ],
+    "operations": false
+  },
+  "assortments": {
+    "columns": [
+      "id",
+      "source_key",
+      "period",
+      "product_id",
+      "product_match_status",
+      "typology_mapping_rule_id",
+      "typology_rank_rule_id",
+      "typology_match_status",
+      "typology_match_method",
+      "source_retailer_name",
+      "source_category_name",
+      "source_product_name",
+      "gtin",
+      "source_typology_value"
+    ],
+    "operations": false
+  },
+  "import_runs": {
+    "columns": [
+      "id",
+      "dataset",
+      "status",
+      "rows_read",
+      "rows_inserted",
+      "rows_rejected",
+      "started_at",
+      "completed_at"
+    ],
+    "operations": true
+  },
+  "numeric_distribution_observations": {
+    "columns": [
+      "id",
+      "source_key",
+      "period",
+      "category_code",
+      "store_id",
+      "store_match_status",
+      "store_match_method",
+      "product_id",
+      "product_match_status",
+      "product_match_method",
+      "presence_value",
+      "value_origin",
+      "source_category_name",
+      "source_store_reference",
+      "source_store_label",
+      "source_product_reference",
+      "source_product_label"
+    ],
+    "operations": false
+  },
+  "products": {
+    "columns": [
+      "id",
+      "gtin",
+      "erp_code",
+      "legacy_erp_code",
+      "internal_code",
+      "legacy_internal_code",
+      "name",
+      "brand",
+      "market",
+      "category",
+      "segment",
+      "content_quantity",
+      "content_unit",
+      "average_price",
+      "average_price_currency",
+      "category_code",
+      "is_active",
+      "created_at",
+      "updated_at"
+    ],
+    "operations": false
+  },
+  "register_observations": {
+    "columns": [
+      "id",
+      "period",
+      "source_kind",
+      "source_store_reference",
+      "source_store_secondary_reference",
+      "source_store_label",
+      "store_id",
+      "store_match_status",
+      "store_match_method",
+      "source_gtin",
+      "source_product_label",
+      "source_brand",
+      "source_family",
+      "product_id",
+      "product_match_status",
+      "revenue_value",
+      "revenue_change_ratio",
+      "units_sold",
+      "units_change_ratio",
+      "average_unit_price",
+      "average_price_change_ratio",
+      "volume_value",
+      "volume_change_ratio"
+    ],
+    "operations": false
+  },
+  "shelf_share_observations": {
+    "columns": [
+      "id",
+      "source_key",
+      "period",
+      "category_code",
+      "store_id",
+      "store_match_status",
+      "store_match_method",
+      "company_value",
+      "total_value",
+      "share",
+      "source_row_count",
+      "source_category_name",
+      "source_store_reference",
+      "source_store_label"
+    ],
+    "operations": false
+  },
+  "store_activity_metrics": {
+    "columns": [
+      "id",
+      "source_key",
+      "period",
+      "store_id",
+      "store_match_status",
+      "store_match_method",
+      "activity_type",
+      "activity_count",
+      "source_store_reference",
+      "source_store_label"
+    ],
+    "operations": false
+  },
+  "store_typology_values": {
+    "columns": [
+      "id",
+      "snapshot_id",
+      "category_key",
+      "category_name",
+      "typology_value"
+    ],
+    "operations": false
+  },
+  "stores": {
+    "columns": [
+      "id",
+      "source_key",
+      "external_network_code",
+      "crm_code",
+      "erp_code",
+      "legacy_store_id",
+      "retail_panel_code",
+      "data_sharing_code",
+      "name",
+      "legal_name",
+      "address_line_1",
+      "address_line_2",
+      "department_code",
+      "postal_code",
+      "city",
+      "retailer_code",
+      "retailer_name",
+      "store_format",
+      "region_code",
+      "region_name",
+      "sales_representative_code",
+      "sales_representative_name",
+      "promoter_code",
+      "promoter_name",
+      "secondary_representative_code",
+      "secondary_representative_name",
+      "sales_area_sqm",
+      "classification",
+      "segmentation",
+      "distribution_model",
+      "has_direct_sales_potential",
+      "survey_validity_days",
+      "planned_sales_visits",
+      "sales_visit_minutes",
+      "planned_promoter_visits",
+      "promoter_visit_minutes",
+      "planned_total_visits",
+      "checkout_count",
+      "annual_turnover_2025_millions",
+      "annual_turnover_2024_millions",
+      "annual_turnover_2023_millions",
+      "october_2023_turnover_millions",
+      "is_active",
+      "created_at",
+      "updated_at"
+    ],
+    "operations": false
+  },
+  "typology_mapping_rules": {
+    "columns": [
+      "id",
+      "source_key",
+      "raw_retailer_name",
+      "raw_category_name",
+      "raw_category_code",
+      "raw_typology_value",
+      "mapped_retailer_name",
+      "mapped_category_code",
+      "mapped_typology_value",
+      "has_source_error"
+    ],
+    "operations": false
+  },
+  "typology_rank_rules": {
+    "columns": [
+      "id",
+      "retailer_name",
+      "category_name",
+      "category_code",
+      "rank",
+      "typology_value"
+    ],
+    "operations": false
+  },
+  "typology_snapshots": {
+    "columns": [
+      "id",
+      "source_key",
+      "period",
+      "store_id",
+      "store_match_status",
+      "store_match_method",
+      "retail_panel_code",
+      "source_customer_code",
+      "point_of_sale_id",
+      "region_code",
+      "sales_representative_code",
+      "retailer_name",
+      "source_info",
+      "postal_code"
+    ],
+    "operations": false
+  }
+}

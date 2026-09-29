@@ -3,8 +3,8 @@
 A portfolio project for building a reliable data platform from heterogeneous
 tabular sources.
 
-The project will be developed incrementally, starting with data ingestion and
-validation before adding an API and a web application.
+The project provides validated data ingestion, PostgreSQL analytics and an
+authenticated read API. A web application is outside the current scope.
 
 ## Development
 
@@ -59,3 +59,19 @@ uv run retail-data analytics status
 An import can also opt in with `--refresh-analytics`. See
 [monthly analytics](docs/monthly-analytics.md) for the store-month contract,
 freshness checks and refresh behavior.
+
+## Authenticated read API
+
+The global read API exposes all 13 application tables and 11 analytical views through
+bounded, typed `/v1` endpoints. Every resource supports an exact primary-key lookup;
+store-related resources also support `store_id` filtering. It requires OAuth2 JWT access
+tokens and a dedicated PostgreSQL SELECT-only login. Start with the
+[API operations guide](docs/read-api-operations.md),
+[security contract](docs/read-api-design.md) and
+[AI agent guide](docs/api-agent-guide.md).
+The API does not issue tokens or deploy an identity provider or frontend.
+
+Personal scripts use `retail-auth login`, then `retail-auth get` or the Python
+`PersonalClient`. Sessions stop at expiration and require fresh credentials;
+there is no automatic renewal. See [personal authentication](docs/personal-authentication.md)
+for provider configuration, native-vault storage and usage examples.

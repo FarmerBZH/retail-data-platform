@@ -1,0 +1,38 @@
+services:
+  identity_database:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    env_file: .env.identity.local
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+    volumes:
+      - identity_database_data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  identity:
+    image: quay.io/keycloak/keycloak:26.7.4
+    restart: unless-stopped
+    env_file: .env.identity.local
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://identity_database:5432/keycloak
+      KC_HOSTNAME: https://localhost:8443
+      KC_HTTPS_CERTIFICATE_FILE: /opt/keycloak/conf/local-tls/tls.crt
+      KC_HTTPS_CERTIFICATE_KEY_FILE: /opt/keycloak/conf/local-tls/tls.key
+      KC_HEALTH_ENABLED: "true"
+    command: ["start"]
+    ports:
+      - "127.0.0.1:8443:8443"
+    volumes:
+      - ./.env.identity.local-certs:/opt/keycloak/conf/local-tls:ro
+    depends_on:
+      identity_database:
+        condition: service_healthy
+
+volumes:
+  identity_database_data:

@@ -22,11 +22,15 @@ OIDC flow, business-data access, browser persistence, telemetry or service worke
 It is not connected to the read API in the context diagram below.
 
 Formatting, lint, strict typing, synthetic component/configuration tests and a
-production build have been verified. A local Chrome check of that build exercised
-360/768/1440 px layouts, keyboard access, reduced motion and empty browser storage,
-without external or business requests. This is not a complete accessibility audit.
-The committed browser harness, CI, real sign-in and production hosting remain later
-increments. Setup and actual scripts are in the [frontend guide](../frontend/README.md).
+production build have been verified. Playwright Chromium tests exercise that build
+at 360/768/1440 px, including keyboard expansion/collapse, retained focus, empty
+browser storage and axe checks. The harness aborts and fails unexpected requests;
+only the local document and hashed shell assets are allowed. Traces, video and
+screenshots are disabled. These checks are not a complete accessibility audit.
+A GitHub workflow runs locked installation and the same local quality command;
+hosted execution has not yet been observed. Real sign-in and production hosting
+remain later increments. Setup and actual scripts are in the
+[frontend guide](../frontend/README.md).
 
 ## Context
 

@@ -131,7 +131,7 @@ demande liens, cohérence et absence de divulgation, pas un faux audit applicati
 
 ## Tâches ordonnées
 
-T01 est **validée**, T02–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
+T01–T02 sont **validées**, T03–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
 satisfaites ; les tâches bloquées par l’identité réelle ne doivent pas empêcher
 les développements testables sur un environnement synthétique. Ne pas déclarer
 la connexion ou J1 reçus avant leur vérification réelle.
@@ -154,6 +154,14 @@ la connexion ou J1 reçus avant leur vérification réelle.
 
 ### T02 — Harnais navigateur et automatisation des contrôles
 
+- Statut : **validée après relecture technique**.
+  Installation verrouillée, format, lint, typage, 21 tests
+  unitaires et 6 scénarios Chromium/axe vérifiés à 360/768/1440 px. Une requête
+  synthétique interdite a fait échouer la commande de CI ; son retrait a rétabli
+  tous les contrôles. Revue Codex Security du diff terminée sans vulnérabilité
+  identifiée, rapport conservé hors du dépôt. Job GitHub défini, exécution distante
+  non encore observée. Contrôles relancés avec succès après relecture, sans
+  modification du code revu.
 - Dépendances : T01.
 - Livrer : Playwright, fixtures synthétiques, interception réseau stricte, axe,
   exécution automatisée des scripts existants dans la CI du dépôt. Configurer

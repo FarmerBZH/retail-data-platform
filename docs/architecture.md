@@ -47,7 +47,26 @@ decimal values remain strings, preserving null. Requests omit cookies and referr
 disable caching, reject redirects and have a ten-second timeout. JSON is limited to
 2,000,000 streamed bytes with strict UTF-8 decoding. Errors retain no response payload
 or credential. Current 401 responses end the session; late refusals cannot end a
-new session. There are no retries, automatic pagination or business cache yet.
+new session. A separate `ReadQueries` service deduplicates and caches reads in the
+current memory session; it is not wired to the entry screen yet. Consumer results
+are cloned and retained state must be bound to the current generation and selection.
+Every raw read shares a session queue with two active reads, thirty-two waiting jobs,
+a thirty-second queue deadline, and sixty starts per rolling minute at one-second
+spacing. Rate history is local and does not establish the server budget consumed by
+other clients. An ignored abort cannot free a still-active transport slot.
+
+The query service caches for thirty seconds, with thirty-two entries, a 1,000,000
+serialized-character budget and 100,000 characters per retained projection. Session
+changes and disposal cancel work and clear the cache. There are thirty-two distinct
+jobs and at most sixty-four consumers per job; only the final consumer's cancellation
+aborts shared work. Eligible retries are restricted to 429/503, with three transient
+failures at most, bounded visible Retry-After or fallback waits, and no retry after
+logout. A page halves limit on 413 down to one, with ten total attempts at most.
+An explicitly requested collection is bounded to five pages, 1,000 rows and twenty-four
+total attempts including freshness checks; repeated cursors fail and partial results
+are identified. A freshness change discards the batch and invalidates the cache;
+unchanged freshness is not a snapshot guarantee. No background/exhaustive loading,
+persistent business storage or new backend endpoint is introduced.
 Synthetic transport tests verify these boundaries; real API/CORS integration and
 rendered business-data flows remain unverified.
 

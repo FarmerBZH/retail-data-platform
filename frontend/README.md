@@ -85,7 +85,8 @@ The `Session.run` boundary rejects results from an ended generation and checks
 expiry before work starts and after it completes, including rejected work.
 Its work callback must publish data only after guarded completion and must not
 retain credentials or write an external cache before that check.
-The read transport uses this boundary; no business cache exists yet (T06).
+The read transport and query service use this boundary; their cache is confined
+to the current memory session. Business screens are not connected yet.
 
 A timer ends the session at its deadline; focus, visibility changes and page-show
 also check expiry after a suspended tab. Page-hide removes credentials and protected
@@ -129,12 +130,63 @@ No response, token, URL or server error body is attached to application errors.
 
 A current 401 ends the session and aborts sibling work. An old response or error
 cannot end a new session or return old data. 403, 422, 413, 429 and 503 have explicit
-error codes and perform no automatic retry. Network failure and cancellation are
-distinct. Pagination, retries, deduplication and a session cache belong to T06.
+error codes. `ReadApi` still performs one attempt; the `ReadQueries` service below
+owns eligible retries. Network failure and cancellation are distinct.
 Consumers must publish only after guarded completion and bind any retained state
 to the current session generation; protected components already unmount on logout.
 The transport has synthetic unit contract tests and the existing browser regression
 suite. Real provider/API/CORS integration remains unverified until T07.
+
+## Bounded queries and collections
+
+Create one `ReadQueries` service for the document with the configured origin and
+existing `Session`, and call `dispose()` when its owner ends. It performs no startup
+reads or background refresh. `resources`, `status` and `page` deduplicate identical
+work and use a memory-only cache for thirty seconds. Page keys include resource,
+normalized query and decoder identity; reuse named decoder functions. Each consumer
+receives a clone, so mutations cannot change another consumer or the cache. Explicit
+`refresh: true` skips a completed cache entry and still joins identical active work.
+
+Every raw read shares the same session queue: at most two active reads, thirty-two
+waiting jobs, a thirty-second queue deadline and sixty departures per rolling minute,
+spaced by at least one second. Local rate history survives identity replacement on
+that Session object. These conservative limits do not account for other tabs/CLI
+clients; the API enforces its shared subject budget. An aborted operation keeps its
+active slot until native fetch/body work settles. Non-cooperative custom transports
+can block slots but cannot return ended-generation data.
+
+The service permits at most thirty-two distinct jobs and sixty-four consumers per
+job. Its cache keeps at most thirty-two entries and 1,000,000 serialized JSON
+characters; a projection exceeding 100,000 characters is not cached. These are
+retention limits, not a measurement of JavaScript heap bytes. Expiry, logout,
+replacement and disposal clear the cache and cancel work. One consumer's cancellation
+does not abort another consumer's identical read; the last departure aborts the work.
+Cached delivery and cache writes check the current generation. Future screens still
+must bind publication of awaited results to their selection and session generation.
+
+Only HTTP 429 and 503 permit automatic retry, at most three transient failures per
+page (two extra attempts). Other 5xx, network errors, 401/403/422 and queue failures
+have no automatic retry. Valid visible `Retry-After` seconds or HTTP dates are honored;
+an absent, CORS-hidden or invalid header uses one then two seconds. A delay exceeding
+ten seconds returns the error for manual retry instead of waiting less than requested.
+Backoff does not hold an active read slot and stops on cancellation.
+
+On 413 or the response byte cap, page limit is halved to one, with filters/cursor
+unchanged. A page reports its actual `limit`; the transient counter is not reset by
+reductions. There are at most ten attempts per page, including reductions and retries.
+Persistent failure at limit one is explicit. No indefinite reduction loop exists.
+
+`collect` is an explicitly requested bounded batch, not a network-wide extraction.
+It permits at most five pages, 1,000 projected rows and twenty-four total attempts,
+including freshness reads before/after, reductions and retries. Smaller `maxPages`
+or `maxItems` are allowed. Opaque cursors preserve filters; empty or repeated cursors
+and empty pages advertising another page fail. Reduced limits carry to later pages.
+Batches deduplicate while running but are not cached. The result includes `complete`,
+`reason`, `nextCursor` and actual `attempts`; callers must not treat partial items as
+a definitive total/KPI. A changed freshness response discards the batch and invalidates
+cached values, preventing older work from repopulating that cache. An unchanged
+freshness response does not establish a database snapshot. Neither this service nor
+business data screens are wired into the entry screen yet.
 
 ## Package scripts
 

@@ -1,7 +1,8 @@
 # Frontend SaaS — tâches d’implémentation et de validation
 
-Statut : T01–T04 sont implémentées, validées et commitées ; T05 est **validée après relecture technique**.
-T06–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
+Statut : T01–T05 sont implémentées, validées et commitées.
+T06 est **commitée après relecture technique**, avec revue Security finale en attente ;
+T07–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
 pour les scripts réels et les limites du socle.
 Point de départ historique : branche `feat/saas-frontend`, API de lecture et client personnel
 existants ; aucun package frontend ni pipeline frontend à ce stade.
@@ -131,7 +132,8 @@ demande liens, cohérence et absence de divulgation, pas un faux audit applicati
 
 ## Tâches ordonnées
 
-T01–T05 sont **validées**, T06–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
+T01–T05 sont **validées**, T06 est **commitée, sécurité finale en attente**,
+T07–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
 satisfaites ; les tâches bloquées par l’identité réelle ne doivent pas empêcher
 les développements testables sur un environnement synthétique. Ne pas déclarer
 la connexion ou J1 reçus avant leur vérification réelle.
@@ -238,6 +240,17 @@ la connexion ou J1 reçus avant leur vérification réelle.
 
 ### T06 — Pagination, concurrence et reprise bornée
 
+- Statut : **commitée après relecture technique et accord explicite**. File de lectures partagée, cache uniquement
+  en mémoire, déduplication, annulation, retries bornés et collections partielles
+  explicites. Rejet sans valeur du scheduler corrigé avec test de régression.
+  Format, lint, typage, 185 tests unitaires/composants, build et 39 scénarios
+  Chromium passent. La revue Codex Security précédente n'a relevé aucun candidat
+  plausible ; rapport local conservé hors dépôt. Elle précède cette dernière
+  correction : **sécurité non vérifiée sur le diff final**, plugin indisponible
+  dans cette session. Ne pas assimiler les tests à une nouvelle revue Security.
+  Le service reste à raccorder
+  aux écrans métier ; fournisseur/API/CORS réels non vérifiés, réservés à T07.
+  Aucun push de T06 effectué.
 - Dépendances : T05.
 - Livrer : pagination par curseur opaque, annulation/déduplication, cache de session,
   deux lectures simultanées au maximum, trois tentatives au maximum sur 429/503.

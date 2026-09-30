@@ -231,12 +231,16 @@ describe("read transport", () => {
         return new Promise(() => undefined);
       })
       .mockResolvedValueOnce(body({}, 401));
-    void api.resources();
+    const sibling = api.resources();
+    const cancelled = expect(sibling).rejects.toMatchObject({
+      code: "cancelled",
+    });
     await expect(api.status()).rejects.toMatchObject({
       code: "unauthenticated",
     });
     expect(session.credentials).toBeUndefined();
     expect(siblingSignal?.aborted).toBe(true);
+    await cancelled;
   });
   it.each([200, 401, 403])(
     "discards late HTTP %i after a new login even when fetch ignores abort",

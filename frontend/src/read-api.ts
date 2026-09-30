@@ -9,6 +9,7 @@ import {
   uuid,
 } from "./api-validation";
 import type { Decoder } from "./api-validation";
+import { readScheduler, ReadSchedulingError } from "./read-scheduler";
 
 // Fixed public routes, never paths or destinations supplied by a response.
 export const resourceNames = [
@@ -78,10 +79,14 @@ export type ApiErrorCode =
   | "cancelled";
 export class ApiError extends Error {
   readonly code: ApiErrorCode;
-  constructor(code: ApiErrorCode) {
+  readonly status: number | undefined;
+  readonly retryAfterMs: number | undefined;
+  constructor(code: ApiErrorCode, status?: number, retryAfterMs?: number) {
     super(`API ${code}`);
     this.name = "ApiError";
     this.code = code;
+    this.status = status;
+    this.retryAfterMs = retryAfterMs;
   }
 }
 
@@ -191,6 +196,27 @@ function queryParameters(query: Query): URLSearchParams {
   return parameters;
 }
 
+export function pageQueryKey(name: ResourceName, query: Query): string {
+  try {
+    resourceName(name);
+    const parameters = queryParameters(query);
+    parameters.sort();
+    return `${name}?${parameters}`;
+  } catch {
+    throw new ApiError("invalid-request");
+  }
+}
+
+function retryDelay(value: string | null): number | undefined {
+  if (value === null) return undefined;
+  if (/^\d{1,10}$/.test(value))
+    return Math.min(Number(value) * 1000, 86400_000);
+  const time = Date.parse(value);
+  if (!Number.isFinite(time) || new Date(time).toUTCString() !== value)
+    return undefined;
+  return Math.min(Math.max(0, time - Date.now()), 86400_000);
+}
+
 const maximumBytes = 2_000_000;
 async function json(response: Response): Promise<unknown> {
   if (
@@ -200,8 +226,10 @@ async function json(response: Response): Promise<unknown> {
       ?.trim()
       .toLowerCase() !== "application/json" ||
     !response.body
-  )
+  ) {
+    await response.body?.cancel().catch(() => undefined);
     throw new ApiError("invalid-response");
+  }
   const reader = response.body.getReader();
   const decoder = new TextDecoder("utf-8", { fatal: true });
   let bytes = 0;
@@ -296,72 +324,87 @@ export class ReadApi {
     try {
       return await this.#sessions.run(
         async (credentials, sessionSignal, operation) => {
-          const signals = [sessionSignal, AbortSignal.timeout(10_000)];
-          if (cancellation) signals.push(cancellation);
-          const signal = AbortSignal.any(signals);
-          let response: Response;
-          try {
-            signal.throwIfAborted();
-            response = await this.#fetch(destination, {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${credentials.accessToken}`,
-                Accept: "application/json",
-              },
-              signal,
-              redirect: "error",
-              credentials: "omit",
-              cache: "no-store",
-              referrerPolicy: "no-referrer",
-            });
-          } catch {
-            throw new ApiError(signal.aborted ? "cancelled" : "network");
-          }
-          if (!operation.isCurrent() || signal.aborted) {
-            await response.body?.cancel().catch(() => undefined);
-            throw new ApiError("cancelled");
-          }
-          if (
-            response.redirected ||
-            (response.url && response.url !== destination.href)
-          ) {
-            await response.body?.cancel().catch(() => undefined);
-            throw new ApiError("invalid-response");
-          }
-          if (!response.ok) {
-            await response.body?.cancel().catch(() => undefined);
-            if (response.status === 401) {
-              // Recheck after asynchronous cancellation; old refusals cannot end a new login.
-              if (operation.isCurrent()) {
-                refused = true;
-                this.#sessions.end();
-              }
-              throw new ApiError("unauthenticated");
+          const scheduledSignal = cancellation
+            ? AbortSignal.any([sessionSignal, cancellation])
+            : sessionSignal;
+          return readScheduler(this.#sessions).run(async () => {
+            const signals = [sessionSignal, AbortSignal.timeout(10_000)];
+            if (cancellation) signals.push(cancellation);
+            const signal = AbortSignal.any(signals);
+            let response: Response;
+            try {
+              signal.throwIfAborted();
+              response = await this.#fetch(destination, {
+                method: "GET",
+                headers: {
+                  Authorization: `Bearer ${credentials.accessToken}`,
+                  Accept: "application/json",
+                },
+                signal,
+                redirect: "error",
+                credentials: "omit",
+                cache: "no-store",
+                referrerPolicy: "no-referrer",
+              });
+            } catch {
+              throw new ApiError(signal.aborted ? "cancelled" : "network");
             }
-            const codes: Record<number, ApiErrorCode> = {
-              403: "forbidden",
-              413: "too-large",
-              422: "invalid-request",
-              429: "rate-limited",
-              503: "unavailable",
-            };
-            throw new ApiError(codes[response.status] ?? "unavailable");
-          }
-          try {
-            const value = await json(response);
-            if (!operation.isCurrent() || signal.aborted)
+            if (!operation.isCurrent() || signal.aborted) {
+              await response.body?.cancel().catch(() => undefined);
               throw new ApiError("cancelled");
-            return decode(value);
-          } catch (error) {
-            if (signal.aborted) throw new ApiError("cancelled");
-            if (error instanceof ApiError) throw error;
-            throw new ApiError("invalid-response");
-          }
+            }
+            if (
+              response.redirected ||
+              (response.url && response.url !== destination.href)
+            ) {
+              await response.body?.cancel().catch(() => undefined);
+              throw new ApiError("invalid-response");
+            }
+            if (!response.ok) {
+              await response.body?.cancel().catch(() => undefined);
+              if (response.status === 401) {
+                // Recheck after asynchronous cancellation; old refusals cannot end a new login.
+                if (operation.isCurrent()) {
+                  refused = true;
+                  this.#sessions.end();
+                }
+                throw new ApiError("unauthenticated");
+              }
+              const codes: Record<number, ApiErrorCode> = {
+                403: "forbidden",
+                413: "too-large",
+                422: "invalid-request",
+                429: "rate-limited",
+                503: "unavailable",
+              };
+              throw new ApiError(
+                codes[response.status] ?? "unavailable",
+                response.status,
+                response.status === 429 || response.status === 503
+                  ? retryDelay(response.headers.get("Retry-After"))
+                  : undefined,
+              );
+            }
+            try {
+              const value = await json(response);
+              if (!operation.isCurrent() || signal.aborted)
+                throw new ApiError("cancelled");
+              return decode(value);
+            } catch (error) {
+              if (signal.aborted) throw new ApiError("cancelled");
+              if (error instanceof ApiError) throw error;
+              throw new ApiError("invalid-response");
+            }
+          }, scheduledSignal);
         },
       );
     } catch (error) {
       if (error instanceof SessionUnavailableError)
         throw new ApiError(refused ? "unauthenticated" : "cancelled");
+      if (error instanceof ReadSchedulingError)
+        throw new ApiError(
+          error.code === "cancelled" ? "cancelled" : "unavailable",
+        );
       if (error instanceof ApiError) throw error;
       throw new ApiError("invalid-response");
     }

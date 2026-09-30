@@ -3,9 +3,9 @@
 ## Scope and status
 
 This document describes the implemented ingestion, analytical and authenticated
-read API boundaries of Retail Data Platform, plus an initial unauthenticated web
-shell. Browser authentication, business screens, production identity deployment
-and multi-tenant authorization are outside the current implementation.
+read API boundaries of Retail Data Platform, plus a web entry screen with OIDC
+authentication. Business screens, verified production identity deployment and
+multi-tenant authorization are outside the current implementation.
 Authorized API readers have global access; store selection is a query filter.
 
 The platform turns heterogeneous tabular source bundles into a validated,
@@ -16,20 +16,35 @@ placing operational data in the public repository.
 
 The isolated `frontend/` package uses React, strict TypeScript, Vite and Material UI.
 Its French entry screen applies shared design tokens, explains unavailable sign-in
-and handles loading/render failures without displaying exception content. A public
-API-origin setting is validated but does not initiate requests. The shell has no
-OIDC flow, business-data access, browser persistence, telemetry or service worker.
+when configuration is missing and handles loading/render failures without displaying
+exception content. A public
+API-origin setting is validated but does not initiate business requests. Configured
+personal sign-in uses `oauth4webapi` with Authorization Code, PKCE S256, state,
+nonce, mandatory callback issuer and RS256 ID-token signature/claim validation.
+Discovery, token and JWKS fetches stay on the configured issuer origin and refuse
+redirects. Top-level authorization navigation remains under provider control.
+The callback URL is replaced before exchange; its transient state is consumed once.
+Only state, nonce and verifier use sessionStorage during redirect, with a ten-minute
+acceptance deadline and cleanup on return or expired re-entry. Access tokens remain
+in memory; refresh-token fields are rejected. ID tokens are never retained as API
+credentials. The shell has no business-data access, telemetry or service worker.
 It is not connected to the read API in the context diagram below.
 
 Formatting, lint, strict typing, synthetic component/configuration tests and a
 production build have been verified. Playwright Chromium tests exercise that build
 at 360/768/1440 px, including keyboard expansion/collapse, retained focus, empty
-browser storage and axe checks. The harness aborts and fails unexpected requests;
-only the local document and hashed shell assets are allowed. Traces, video and
+browser storage and axe checks. Signed synthetic OIDC scenarios cover success,
+issuer/state/nonce/signature failures, refused exchange, unexpected refresh tokens,
+orphan callback cleanup and reload. Unit tests also verify replay, expiry and
+configuration binding. A dedicated build supplies public synthetic settings without
+reading local environment files; the normal production build is checked separately.
+The default harness aborts and fails unexpected requests; OIDC scenarios explicitly
+intercept their synthetic provider and callback routes. Traces, video and
 screenshots are disabled. These checks are not a complete accessibility audit.
 A GitHub workflow runs locked installation and the same local quality command;
-hosted execution has not yet been observed. Real sign-in and production hosting
-remain later increments. Setup and actual scripts are in the
+hosted execution has not yet been observed. Real provider compatibility, API
+authorization, UI expiry/logout lifecycle and production hosting remain later
+increments. Setup and actual scripts are in the
 [frontend guide](../frontend/README.md).
 
 ## Context

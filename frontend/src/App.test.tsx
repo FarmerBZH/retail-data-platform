@@ -23,7 +23,9 @@ describe("unauthenticated shell", () => {
     expect(screen.getByRole("button", { name: "Se connecter" })).toBeDisabled();
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
     expect(
-      screen.getByText(/configuration du service n’est pas encore renseignée/),
+      screen.getByText(
+        /configuration de connexion n’est pas encore renseignée/,
+      ),
     ).toBeVisible();
     await user.tab();
     const details = screen.getByRole("button", { name: "Comprendre l’accès" });
@@ -54,7 +56,9 @@ describe("unauthenticated shell", () => {
       <App configuration={readConfiguration("https://api.example.test")} />,
     );
     expect(
-      screen.getByText(/connexion personnelle n’est pas encore disponible/),
+      screen.getByText(
+        /configuration de connexion n’est pas encore renseignée/,
+      ),
     ).toBeVisible();
     expect(screen.getByRole("button", { name: "Se connecter" })).toBeDisabled();
   });

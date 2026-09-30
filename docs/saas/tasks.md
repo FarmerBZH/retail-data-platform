@@ -1,9 +1,9 @@
 # Frontend SaaS — tâches d’implémentation et de validation
 
-Statut : plan d’implémentation pour les agents. T01 est implémentée et validée ;
-les tâches suivantes restent à faire. Voir le [guide frontend](../../frontend/README.md)
+Statut : T01–T02 sont implémentées, validées et commitées ; T03 est implémentée
+et **validée après relecture technique**. T04–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
 pour les scripts réels et les limites du socle.
-Point de départ : branche `feat/saas-frontend`, API de lecture et client personnel
+Point de départ historique : branche `feat/saas-frontend`, API de lecture et client personnel
 existants ; aucun package frontend ni pipeline frontend à ce stade.
 
 ## Contrats à lire
@@ -81,7 +81,7 @@ Références : [Vitest](https://vitest.dev/guide/),
 | Sécurité | Tests négatifs et revue Codex Security du diff | Chaque changement applicatif avant commit |
 
 T01 fournit les scripts de format, lint, typage, tests et build dans le guide
-frontend et les consignes locales. T02 doit ajouter le harnais navigateur et la CI.
+frontend et les consignes locales. T02 ajoute le harnais navigateur et la CI.
 Ne pas recopier des commandes hypothétiques dans un compte rendu.
 Les changements Python conservent format, lint, mypy et pytest du projet ; les
 changements de persistance exigent PostgreSQL réel. Toute migration future exige
@@ -131,7 +131,7 @@ demande liens, cohérence et absence de divulgation, pas un faux audit applicati
 
 ## Tâches ordonnées
 
-T01–T02 sont **validées**, T03–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
+T01–T03 sont **validées**, T04–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
 satisfaites ; les tâches bloquées par l’identité réelle ne doivent pas empêcher
 les développements testables sur un environnement synthétique. Ne pas déclarer
 la connexion ou J1 reçus avant leur vérification réelle.
@@ -174,6 +174,12 @@ la connexion ou J1 reçus avant leur vérification réelle.
 
 ### T03 — Connexion OIDC et retour PKCE
 
+- Statut : **validée après relecture technique**. Parcours OIDC et tests synthétiques implémentés ;
+  formatage, lint, typage, build, 64 tests unitaires/composants et 30 scénarios
+  Chromium passent. Revue Codex Security du diff terminée sans vulnérabilité
+  relevée. Compatibilité réelle du fournisseur, du client autorisé par l’API et
+  de CORS réservée à T07 ; cycle de session T04 et transport API T05 restent à faire.
+  Aucun commit ni push de T03.
 - Dépendances : T01–T02.
 - Livrer : bibliothèque OIDC maintenue, configuration publique validée, bouton
   Se connecter, code + PKCE S256, contrôle state/issuer et nonce si ID token utilisé.

@@ -1,8 +1,9 @@
 # Frontend shell
 
 React, strict TypeScript, Vite and Material UI provide the French entry screen
-and shared theme from [DESIGN.md](../DESIGN.md). This increment has no
-authentication, API calls or business data. Sign-in is intentionally unavailable.
+and shared theme from [DESIGN.md](../DESIGN.md). Public OIDC configuration enables
+personal sign-in with Authorization Code and PKCE. No business API calls or data
+screens are implemented yet; missing configuration keeps sign-in unavailable.
 Loading and render failures have accessible, generic fallback screens.
 
 ## Run locally
@@ -31,13 +32,58 @@ VITE_API_BASE_URL=http://127.0.0.1:8000
 
 Only an HTTPS origin (or HTTP loopback for development) is accepted, without
 credentials, path, query or fragment. Invalid values produce a generic message
-without echoing the input. A valid origin still does not enable sign-in or make
-requests in this increment. Restart Vite after changing environment settings;
+without echoing the input. An API origin alone does not enable sign-in.
+Restart Vite after changing environment settings;
 rebuild when changing configuration for a built application.
 
 Vite client configuration is public and may appear in built assets. Never place
 tokens, client secrets, passwords or business values in frontend environment
-variables. OIDC configuration and its validation will arrive with the sign-in task.
+variables.
+
+## Personal OIDC sign-in
+
+Configure these public values alongside the API origin:
+
+```dotenv
+VITE_OIDC_ISSUER=https://identity.example.test/realm
+VITE_OIDC_CLIENT_ID=synthetic-web
+VITE_OIDC_REDIRECT_URI=http://127.0.0.1:5173/oidc/callback
+```
+
+The redirect must be exactly the current origin plus `/oidc/callback`, with no
+query, fragment or wildcard. The issuer uses HTTPS (HTTP loopback is allowed only
+for local development). Discovery must advertise S256 and authorization, token
+and JWKS endpoints on the issuer origin. Discovery, token and JWKS fetches omit credentials/referrers,
+disable caching, reject HTTP redirects and time out after ten seconds.
+Top-level authorization navigation and provider cookies remain provider-controlled.
+
+The MIT-licensed, pinned `oauth4webapi` library handles PKCE and protocol validation.
+Every login requests `openid data:read`, `prompt=login`, `max_age=0`, state and nonce.
+The callback requires an exact issuer and matching state; it is consumed before
+network activity and its URL is immediately replaced with `/`. ID tokens require
+RS256, valid issuer/audience/nonce/time claims and a valid JWKS signature. An
+authentication time more than sixty seconds before issuance is rejected. Token
+responses require Bearer, explicit `data:read`, and a processed integer lifetime from one
+second to 24 hours. Any refresh-token field is rejected; there is no silent login,
+refresh, userinfo request or arbitrary return destination.
+
+Only state (including creation time and configuration binding), nonce and the PKCE
+verifier pass through `sessionStorage` during redirection. The transaction expires
+after ten minutes and is deleted on return, failure, a new attempt, or re-entry
+after expiry. A page away at the provider cannot actively erase storage; expired
+state is never accepted when the app executes again. The access token stays only
+in memory; the ID token is never retained or sent to the API. Reload requires a new
+login. The full UI/session expiry and logout lifecycle is task T04; API transport
+is task T05. The success screen confirms OIDC validation, not API authorization.
+
+Real provider compatibility is unverified (T07). Configure the public client with
+the exact redirect, web origin and token-endpoint CORS. Its ID must match the API's
+single allowed `API_CLIENT_ID`; do not silently introduce a second client or change
+the CLI identity contract. The API remains responsible for validating RS256
+`at+jwt`, its audience, `azp`, signed `auth_time` and read permissions. Provider
+configuration must enforce credential entry and avoid issuing refresh tokens.
+Production callback access logs must omit query parameters; no application log
+or telemetry receives callback URLs, tokens or provider error payloads.
 
 ## Package scripts
 
@@ -52,7 +98,7 @@ variables. OIDC configuration and its validation will arrive with the sign-in ta
 | `npm run test:watch`   | Interactive test loop                                            |
 | `npm run build`        | Typecheck and production build in ignored `dist/`                |
 | `npm run preview`      | Inspect the built shell on loopback, default port 4173           |
-| `npm run test:e2e`     | Build and test with Playwright Chromium and axe                  |
+| `npm run test:e2e`     | Build synthetic configuration and test with Chromium and axe     |
 | `npm run check`        | Run formatting, lint, types, unit tests, build and browser tests |
 
 Run format check, lint, typecheck, tests and build before proposing a change.
@@ -69,14 +115,21 @@ npx --no-install playwright install chromium
 npm run check
 ```
 
-The harness starts a fresh production preview on `127.0.0.1:4180` and refuses
+The harness builds the same application with explicit synthetic configuration in
+ignored `dist-e2e/`, ignoring local environment files, then starts a fresh preview
+on `127.0.0.1:4180` and refuses
 an occupied port. Tests use isolated contexts at 360, 768 and 1440 pixels. They
 exercise the public shell with synthetic inputs, keyboard expansion/collapse,
 retained focus, horizontal overflow, empty browser storage and axe checks in both
 disclosure states. No backend or identity-provider credentials are needed.
-Only the local document and hashed JavaScript/CSS assets may reach the network;
+The default fixture allows only the local document and JavaScript/CSS assets;
 other requests are aborted and fail the test. Future business scenarios must
-explicitly fulfill synthetic responses. Browser errors also fail the test.
+explicitly fulfill synthetic responses. OIDC scenarios intercept only their
+synthetic discovery, authorization, token, JWKS and callback routes. Keys are
+generated per fixture, and tests exercise the real library without production
+bypasses. Browser errors also fail the test. `npm run check` separately builds the
+normal production configuration before these scenarios; test providers are never
+imported by the application.
 
 Tracing, video and screenshots are disabled. Generated test results are ignored;
 the workflow does not upload them. Do not use personal sessions, real data,
@@ -90,7 +143,7 @@ permissions, no persisted checkout credentials, secrets or deployment. Local
 execution does not establish that the hosted job has run or that branch protection
 is configured. Production CSP and hosting checks are later tasks.
 Vite dev/preview are local tools, not production servers.
-No runtime storage, service worker, external font or telemetry is added here.
+No token storage, service worker, external font or telemetry is added here.
 MUI uses its MIT-licensed components and Emotion engine; charts and commercial
 components are not installed in this increment. Versions are pinned in the
 manifest and lockfile; review dependency changes deliberately.

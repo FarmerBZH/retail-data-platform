@@ -21,7 +21,14 @@ export default defineConfig({
     use: { viewport: { width, height: 900 } },
   })),
   webServer: {
-    command: "npm run preview -- --port 4180",
+    command:
+      "npm run build -- --mode e2e --outDir dist-e2e && npm run preview -- --outDir dist-e2e --port 4180",
+    env: {
+      VITE_API_BASE_URL: "https://api.example.test",
+      VITE_OIDC_ISSUER: "https://identity.example.test",
+      VITE_OIDC_CLIENT_ID: "synthetic-web",
+      VITE_OIDC_REDIRECT_URI: "http://127.0.0.1:4180/oidc/callback",
+    },
     url: "http://127.0.0.1:4180",
     reuseExistingServer: false,
     timeout: 30_000,

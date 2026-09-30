@@ -1,7 +1,5 @@
 import { useState } from "react";
 import {
-  Alert,
-  AlertTitle,
   Box,
   Button,
   Collapse,
@@ -11,11 +9,19 @@ import {
   Typography,
 } from "@mui/material";
 import type { Configuration } from "./config";
+import type { Authentication } from "./authentication";
+import { SignIn } from "./SignIn";
 
 export default function App({
   configuration,
+  authentication,
+  completion,
+  oidcInvalid = false,
 }: {
   configuration: Configuration;
+  authentication?: Authentication | undefined;
+  completion?: Promise<boolean> | undefined;
+  oidcInvalid?: boolean;
 }) {
   const [showAccessDetails, setShowAccessDetails] = useState(false);
 
@@ -74,21 +80,11 @@ export default function App({
                 </Typography>
               </Stack>
 
-              <Alert
-                severity={configuration.status === "invalid" ? "error" : "info"}
-              >
-                <AlertTitle>Connexion indisponible</AlertTitle>
-                {configuration.status === "missing" &&
-                  "La configuration du service n’est pas encore renseignée. Contactez la personne responsable de la plateforme."}
-                {configuration.status === "invalid" &&
-                  "La configuration du service doit être corrigée. Contactez la personne responsable de la plateforme."}
-                {configuration.status === "configured" &&
-                  "La connexion personnelle n’est pas encore disponible dans cette version."}
-              </Alert>
-
-              <Button variant="contained" disabled fullWidth>
-                Se connecter
-              </Button>
+              <SignIn
+                authentication={authentication}
+                completion={completion}
+                invalid={configuration.status === "invalid" || oidcInvalid}
+              />
               <Divider />
               <Box>
                 <Button

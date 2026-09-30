@@ -16,13 +16,14 @@
     "test:watch": "vitest",
     "build": "npm run typecheck && vite build",
     "preview": "vite preview --host 127.0.0.1",
-    "test:e2e": "npm run build && playwright test",
-    "check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run test:e2e"
+    "test:e2e": "playwright test",
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run build && npm run test:e2e"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
     "@emotion/styled": "11.14.1",
     "@mui/material": "9.4.0",
+    "oauth4webapi": "3.8.8",
     "react": "19.3.0",
     "react-dom": "19.3.0"
   },

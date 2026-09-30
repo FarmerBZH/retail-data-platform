@@ -10,7 +10,7 @@ test("public shell is responsive, isolated and keyboard accessible", async ({
   ).toBeVisible();
   await expect(
     page.getByRole("button", { name: "Se connecter", exact: true }),
-  ).toBeDisabled();
+  ).toBeEnabled();
   expect(await page.locator("html").getAttribute("lang")).toBe("fr");
   expect(
     await page.evaluate(
@@ -19,6 +19,7 @@ test("public shell is responsive, isolated and keyboard accessible", async ({
   ).toBe(true);
 
   const explanation = page.getByRole("button", { name: "Comprendre l’accès" });
+  await page.keyboard.press("Tab");
   await page.keyboard.press("Tab");
   await expect(explanation).toBeFocused();
   await page.keyboard.press("Enter");

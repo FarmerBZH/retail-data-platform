@@ -3,13 +3,30 @@
 ## Scope and status
 
 This document describes the implemented ingestion, analytical and authenticated
-read API boundaries of Retail Data Platform. A web application, production identity
-deployment and multi-tenant authorization are outside the current architecture.
+read API boundaries of Retail Data Platform, plus an initial unauthenticated web
+shell. Browser authentication, business screens, production identity deployment
+and multi-tenant authorization are outside the current implementation.
 Authorized API readers have global access; store selection is a query filter.
 
 The platform turns heterogeneous tabular source bundles into a validated,
 traceable PostgreSQL dataset and exposes bounded authenticated reads without
 placing operational data in the public repository.
+
+## Frontend shell boundary
+
+The isolated `frontend/` package uses React, strict TypeScript, Vite and Material UI.
+Its French entry screen applies shared design tokens, explains unavailable sign-in
+and handles loading/render failures without displaying exception content. A public
+API-origin setting is validated but does not initiate requests. The shell has no
+OIDC flow, business-data access, browser persistence, telemetry or service worker.
+It is not connected to the read API in the context diagram below.
+
+Formatting, lint, strict typing, synthetic component/configuration tests and a
+production build have been verified. A local Chrome check of that build exercised
+360/768/1440 px layouts, keyboard access, reduced motion and empty browser storage,
+without external or business requests. This is not a complete accessibility audit.
+The committed browser harness, CI, real sign-in and production hosting remain later
+increments. Setup and actual scripts are in the [frontend guide](../frontend/README.md).
 
 ## Context
 

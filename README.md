@@ -4,8 +4,10 @@ A portfolio project for building a reliable data platform from heterogeneous
 tabular sources.
 
 The project provides validated data ingestion, PostgreSQL analytics and an
-authenticated read API. The web application is being specified; it is not yet
-implemented. See the [SaaS frontend specification](docs/saas/README.md).
+authenticated read API. An initial React frontend shell provides a French entry
+screen and shared Material UI theme; authentication and business screens are not
+implemented yet. See the [frontend setup](frontend/README.md) and
+[SaaS frontend specification](docs/saas/README.md).
 
 ## Development
 

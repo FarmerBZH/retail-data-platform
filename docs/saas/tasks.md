@@ -1,6 +1,8 @@
 # Frontend SaaS — tâches d’implémentation et de validation
 
-Statut : plan demandé pour les agents, aucune tâche implémentée par ce document.
+Statut : plan d’implémentation pour les agents. T01 est implémentée et validée ;
+les tâches suivantes restent à faire. Voir le [guide frontend](../../frontend/README.md)
+pour les scripts réels et les limites du socle.
 Point de départ : branche `feat/saas-frontend`, API de lecture et client personnel
 existants ; aucun package frontend ni pipeline frontend à ce stade.
 
@@ -78,9 +80,9 @@ Références : [Vitest](https://vitest.dev/guide/),
 | Accessibilité / visuel | axe, clavier, focus, responsive et contrôle visuel humain | Dès le shell, puis chaque écran |
 | Sécurité | Tests négatifs et revue Codex Security du diff | Chaque changement applicatif avant commit |
 
-Aucune commande frontend n’existe encore : T01 et T02 doivent créer les scripts
-réels, les documenter dans les consignes locales et le guide de lancement, puis
-les exécuter. Ne pas recopier des commandes hypothétiques dans un compte rendu.
+T01 fournit les scripts de format, lint, typage, tests et build dans le guide
+frontend et les consignes locales. T02 doit ajouter le harnais navigateur et la CI.
+Ne pas recopier des commandes hypothétiques dans un compte rendu.
 Les changements Python conservent format, lint, mypy et pytest du projet ; les
 changements de persistance exigent PostgreSQL réel. Toute migration future exige
 modèle aligné, upgrade à neuf, downgrade/upgrade et `alembic check`.
@@ -129,13 +131,17 @@ demande liens, cohérence et absence de divulgation, pas un faux audit applicati
 
 ## Tâches ordonnées
 
-Toutes les tâches sont **à faire**. Réaliser la suivante dont les dépendances sont
+T01 est **validée**, T02–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
 satisfaites ; les tâches bloquées par l’identité réelle ne doivent pas empêcher
 les développements testables sur un environnement synthétique. Ne pas déclarer
 la connexion ou J1 reçus avant leur vérification réelle.
 
 ### T01 — Socle React, thème et contrôles statiques
 
+- Statut : **validée**, commit autorisé après relecture. Format, lint, typage, 21 tests et build
+  vérifiés ; contrôle navigateur local aux trois largeurs et au clavier effectué.
+  Revue Codex Security du diff terminée sans vulnérabilité identifiée ; rapport
+  conservé hors du dépôt. Authentification, CI et recette de production non couvertes.
 - Dépendances : aucune.
 - Livrer : package frontend isolé, React/TypeScript strict/Vite, composants MUI,
   thème conforme à DESIGN, page de connexion sans données, états chargement/erreur.

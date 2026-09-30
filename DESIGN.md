@@ -1,6 +1,7 @@
 # Design de la plateforme analytique
 
-Statut : référence visuelle cible, sans composants implémentés à ce stade.
+Statut : référence visuelle cible. Le socle frontend applique le thème à l’écran
+d’entrée ; les écrans métier et graphiques restent à implémenter.
 MUI, le responsive et une interface agréable et simple sont confirmés. Les valeurs
 ci-dessous fixent une base commune pour l’implémentation ; elles pourront évoluer
 ensemble après une revue des premiers écrans.
@@ -185,8 +186,9 @@ Recette minimale : 360, 768 et 1440 px, zoom navigateur à 200 %, clavier seul,
 libellés longs, valeurs négatives, listes vides, données partielles et erreurs.
 Vérifier l’absence de débordement de page, la lisibilité des axes et l’accès au texte
 complet des tableaux. Utiliser uniquement des exemples et captures synthétiques.
-Les premiers écrans permettront de vérifier ces règles en conditions réelles ;
-aucune recette d’interface n’a encore eu lieu.
+Le shell initial a été vérifié à 360, 768 et 1440 px avec navigation clavier et
+réduction du mouvement. La recette complète des écrans métier, du zoom et des
+graphiques reste à effectuer.
 
 ## Références MUI
 

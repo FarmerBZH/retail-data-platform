@@ -1,7 +1,7 @@
 # Frontend SaaS — tâches d’implémentation et de validation
 
-Statut : T01–T03 sont implémentées, validées et commitées ; T04 est **validée après relecture technique**.
-T05–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
+Statut : T01–T04 sont implémentées, validées et commitées ; T05 est **validée après relecture technique**.
+T06–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
 pour les scripts réels et les limites du socle.
 Point de départ historique : branche `feat/saas-frontend`, API de lecture et client personnel
 existants ; aucun package frontend ni pipeline frontend à ce stade.
@@ -131,7 +131,7 @@ demande liens, cohérence et absence de divulgation, pas un faux audit applicati
 
 ## Tâches ordonnées
 
-T01–T04 sont **validées**, T05–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
+T01–T05 sont **validées**, T06–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
 satisfaites ; les tâches bloquées par l’identité réelle ne doivent pas empêcher
 les développements testables sur un environnement synthétique. Ne pas déclarer
 la connexion ou J1 reçus avant leur vérification réelle.
@@ -214,6 +214,18 @@ la connexion ou J1 reçus avant leur vérification réelle.
 
 ### T05 — Transport API et validation des réponses
 
+- Statut : **validée après relecture technique**. Aucun défaut bloquant relevé ;
+  aucun changement du code applicatif nécessaire pendant la relecture.
+  Client GET à routes fixes, origine validée,
+  réponses JSON bornées et projections runtime, valeurs exactes/null préservées,
+  erreurs génériques et 401 lié à la génération de session. Aucun écran métier
+  ni chargement automatique n’est introduit. Format, lint, typage, 145 tests
+  unitaires/composants, build et 39 scénarios Chromium de régression passent,
+  avec une nouvelle exécution complète après relecture.
+  Revue Codex Security du diff finalisée sans constat ; rapport conservé hors du
+  dépôt. Le transport est testé avec des réponses synthétiques ; la connexion
+  navigateur/API réelle reste à vérifier en T07. Commit autorisé après relecture ;
+  aucun push demandé.
 - Dépendances : T04.
 - Livrer : client de lecture typé, origine API configurée, chemins autorisés,
   validation runtime des enveloppes/champs utilisés, dates et décimaux en chaînes.

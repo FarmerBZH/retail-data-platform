@@ -14,6 +14,12 @@ export type SessionOperation = Readonly<{
   isCurrent: () => boolean;
 }>;
 
+export class SessionUnavailableError extends Error {
+  constructor() {
+    super("Session unavailable");
+  }
+}
+
 // Snapshots contain no credentials. Each generation owns one cancellation signal.
 export class Session {
   #snapshot: SessionSnapshot = { phase: "idle", generation: 0 };
@@ -108,16 +114,25 @@ export class Session {
     return this.#credentials;
   }
 
-  // Future transport must use this boundary; an ignored abort still cannot publish
+  // Transport uses this boundary; an ignored abort still cannot publish
   // a result into a newer session. No business cache is introduced here.
   async run<T>(
-    work: (credentials: AccessSession, signal: AbortSignal) => Promise<T>,
+    work: (
+      credentials: AccessSession,
+      signal: AbortSignal,
+      operation: SessionOperation,
+    ) => Promise<T>,
   ): Promise<T> {
     const credentials = this.credentials;
-    if (!credentials) throw new Error("Session unavailable");
+    if (!credentials) throw new SessionUnavailableError();
     const operation = this.#operation();
-    const result = await work(credentials, operation.signal);
-    if (!operation.isCurrent()) throw new Error("Session unavailable");
-    return result;
+    try {
+      const result = await work(credentials, operation.signal, operation);
+      if (!operation.isCurrent()) throw new SessionUnavailableError();
+      return result;
+    } catch (error) {
+      if (!operation.isCurrent()) throw new SessionUnavailableError();
+      throw error;
+    }
   }
 }

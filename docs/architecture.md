@@ -31,13 +31,25 @@ credentials. A generation-bound memory session expires by timer and is checked
 again on focus, visibility and page-show. Logout, replacement and document departure
 clear credentials, cancel outstanding operations and unmount protected content.
 Late OIDC responses cannot recreate an ended session. The session work boundary
-rejects results from old generations, including work that ignores cancellation.
+rejects results and errors from old generations, including work that ignores cancellation.
 Page-hide clears protected content synchronously before caching; persisted restoration
 requires a new login. Intentional provider navigation preserves only transient PKCE
 state. Redirect-state removal is best-effort if browser storage throws; memory
-authority still ends and login/exchange refuse storage failures. The shell has no
-business-data access, telemetry or service worker.
+authority still ends and login/exchange refuse storage failures. The shell initiates
+no business-data reads, telemetry or service worker.
 It is not connected to the read API in the context diagram below.
+
+The separate read transport provides fixed GET routes for the catalog, analytical
+freshness and single pages of published resources. It validates the configured
+origin, query values, JSON envelopes and consumer-supplied row projections. A store
+selection projection is available; unused row fields are discarded. Dates and exact
+decimal values remain strings, preserving null. Requests omit cookies and referrers,
+disable caching, reject redirects and have a ten-second timeout. JSON is limited to
+2,000,000 streamed bytes with strict UTF-8 decoding. Errors retain no response payload
+or credential. Current 401 responses end the session; late refusals cannot end a
+new session. There are no retries, automatic pagination or business cache yet.
+Synthetic transport tests verify these boundaries; real API/CORS integration and
+rendered business-data flows remain unverified.
 
 Formatting, lint, strict typing, synthetic component/configuration tests and a
 production build have been verified. Playwright Chromium tests exercise that build
@@ -56,7 +68,7 @@ intercept their synthetic provider and callback routes. Traces, video and
 screenshots are disabled. These checks are not a complete accessibility audit.
 A GitHub workflow runs locked installation and the same local quality command;
 hosted execution has not yet been observed. Real provider compatibility, API
-authorization, business transport/cache integration and production hosting remain later
+authorization, business cache integration and production hosting remain later
 increments. Setup and actual scripts are in the
 [frontend guide](../frontend/README.md).
 

@@ -2,8 +2,9 @@
 
 React, strict TypeScript, Vite and Material UI provide the French entry screen
 and shared theme from [DESIGN.md](../DESIGN.md). Public OIDC configuration enables
-personal sign-in with Authorization Code and PKCE. No business API calls or data
-screens are implemented yet; missing configuration keeps sign-in unavailable.
+personal sign-in with Authorization Code and PKCE. A tested read transport is
+available for future data screens; the entry screen makes no business API calls.
+Missing configuration keeps sign-in unavailable.
 Loading and render failures have accessible, generic fallback screens.
 
 ## Run locally
@@ -81,10 +82,10 @@ a new login and document departure invalidate the previous generation. Pending O
 fetches are aborted, and even responses that ignore abort cannot establish an old
 session. Protected components are unmounted and their local state is reset.
 The `Session.run` boundary rejects results from an ended generation and checks
-expiry before work starts and after it completes; future API transport must use it.
+expiry before work starts and after it completes, including rejected work.
 Its work callback must publish data only after guarded completion and must not
 retain credentials or write an external cache before that check.
-No business transport or business cache exists yet (T05/T06).
+The read transport uses this boundary; no business cache exists yet (T06).
 
 A timer ends the session at its deadline; focus, visibility changes and page-show
 also check expiry after a suspended tab. Page-hide removes credentials and protected
@@ -104,6 +105,36 @@ the CLI identity contract. The API remains responsible for validating RS256
 configuration must enforce credential entry and avoid issuing refresh tokens.
 Production callback access logs must omit query parameters; no application log
 or telemetry receives callback URLs, tokens or provider error payloads.
+
+## Validated read transport
+
+`ReadApi` takes a validated public API origin and the existing `Session`. It exposes
+single GET reads for `/v1/resources`, `/v1/analytics/status` and pages of the fixed
+published resource list. Callers provide a runtime row decoder; the initial
+`storeSummary` projection validates only the fields required for store selection.
+Additional projections must validate every field they consume before use. Catalog
+paths are checked but never followed as destinations. Query names, lengths, UUIDs,
+monthly dates and page limits are checked before requests. Unsupported filters on
+a particular resource remain subject to server validation. Cursors stay opaque.
+
+Requests use the current in-memory bearer only in the Authorization header, omit
+cookies/referrers, disable caching and reject redirects. A ten-second abort signal
+bounds native fetch; injected test transports must cooperate with cancellation for
+prompt settlement. Generation checks also discard results from ignored aborts.
+JSON responses require the correct media type and valid UTF-8 and are streamed with
+a 2,000,000-byte cap. Pages validate the envelope, requested row bound and every
+projected row. Decimals, including scientific notation, and date/timestamp values
+stay strings; null does not become zero. Unknown fields are discarded by projections.
+No response, token, URL or server error body is attached to application errors.
+
+A current 401 ends the session and aborts sibling work. An old response or error
+cannot end a new session or return old data. 403, 422, 413, 429 and 503 have explicit
+error codes and perform no automatic retry. Network failure and cancellation are
+distinct. Pagination, retries, deduplication and a session cache belong to T06.
+Consumers must publish only after guarded completion and bind any retained state
+to the current session generation; protected components already unmount on logout.
+The transport has synthetic unit contract tests and the existing browser regression
+suite. Real provider/API/CORS integration remains unverified until T07.
 
 ## Package scripts
 

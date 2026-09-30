@@ -1,0 +1,449 @@
+# Frontend SaaS — tâches d’implémentation et de validation
+
+Statut : plan demandé pour les agents, aucune tâche implémentée par ce document.
+Point de départ : branche `feat/saas-frontend`, API de lecture et client personnel
+existants ; aucun package frontend ni pipeline frontend à ce stade.
+
+## Contrats à lire
+
+Lire le [PRD](prd.md), le [produit](product.md), les [indicateurs](metrics.md),
+l’[intégration](integration.md), la [matrice de couverture](data-coverage.md),
+la [réception](acceptance.md) et le [design](../../DESIGN.md).
+Les limites implémentées sont celles de l’[architecture](../architecture.md),
+du [contrat mensuel](../monthly-analytics.md), du
+[guide API](../api-agent-guide.md), des [opérations API](../read-api-operations.md)
+et du [contrat de sécurité API](../read-api-design.md).
+Pour la connexion, lire aussi l’[authentification personnelle](../personal-authentication.md)
+et l’[identité locale](../local-identity.md).
+
+Le [registre](../../src/retail_data_platform/api/resources.json) et les
+[projections imbriquées](../../src/retail_data_platform/api/resources.py) font
+autorité sur les champs ; le catalogue authentifié détermine les capacités du lecteur.
+La matrice recense actuellement 24 ressources, 325 champs de premier niveau et
+74 chemins enfants : vérifier les ensembles, pas seulement ces nombres.
+
+## Périmètre et règles de réalisation
+
+La tranche autorisée réalise la connexion web, la sélection de magasins, les fiches
+unitaires, l’exploration des données publiées et leur qualité sur l’API existante.
+L’application est en français, en lecture seule, pour une seule organisation avec
+accès global. Un filtre magasin n’est jamais une règle d’autorisation.
+
+Les vues réseau, totaux multi-magasins, cohortes réseau, classements globaux,
+recherche serveur et disponibilité des périodes restent dépendants d’un futur
+périmètre backend. Les signaler indisponibles dans cette tranche ; ne pas simuler
+ces fonctions en téléchargeant le réseau ou en agrégeant une première page.
+La réception de cette tranche n’est ni la réception du P0 complet ni une autorisation
+de mise en production. Facturation, export, écriture, inscription publique et
+multi-tenant restent hors périmètre.
+
+Appliquer les consignes locales des agents, en particulier :
+
+- Lire état Git, diff et historique avant chaque tâche ; préserver les changements
+  préexistants. Rester sur la branche courante, sans commit ni push implicite.
+- Une tâche ci-dessous correspond à une proposition de commit cohérente, avec son
+  code, ses tests et les ajustements documentaires nécessaires. Les messages sont
+  des propositions en anglais, à l’impératif, conformes à l’historique.
+- Scinder une tâche avant implémentation si elle combine plusieurs comportements
+  indépendants, des prérequis importants ou un diff difficile à relire. Ne pas
+  livrer d’abord le comportement puis reporter ses tests à un autre commit.
+- Présenter le diff vérifié et le résultat des contrôles pour approbation explicite
+  du commit. L’approbation du commit ne vaut pas approbation du push.
+- Utiliser exclusivement des fixtures, identités et captures synthétiques. Ne pas
+  copier de données privées, même anonymisées, dans les tests ou rapports publiables.
+- Conserver tokens, données métier, sélection et caches en mémoire. Seuls state,
+  nonce et vérificateur PKCE transitoires peuvent utiliser sessionStorage pendant
+  la redirection, conformément au contrat d’intégration.
+- Mettre à jour l’architecture seulement pour les frontières effectivement
+  implémentées et vérifiées. Le fichier local de consignes reste exclu des commits.
+
+## Stratégie de tests dès les premières fonctionnalités
+
+Outillage proposé à installer progressivement : Vitest pour les fonctions et
+contrats, React Testing Library pour les interactions de composants, Playwright
+pour les parcours navigateur, et axe avec Playwright pour les contrôles automatisés
+d’accessibilité. Vérifier les versions et compatibilités lors de l’installation,
+verrouiller les dépendances et conserver une seule chaîne par niveau de test.
+Références : [Vitest](https://vitest.dev/guide/),
+[Testing Library](https://testing-library.com/docs/react-testing-library/intro/),
+[Playwright et accessibilité](https://playwright.dev/docs/accessibility-testing).
+
+| Niveau | Preuve attendue | Quand |
+| --- | --- | --- |
+| Statique | Format, lint, TypeScript strict et build de production | Chaque changement frontend |
+| Unitaire | Calculs exacts, dates, filtres, erreurs et transitions de session | Avec la fonction concernée |
+| Composant / transport | Interactions utilisateur et réponses API synthétiques contrôlées | Avec chaque écran ou contrat |
+| E2E simulé | Application construite, navigateur réel, réseau synthétique déterministe | Chaque fonctionnalité visible |
+| Intégration réelle | Navigateur + fournisseur OIDC + API + PostgreSQL de test isolé | Connexion, jalons et recette finale |
+| Accessibilité / visuel | axe, clavier, focus, responsive et contrôle visuel humain | Dès le shell, puis chaque écran |
+| Sécurité | Tests négatifs et revue Codex Security du diff | Chaque changement applicatif avant commit |
+
+Aucune commande frontend n’existe encore : T01 et T02 doivent créer les scripts
+réels, les documenter dans les consignes locales et le guide de lancement, puis
+les exécuter. Ne pas recopier des commandes hypothétiques dans un compte rendu.
+Les changements Python conservent format, lint, mypy et pytest du projet ; les
+changements de persistance exigent PostgreSQL réel. Toute migration future exige
+modèle aligné, upgrade à neuf, downgrade/upgrade et `alembic check`.
+
+Les tests doivent vérifier des résultats attendus indépendants de l’implémentation,
+pas seulement des snapshots ou l’absence d’exception. Les simulations doivent
+échouer sur une requête inattendue ; aucun mock ou contournement de session ne doit
+entrer dans le bundle de production. Aucun secours par données de démonstration
+lorsque l’API réelle échoue.
+
+Ne pas sauvegarder de session authentifiée avec `storageState`. Désactiver les
+traces réseau/vidéos susceptibles de contenir des credentials sur les parcours OIDC,
+même synthétiques ; produire des assertions sans valeur sensible. Les captures
+d’interface doivent être synthétiques et sans token. Les rapports générés, caches,
+bundles et configurations privées restent ignorés ; seuls les baselines synthétiques
+explicitement revus peuvent être versionnés.
+
+## Revue avec Codex Security
+
+Utiliser le plugin **Codex Security**, workflow `security-diff-scan`, sur le diff
+exact de la tâche avant demande de commit. Charger le skill installé au moment
+de la revue et suivre son préflight, son modèle de menaces, sa validation et sa
+finalisation. Le présent plan n’est pas un scan et n’atteste aucune sécurité.
+
+1. Figer le périmètre revu : base Git, fichiers nouveaux inclus, modifications et
+   suppressions. Revoir le patch local sans créer un commit pour les besoins du scan.
+2. Conserver l’identifiant du scan et son contexte ; poursuivre le même scan en cas
+   de reprise. Signaler les fichiers exclus et toute couverture incomplète.
+3. Vérifier en priorité les frontières touchées : OIDC et destinations réseau,
+   nettoyage de session, exposition des données, rendu de texte non fiable,
+   accès OPS, dépendances et configuration du build.
+4. Fournir le rapport, les constats validés, les tests de non-régression associés
+   et les limites. Les rapports bruts restent hors des fichiers publiés ; toute
+   synthèse publique doit être relue pour éviter chemins locaux et données privées.
+5. Corriger les vulnérabilités confirmées avant acceptation de la tâche, puis
+   vérifier la correction et le diff final. Une exception doit être explicitement
+   arbitrée ; aucun risque élevé/critique non résolu n’est accepté pour la livraison.
+6. Si l’outil est indisponible ou le scan incomplet, noter « sécurité non vérifiée ».
+   Les tests automatisés peuvent continuer, mais ils ne remplacent pas cette revue.
+
+Effectuer aussi un scan cumulatif depuis la base de cette tranche aux jalons J1
+et J3, pour les interactions entre fonctionnalités. Aucun audit automatique ne
+prouve l’absence de vulnérabilités ; la validation réelle OIDC et les contrôles
+de l’environnement restent nécessaires. Une modification exclusivement documentaire
+demande liens, cohérence et absence de divulgation, pas un faux audit applicatif.
+
+## Tâches ordonnées
+
+Toutes les tâches sont **à faire**. Réaliser la suivante dont les dépendances sont
+satisfaites ; les tâches bloquées par l’identité réelle ne doivent pas empêcher
+les développements testables sur un environnement synthétique. Ne pas déclarer
+la connexion ou J1 reçus avant leur vérification réelle.
+
+### T01 — Socle React, thème et contrôles statiques
+
+- Dépendances : aucune.
+- Livrer : package frontend isolé, React/TypeScript strict/Vite, composants MUI,
+  thème conforme à DESIGN, page de connexion sans données, états chargement/erreur.
+  Installer uniquement les dépendances nécessaires ; vérifier licences et lockfile.
+- Valider : lint, typage, build, un test de comportement du shell ; configuration
+  absente ou invalide expliquée sans secret. Rien de privé dans le bundle.
+- Terminé quand : lancement reproductible, scripts réels documentés, artefacts
+  ignorés, aucune régression Python induite.
+- Commit proposé : `Add frontend shell and shared theme`.
+
+### T02 — Harnais navigateur et automatisation des contrôles
+
+- Dépendances : T01.
+- Livrer : Playwright, fixtures synthétiques, interception réseau stricte, axe,
+  exécution automatisée des scripts existants dans la CI du dépôt. Configurer
+  l’installation verrouillée et le build testé, sans secret ni déploiement.
+- Valider : démarrage propre, erreur volontaire détectée par le pipeline, écran
+  à 360/768/1440 px, ouverture/fermeture au clavier avec focus restauré.
+- Terminé quand : tests exécutables localement et job CI défini ; distinguer
+  exécution locale vérifiée et exécution distante non encore observée sans push.
+- Commit proposé : `Automate frontend quality checks`.
+
+### T03 — Connexion OIDC et retour PKCE
+
+- Dépendances : T01–T02.
+- Livrer : bibliothèque OIDC maintenue, configuration publique validée, bouton
+  Se connecter, code + PKCE S256, contrôle state/issuer et nonce si ID token utilisé.
+  Nettoyer l’URL du callback et les éléments de redirection au retour ou expiration.
+  Refuser refresh token, renouvellement silencieux et retour vers une URL arbitraire.
+- Valider : succès simulé, state faux/absent/rejoué, issuer incorrect, nonce incorrect,
+  échange refusé, retour expiré, refresh token inattendu ; aucun token persistant.
+- Terminé quand : le callback échoue fermé ; `prompt=login`, `max_age=0` et scopes
+  requis sont testés ; l’ID token n’est jamais envoyé comme bearer à l’API.
+- Commit proposé : `Add browser PKCE sign-in`.
+
+### T04 — Cycle de session et effacement des données
+
+- Dépendances : T03.
+- Livrer : session en mémoire, garde des écrans, expiration effective, déconnexion,
+  annulation et effacement des caches ; identifiant de génération de session ou
+  protection équivalente contre les retours tardifs.
+- Valider : reload, expiration pendant une requête, déconnexion, utilisateur suivant,
+  retour arrière navigateur et reprise d’un onglet suspendu ; aucun ancien contenu.
+- Terminé quand : pas de reconnexion automatique ni de renouvellement ; toutes les
+  données disparaissent à la fin de session, même si le réseau répond ensuite.
+- Commit proposé : `Clear data when browser sessions end`.
+
+### T05 — Transport API et validation des réponses
+
+- Dépendances : T04.
+- Livrer : client de lecture typé, origine API configurée, chemins autorisés,
+  validation runtime des enveloppes/champs utilisés, dates et décimaux en chaînes.
+  Refuser destinations ou redirections non autorisées ; erreurs sans payload privé.
+- Valider : réponse malformée, null, décimaux exacts, tentative de destination externe,
+  401 purgeant la session, 403 sans boucle, 422 sans retry et panne réseau explicite.
+- Terminé quand : aucun accès DB côté navigateur, aucun bearer en URL/log, et les
+  composants n’implémentent pas chacun leur propre transport.
+- Commit proposé : `Add validated read API transport`.
+
+### T06 — Pagination, concurrence et reprise bornée
+
+- Dépendances : T05.
+- Livrer : pagination par curseur opaque, annulation/déduplication, cache de session,
+  deux lectures simultanées au maximum, trois tentatives au maximum sur 429/503.
+  Gérer 413 en réduisant limit jusqu’à 1 ; définir et tester un plafond total d’essais.
+- Valider : deux pages, changement de limit, filtres conservés, curseur invalide,
+  curseur répété, 413 persistant, Retry-After lisible ou masqué par CORS, réponses
+  désordonnées et arrêt des retries après logout. Pas de boucle de pagination.
+- Terminé quand : limites de travail explicites, résultat incomplet identifié, pas
+  de chargement exhaustif automatique du réseau. Respect du budget API partagé,
+  sans prétendre connaître les requêtes des autres clients.
+- Commit proposé : `Bound paginated reads and retries`.
+
+### T07 — Connexion réelle au fournisseur et à l’API
+
+- Dépendances : T03–T06 ; configuration OIDC de test et PostgreSQL isolé disponibles.
+- Livrer : smoke test navigateur reproductible avec utilisateurs synthétiques et
+  nettoyage. Valider le client autorisé unique, redirects exacts, origines API et
+  échange de code depuis le navigateur. Préserver le contrat CLI.
+- Valider : connexion réelle et lecture API, refus sans data:read, mauvais client,
+  audience/expiration, origine non autorisée, callback non enregistré ; vérification
+  serveur des claims RS256, at+jwt, azp et auth_time selon le contrat existant.
+- Terminé quand : résultats réels établis et non-régression CLI vérifiée. Si une
+  évolution du contrôle des clients côté API est nécessaire, la proposer séparément
+  pour autorisation ; ne pas élargir silencieusement la liste des clients acceptés.
+- Commit proposé : `Verify browser sign-in against the identity provider`.
+
+### T08 — Liste des magasins et sélection en mémoire
+
+- Dépendances : T05–T06 ; T07 nécessaire à la recette réelle, pas aux mocks.
+- Livrer : table MUI paginée depuis stores, sélection explicite, ouverture d’un
+  magasin et retour conservant le contexte ; attributs marqués actuels.
+  Pas de recherche texte ni de filtre enseigne/région/statut non pris en charge.
+- Valider : sélection à travers deux pages, sélection vide, ID inexistant, magasin
+  inactif, libellé long, reprise après erreur. Tri local nommé « Trier cette page ».
+- Terminé quand : compteur de sélection exact, aucun total réseau affiché et les
+  actions réseau/comparaison indisponibles expliquées sans lancer de requêtes.
+- Commit proposé : `Add paginated store selection`.
+
+### T09 — Fiche magasin et contexte de période
+
+- Dépendances : T08.
+- Livrer : en-tête, référentiel complet dépliable, onglets, mois inclusifs explicites,
+  validation des bornes et limites de période documentées. Séparer filtres saisis et
+  appliqués ; conserver contexte en mémoire, sans identifiant métier dans l’URL.
+- Valider : intervalle inversé, changement d’année/fuseau, période sans observation,
+  Apply, aller-retour liste/détail ; seuls les besoins de l’onglet actif sont lus.
+- Terminé quand : aucune ancienne valeur sous un nouveau contexte et aucune
+  disponibilité de mois inventée ; les 12 derniers mois ne sont pas présumés connus.
+- Commit proposé : `Add store detail and month selection`.
+
+### T10 — Valeurs exactes et fraîcheur
+
+- Dépendances : T05–T06 et T09.
+- Livrer : fonctions pures de décimaux, mois, ratios et affichage français nécessaires
+  à la fiche unitaire ; bandeau basé sur analytics/status, couverture distincte.
+- Valider : 0.1 + 0.2, null/0/négatif, ratio 0.12, dénominateur nul, précision élevée,
+  current/stale/uninitialized, échec de refresh gardant la publication antérieure.
+  Changement de fraîcheur avant/après plusieurs pages : invalidation et rechargement.
+- Terminé quand : aucune conversion binaire pour les calculs métier, aucune devise
+  ou HT/TTC inventé et aucune garantie de snapshot entre pages.
+- Commit proposé : `Preserve exact values and publication freshness`.
+
+### T11 — Synthèse mensuelle d’un magasin
+
+- Dépendances : T09–T10.
+- Livrer : analytics_store_month, KPI qualifiés, premier graphique MUI X Charts
+  Community et tableau accessible ; grille des mois avec trous explicites.
+- Valider : mois absent, zéro, données ambiguës, somme partielle, pagination inachevée,
+  négatifs, absence de multiplication par catégories/produits ; graphique et table
+  concordants, valeurs exactes dans les libellés et détails.
+- Terminé quand : aucun KPI définitif si extraction bornée incomplète ; coordonnées
+  seules converties pour le tracé ; réduction de mouvement et clavier vérifiés.
+- Commit proposé : `Show store monthly sales with coverage`.
+
+### T12 — Comparaisons calendaires du magasin
+
+- Dépendances : T11.
+- Livrer : lecture analytics_store_month_changes pour M-1/N-1 ; comparaisons de
+  fenêtres uniquement depuis les montants complets du magasin, jamais une moyenne
+  des pourcentages ; montrer les périodes et les limites de couverture.
+- Valider : mois intermédiaire absent, k mois précédents, décalage de 12 mois,
+  référence zéro/null/négative, fenêtre incomplète et variation absolue exacte.
+- Terminé quand : aucune comparaison multi-magasins ajoutée ; base négative signalée,
+  pas de flèche positive interprétée automatiquement comme une amélioration.
+- Commit proposé : `Add calendar comparisons for store sales`.
+
+### T13 — Explorateur de collections et détails complets
+
+- Dépendances : T06, T08 et T10.
+- Livrer : Données → référentiels/observations/analyses, catalogue selon droits,
+  liste paginée et fiche de ligne à clé complète, rendu récursif des objets/listes
+  autorisés avec libellés français. Réutiliser ce détail pour les liens magasin.
+- Valider : clés composites, deuxième page, listes vides/multiples, texte HTML inerte,
+  produit sans vente, observation non rapprochée, règle inutilisée ; aucun appel
+  automatique par élément des listes d’observation_ids.
+- Terminé quand : tous les champs d’une ligne sont consultables ; filtres limités
+  au catalogue et aucun champ DB non publié exposé. Le manifeste de couverture
+  commencé ici associe ressource/champ/chemin à un composant et un test.
+- Commit proposé : `Add published data explorer`.
+
+### T14 — Ventes et produits du magasin
+
+- Dépendances : T11 et T13.
+- Livrer : analytics_register_product_month, tableau par GTIN source/mois, barres
+  sur périmètre explicite, courbe d’un produit sélectionné et preuves à la demande.
+- Valider : plusieurs GTIN avec product_id null restant distincts, ambiguïtés,
+  retours, volumes non comparables, produit disparu du référentiel vivant.
+- Terminé quand : aucune catégorie filtrable inventée pour les ventes, aucune
+  somme des volumes hétérogènes ni confusion entre observation et total magasin.
+- Commit proposé : `Add store product sales details`.
+
+### T15 — Présence et linéaire par catégorie
+
+- Dépendances : T11 et T13.
+- Livrer : analytics_store_category_month, analytics_distribution_product_month et
+  analytics_shelf_category_month, courbes séparées et dénominateurs consultables.
+- Valider : absence inférée, produit ambigu, catégorie inconnue, ratio supérieur à
+  100 %, dénominateur nul, unités inconnues et catégories non comparables.
+- Terminé quand : aucun plafonnement ou moyenne de ratios, aucune assimilation de
+  présence à la distribution réseau ou à la conformité d’assortiment.
+- Commit proposé : `Add store presence and shelf share views`.
+
+### T16 — Activité commerciale par type
+
+- Dépendances : T11 et T13.
+- Livrer : analytics_activity_month et observations liées, trois séries distinctes
+  appels/terrain/participatif, tableau et alignement temporel avec les ventes.
+- Valider : type absent, zéro déclaré, ambiguïté, plusieurs preuves, période modifiée
+  pendant une lecture et panne limitée à ce bloc.
+- Terminé quand : aucune addition intertypes, aucun score causal ou retour sur
+  investissement ; champs de planification séparés de l’activité observée.
+- Commit proposé : `Add store activity by source type`.
+
+### T17 — Typologies et assortiments
+
+- Dépendances : T13 et T09.
+- Livrer : analytics_typology_month, analytics_assortment_candidates et
+  analytics_retailer_assortment_month ; tables mensuelles, règles/snapshots liés,
+  candidats exacts distincts du contexte enseigne. Matrice thermique avancée différée.
+- Valider : mois sans valeur, snapshots contradictoires, mapping ambigu, plusieurs
+  règles candidates, assortiment sans candidat et listes imbriquées multiples.
+- Terminé quand : aucun report de valeur entre mois, aucune conformité déduite d’une
+  absence, et nombre de lignes distinct d’un nombre de produits obligatoires.
+- Commit proposé : `Add typology and assortment inspection`.
+
+### T18 — Qualité d’attribution et audits autorisés
+
+- Dépendances : T07, T10 et T13.
+- Livrer : analytics_monthly_link_quality avec périmètre réseau explicite ;
+  import_runs et analytics_refresh_runs réservés à operations:read.
+- Valider : rôles ordinaires/OPS, zéro requête OPS sans droit, accès direct refusé
+  par l’API, changement d’utilisateur, freshness stale et refresh en échec.
+- Terminé quand : aucun filtre store_id sur la qualité réseau, aucun CA perdu
+  déduit des nombres de lignes, aucun nom de fichier/hash/erreur privée révélé.
+- Commit proposé : `Add data quality and restricted audit views`.
+
+### T19 — Réconciliation exhaustive des champs et parcours
+
+- Dépendances : T12–T18.
+- Livrer : contrôle automatisé registre ↔ projections ↔ manifeste frontend ↔ matrice,
+  complétant les tests existants de chaque fonctionnalité.
+- Valider : chaque champ/chemin rendu avec valeur synthétique attendue, null, liste
+  vide ou plusieurs éléments selon son type ; contrôle négatif d’un champ omis.
+  Vérifier aussi les destinations métier spécialisées, pas uniquement l’explorateur.
+- Terminé quand : aucun écart non expliqué sur les ensembles publiés ; couverture
+  OPS testée avec les deux rôles et secours Données disponible pour chaque ressource.
+- Commit proposé : `Verify complete published field coverage`.
+
+### T20 — Qualification responsive et accessibilité des parcours
+
+- Dépendances : T19 ; les contrôles de base existent depuis T02.
+- Livrer : compléter les tests transversaux et corriger les écarts observés, sans
+  refonte générale. Références visuelles synthétiques limitées aux états importants.
+- Valider : 360/768/1440 px, zoom réel 200 %, clavier seul, focus des dialogues,
+  réduction du mouvement, contrastes rendus, libellés longs, graphiques et tables.
+- Terminé quand : pas de débordement horizontal de page, tous les champs et actions
+  accessibles ; résultats axe complétés par une recette humaine du clavier/zoom
+  et un contrôle des annonces avec lecteur d’écran. Aucun score automatique ne vaut certification.
+- Commit proposé : `Verify accessible responsive user journeys`.
+
+### T21 — Sécurité du build et contrôles navigateur transversaux
+
+- Dépendances : T19–T20.
+- Livrer : tests du build de production, configuration CSP compatible avec les
+  styles MUI, assets maîtrisés et destinations connect-src explicites dans un
+  environnement de recette défini. Vérifier dépendances et configuration publique.
+- Valider : libellés HTML/URL malveillants inertes, absence de secret dans assets,
+  stockage/cache/logs sans tokens ni données métier, callback nettoyé, pas de
+  service worker métier, session interrompue pendant retry et refus des origines.
+- Terminé quand : scan Codex Security cumulatif final terminé et constats traités ;
+  les headers réels du serveur de recette sont inspectés. Si aucun environnement
+  n’est défini, marquer cette partie bloquée ; ne pas inventer d’hébergeur ni déployer.
+- Commit proposé : `Verify browser security boundaries`.
+
+### T22 — Recette intégrée et limites de livraison
+
+- Dépendances : T07 et T19–T21.
+- Livrer : parcours E2E réels sur données synthétiques couvrant connexion → liste →
+  fiche → preuves → qualité → logout, et synthèse générique des résultats vérifiés.
+  Mettre à jour README et architecture uniquement sur les capacités effectivement reçues.
+- Valider : profils synthétiques reproductibles, réseau lent, erreurs partielles,
+  pagination, mémoire/requêtes/volume de réponse et temps de chargement p95.
+  Annoncer machine, profil, nombre de répétitions et limites des mesures.
+- Terminé quand : budgets de qualification explicitement convenus et comparés aux
+  mesures, tests complets et scans disponibles. Distinguer réception fonctionnelle,
+  validation de charge et préparation production ; aucun seuil arbitraire ne vaut accord.
+- Commit proposé : `Document verified frontend delivery boundaries`.
+
+## Jalons testables
+
+| Jalon | Tâches | Démonstration attendue |
+| --- | --- | --- |
+| J0 — Socle contrôlé | T01–T02 | Shell responsive, build et tests reproductibles |
+| J1 — Première tranche utilisable | T03–T11 | Connexion réelle, magasin, période, graphique/table, fraîcheur, logout ; revue Security cumulative |
+| J2 — Investigation complète | T12–T19 | Comparaisons unitaires, onglets, preuves, explorateur exhaustif et audits selon droits |
+| J3 — Tranche qualifiée | T20–T22 | Recette intégrée, accessibilité, mesures et sécurité ; limites de production explicites |
+
+Chaque jalon inclut les tests des tâches précédentes. Une tâche avec seulement
+des mocks validés reste signalée comme telle ; les tests ignorés ne comptent pas
+comme réussis. Le frontend peut progresser pendant un blocage OIDC, mais J1 et
+les validations réelles en dépendant restent ouverts.
+
+## Traçabilité de la réception
+
+| Contrat / risque | Tâches et preuves principales |
+| --- | --- |
+| Connexion, expiration, confidentialité | T03–T07, T21 ; tests négatifs, smoke réel et Security |
+| Pagination, limites, concurrence, données périmées | T05–T06, T10 ; transport et E2E |
+| Exactitude, null/zéro, ambiguïtés, mois et ratios | T10–T12, T14–T17 ; oracles synthétiques |
+| Couverture de tous les champs et lignes isolées | T13–T19 ; registre, manifeste et rendu réel |
+| Droits OPS et qualité réseau | T18 ; absence d’appel et refus serveur |
+| Responsive, clavier, graphiques accessibles | T02 puis chaque écran, T20 ; auto + humain |
+| Performance et livraison | T22 ; mesures sur profils déclarés et budgets convenus |
+| Réseau, classement, cohortes et comparaison multi-magasins | Différés ; cas correspondants d’acceptance.md non reçus dans cette tranche |
+
+## Reprise par un agent
+
+Choisir une seule tâche pour commencer. Dans son compte rendu, fournir son ID,
+le périmètre réalisé, les fichiers modifiés, les commandes réellement exécutées,
+les résultats et contrôles non effectués, le scan Security applicable, les limites
+restantes et le message de commit proposé. Mettre à jour le statut seulement à
+partir de ces preuves ; conserver les résultats sensibles hors des fichiers publics.
+
+États utiles : **à faire**, **en cours**, **bloqué** (cause précise), **à relire**
+(tests faits, commit non approuvé), **validé**, **commité** (après accord explicite).
+Ne pas confondre code implémenté, fonctionnalité vérifiée et commit approuvé.
+
+Les dépendances backend différées doivent faire l’objet d’un futur arbitrage dédié.
+Le présent fichier n’autorise ni leur implémentation, ni un changement de modèle
+d’accès, ni un push ou déploiement automatique.

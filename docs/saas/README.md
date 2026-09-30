@@ -25,6 +25,8 @@ Les documents suivants précisent ses contrats sans répéter les arbitrages pro
    champs publiés, objets imbriqués, destinations et droits de consultation.
 6. [Design de référence](../../DESIGN.md) : thème MUI, responsive, composants,
    graphiques et états visuels communs.
+7. [Tâches d’implémentation](tasks.md) : fonctionnalités ordonnées, propositions
+   de petits commits, tests progressifs et revues Codex Security pour les agents.
 
 Ces documents définissent la cible ; [l'architecture](../architecture.md) décrit
 uniquement l'existant. En cas de divergence avec une capacité supposée, vérifier

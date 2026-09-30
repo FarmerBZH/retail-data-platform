@@ -1,11 +1,12 @@
 import * as oauth from "oauth4webapi";
 import { CALLBACK_PATH, secureUrl } from "./oidc-config";
 import type { OidcSettings } from "./oidc-config";
+import { Session } from "./session";
+import type { SessionOperation } from "./session";
 
 export const REDIRECT_KEY = "oidc.redirect";
 export const REDIRECT_TTL = 10 * 60 * 1000;
 type RedirectState = { state: string; nonce: string; verifier: string };
-export type AccessSession = { accessToken: string; expiresAt: number };
 
 // Capture and erase before React renders or an exchange starts. Never log this URL.
 export function captureCallback(
@@ -19,8 +20,9 @@ export function captureCallback(
 }
 
 export class Authentication {
-  #session: AccessSession | undefined;
-  #busy = false;
+  readonly sessions = new Session();
+  #busy: SessionOperation | undefined;
+  #leavingForProvider = false;
   readonly #client: oauth.Client;
   readonly #issuer: URL;
   readonly #options;
@@ -50,6 +52,7 @@ export class Authentication {
         if (!destination || destination.origin !== this.#issuer.origin)
           throw new Error("Sign-in unavailable");
         const { body, signal, ...rest } = options;
+        signal?.throwIfAborted();
         return fetch(url, {
           ...rest,
           ...(body === undefined ? {} : { body }),
@@ -65,10 +68,43 @@ export class Authentication {
     this.expireRedirect();
   }
 
-  get session(): AccessSession | undefined {
-    if (this.#session && this.#session.expiresAt <= Date.now())
-      this.#session = undefined;
-    return this.#session;
+  get session() {
+    return this.sessions.credentials;
+  }
+
+  logout(): void {
+    this.#leavingForProvider = false;
+    this.#busy = undefined;
+    this.sessions.end();
+    this.#clearRedirect();
+  }
+
+  leaveDocument(): void {
+    const preserveRedirect = this.#leavingForProvider;
+    this.#leavingForProvider = false;
+    this.#busy = undefined;
+    this.sessions.end();
+    if (!preserveRedirect) this.#clearRedirect();
+  }
+
+  #clearRedirect(): void {
+    try {
+      this.storage.removeItem(REDIRECT_KEY);
+    } catch {
+      // Ending memory authority must succeed even if browser storage is blocked.
+    }
+  }
+
+  #assertCurrent(operation: SessionOperation): void {
+    if (!operation.isCurrent()) throw new Error("Sign-in unavailable");
+  }
+
+  #requestOptions(operation: SessionOperation) {
+    return {
+      ...this.#options,
+      signal: () =>
+        AbortSignal.any([operation.signal, AbortSignal.timeout(10_000)]),
+    };
   }
 
   // A state is bound to this issuer/client/callback without storing extra metadata.
@@ -123,8 +159,13 @@ export class Authentication {
     if (!this.#readRedirect()) this.storage.removeItem(REDIRECT_KEY);
   }
 
-  async #server(): Promise<oauth.AuthorizationServer> {
-    const response = await oauth.discoveryRequest(this.#issuer, this.#options);
+  async #server(
+    operation: SessionOperation,
+  ): Promise<oauth.AuthorizationServer> {
+    const response = await oauth.discoveryRequest(
+      this.#issuer,
+      this.#requestOptions(operation),
+    );
     const server = await oauth.processDiscoveryResponse(this.#issuer, response);
     for (const key of [
       "authorization_endpoint",
@@ -142,11 +183,13 @@ export class Authentication {
 
   async signIn(): Promise<void> {
     if (this.#busy) return;
-    this.#busy = true;
-    this.#session = undefined;
+    const operation = this.sessions.begin();
+    this.#busy = operation;
+    this.#leavingForProvider = false;
     try {
       this.storage.removeItem(REDIRECT_KEY);
-      const server = await this.#server();
+      const server = await this.#server(operation);
+      this.#assertCurrent(operation);
       const verifier = oauth.generateRandomCodeVerifier();
       const nonce = oauth.generateRandomNonce();
       const state = `${Date.now()}.${await this.#binding()}.${oauth.generateRandomState()}`;
@@ -163,23 +206,30 @@ export class Authentication {
         state,
         nonce,
       }).toString();
+      this.#assertCurrent(operation);
       this.storage.setItem(
         REDIRECT_KEY,
         JSON.stringify({ state, nonce, verifier }),
       );
+      this.#leavingForProvider = true;
       this.navigate(url.href);
     } catch {
-      this.storage.removeItem(REDIRECT_KEY);
+      if (operation.isCurrent()) {
+        this.#leavingForProvider = false;
+        this.#clearRedirect();
+        this.sessions.end("error");
+      }
       throw new Error("Sign-in unavailable");
     } finally {
-      this.#busy = false;
+      if (this.#busy === operation) this.#busy = undefined;
     }
   }
 
   async complete(callback: URL): Promise<void> {
     if (this.#busy) throw new Error("Sign-in unavailable");
-    this.#busy = true;
-    this.#session = undefined;
+    const operation = this.sessions.begin();
+    this.#busy = operation;
+    this.#leavingForProvider = false;
     try {
       const transaction = this.#readRedirect();
       // Consume before any asynchronous operation: callbacks cannot be replayed.
@@ -193,7 +243,8 @@ export class Authentication {
         transaction.state.split(".")[1] !== (await this.#binding())
       )
         throw new Error("Sign-in unavailable");
-      const server = await this.#server();
+      const server = await this.#server(operation);
+      this.#assertCurrent(operation);
       const params = oauth.validateAuthResponse(
         server,
         this.#client,
@@ -208,8 +259,9 @@ export class Authentication {
         params,
         this.settings.redirectUri,
         transaction.verifier,
-        this.#options,
+        this.#requestOptions(operation),
       );
+      this.#assertCurrent(operation);
       const result = await oauth.processAuthorizationCodeResponse(
         server,
         this.#client,
@@ -233,7 +285,7 @@ export class Authentication {
       await oauth.validateApplicationLevelSignature(
         server,
         response,
-        this.#options,
+        this.#requestOptions(operation),
       );
       const claims = oauth.getValidatedIdTokenClaims(result);
       if (
@@ -249,12 +301,19 @@ export class Authentication {
         (claims.auth_time + 86400) * 1000,
       );
       if (expiresAt <= Date.now()) throw new Error("Sign-in unavailable");
-      this.#session = { accessToken: result.access_token, expiresAt };
+      this.#assertCurrent(operation);
+      if (
+        !this.sessions.accept(operation, {
+          accessToken: result.access_token,
+          expiresAt,
+        })
+      )
+        throw new Error("Sign-in unavailable");
     } catch {
-      this.#session = undefined;
+      if (operation.isCurrent()) this.sessions.end("error");
       throw new Error("Sign-in unavailable");
     } finally {
-      this.#busy = false;
+      if (this.#busy === operation) this.#busy = undefined;
     }
   }
 }

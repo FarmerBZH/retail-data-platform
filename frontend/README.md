@@ -73,8 +73,28 @@ after ten minutes and is deleted on return, failure, a new attempt, or re-entry
 after expiry. A page away at the provider cannot actively erase storage; expired
 state is never accepted when the app executes again. The access token stays only
 in memory; the ID token is never retained or sent to the API. Reload requires a new
-login. The full UI/session expiry and logout lifecycle is task T04; API transport
-is task T05. The success screen confirms OIDC validation, not API authorization.
+login. Session expiry and logout remove the authenticated screen and restore focus
+on the sign-in action. The success screen confirms OIDC validation, not API authorization.
+
+Each session has an in-memory generation and cancellation signal. Expiry, logout,
+a new login and document departure invalidate the previous generation. Pending OIDC
+fetches are aborted, and even responses that ignore abort cannot establish an old
+session. Protected components are unmounted and their local state is reset.
+The `Session.run` boundary rejects results from an ended generation and checks
+expiry before work starts and after it completes; future API transport must use it.
+Its work callback must publish data only after guarded completion and must not
+retain credentials or write an external cache before that check.
+No business transport or business cache exists yet (T05/T06).
+
+A timer ends the session at its deadline; focus, visibility changes and page-show
+also check expiry after a suspended tab. Page-hide removes credentials and protected
+content synchronously before browser caching. A persisted page-show ends the session
+and attempts to remove redirect state instead of restoring authentication. Storage
+removal is best-effort if browser access throws; memory authority still ends, and
+login/exchange fail closed on storage errors. Only an intentional provider
+handoff preserves the transient PKCE record across departure. These controls do not
+revoke a copied JWT or end the identity provider's own session; a new login still
+requests `prompt=login` and `max_age=0`.
 
 Real provider compatibility is unverified (T07). Configure the public client with
 the exact redirect, web origin and token-endpoint CORS. Its ID must match the API's

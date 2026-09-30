@@ -11,6 +11,7 @@ import {
   REDIRECT_KEY,
 } from "./authentication";
 import { readOidcConfiguration } from "./oidc-config";
+import { bindBrowserSession } from "./browser-session";
 
 const callback = captureCallback(window.location, window.history);
 const App = lazy(() => import("./App"));
@@ -38,12 +39,10 @@ try {
   /* Storage unavailable: sign-in remains disabled, with no fallback. */
 }
 // One exchange per document, outside React StrictMode's repeated effects.
-const completion = callback
-  ? (authentication?.complete(callback).then(
-      () => true,
-      () => false,
-    ) ?? Promise.resolve(false))
-  : undefined;
+if (authentication) {
+  bindBrowserSession(authentication, window);
+  if (callback) void authentication.complete(callback).catch(() => undefined);
+}
 const root = document.getElementById("root");
 if (!root) throw new Error("Application root unavailable");
 
@@ -59,7 +58,6 @@ createRoot(root, {
           <App
             configuration={configuration}
             authentication={authentication}
-            completion={completion}
             oidcInvalid={oidc.status === "invalid"}
           />
         </Suspense>

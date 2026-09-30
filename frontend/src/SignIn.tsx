@@ -1,83 +1,104 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef } from "react";
 import { Alert, AlertTitle, Button } from "@mui/material";
 import type { Authentication } from "./authentication";
+import { SessionBoundary } from "./SessionBoundary";
+import { useSession } from "./use-session";
 
 export function SignIn({
   authentication,
-  completion,
   invalid,
 }: {
   authentication?: Authentication | undefined;
-  completion?: Promise<boolean> | undefined;
   invalid: boolean;
 }) {
-  const [phase, setPhase] = useState<"idle" | "pending" | "success" | "error">(
-    completion ? "pending" : "idle",
-  );
+  const snapshot = useSession(authentication?.sessions);
+  const phase = snapshot.phase;
+  const button = useRef<HTMLButtonElement>(null);
   useEffect(() => {
-    let active = true;
-    void completion?.then((ok) => {
-      if (active) setPhase(ok ? "success" : "error");
-    });
-    return () => {
-      active = false;
-    };
-  }, [completion]);
-
-  async function signIn() {
-    if (!authentication) return;
-    setPhase("pending");
-    try {
-      await authentication.signIn();
-    } catch {
-      setPhase("error");
-    }
-  }
-
+    if (phase === "expired" || phase === "signed-out") button.current?.focus();
+  }, [phase, snapshot.generation]);
+  const expired = phase === "expired";
+  const ended = phase === "signed-out";
+  const pending = phase === "pending";
+  const success = phase === "authenticated";
   return (
     <>
-      <Alert
-        severity={
-          phase === "error" || invalid
-            ? "error"
-            : phase === "success"
-              ? "success"
-              : "info"
-        }
-      >
-        <AlertTitle>
-          {phase === "success"
-            ? "Connexion vérifiée"
-            : phase === "error"
-              ? "Connexion interrompue"
-              : phase === "pending"
-                ? "Connexion en cours"
-                : authentication
-                  ? "Connexion personnelle"
-                  : "Connexion indisponible"}
-        </AlertTitle>
-        {phase === "success"
-          ? "Votre connexion a été vérifiée. Les écrans de consultation seront disponibles dans une prochaine étape."
-          : phase === "error"
-            ? "La connexion n’a pas pu être vérifiée. Réessayez une nouvelle connexion."
-            : phase === "pending"
-              ? "Vérification auprès du service d’identité…"
-              : invalid
-                ? "La configuration du service doit être corrigée. Contactez la personne responsable de la plateforme."
-                : authentication
-                  ? "Vous allez vous authentifier auprès du service d’identité de votre organisation."
-                  : "La configuration de connexion n’est pas encore renseignée. Contactez la personne responsable de la plateforme."}
-      </Alert>
-      <Button
-        variant="contained"
-        disabled={!authentication || phase === "pending" || phase === "success"}
-        fullWidth
-        onClick={() => {
-          void signIn();
-        }}
-      >
-        Se connecter
-      </Button>
+      {authentication && (
+        <SessionBoundary session={authentication.sessions}>
+          <Alert severity="success">
+            <AlertTitle>Connexion vérifiée</AlertTitle>
+            Votre connexion a été vérifiée. Les écrans de consultation seront
+            disponibles dans une prochaine étape.
+          </Alert>
+          <Button
+            variant="outlined"
+            fullWidth
+            onClick={() => authentication.logout()}
+          >
+            Se déconnecter
+          </Button>
+        </SessionBoundary>
+      )}
+      {!success && (
+        <>
+          <Alert
+            severity={
+              phase === "error" || invalid
+                ? "error"
+                : expired
+                  ? "warning"
+                  : "info"
+            }
+          >
+            <AlertTitle>
+              {expired
+                ? "Session expirée"
+                : ended
+                  ? "Session terminée"
+                  : phase === "error"
+                    ? "Connexion interrompue"
+                    : pending
+                      ? "Connexion en cours"
+                      : authentication
+                        ? "Connexion personnelle"
+                        : "Connexion indisponible"}
+            </AlertTitle>
+            {expired
+              ? "Votre session a expiré. Connectez-vous à nouveau pour poursuivre."
+              : ended
+                ? "Votre session est terminée. Une nouvelle connexion est nécessaire."
+                : phase === "error"
+                  ? "La connexion n’a pas pu être vérifiée. Réessayez une nouvelle connexion."
+                  : pending
+                    ? "Vérification auprès du service d’identité…"
+                    : invalid
+                      ? "La configuration du service doit être corrigée. Contactez la personne responsable de la plateforme."
+                      : authentication
+                        ? "Vous allez vous authentifier auprès du service d’identité de votre organisation."
+                        : "La configuration de connexion n’est pas encore renseignée. Contactez la personne responsable de la plateforme."}
+          </Alert>
+          <Button
+            ref={button}
+            variant="contained"
+            disabled={!authentication || pending}
+            fullWidth
+            onClick={() => {
+              void authentication?.signIn().catch(() => undefined);
+            }}
+          >
+            Se connecter
+          </Button>
+          {pending && (
+            <Button
+              variant="outlined"
+              fullWidth
+              onClick={() => authentication?.logout()}
+            >
+              Annuler la connexion
+            </Button>
+          )}
+        </>
+      )}
     </>
   );
 }

@@ -1,7 +1,7 @@
 # Frontend SaaS — tâches d’implémentation et de validation
 
-Statut : T01–T02 sont implémentées, validées et commitées ; T03 est implémentée
-et **validée après relecture technique**. T04–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
+Statut : T01–T03 sont implémentées, validées et commitées ; T04 est **validée après relecture technique**.
+T05–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
 pour les scripts réels et les limites du socle.
 Point de départ historique : branche `feat/saas-frontend`, API de lecture et client personnel
 existants ; aucun package frontend ni pipeline frontend à ce stade.
@@ -131,7 +131,7 @@ demande liens, cohérence et absence de divulgation, pas un faux audit applicati
 
 ## Tâches ordonnées
 
-T01–T03 sont **validées**, T04–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
+T01–T04 sont **validées**, T05–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
 satisfaites ; les tâches bloquées par l’identité réelle ne doivent pas empêcher
 les développements testables sur un environnement synthétique. Ne pas déclarer
 la connexion ou J1 reçus avant leur vérification réelle.
@@ -178,8 +178,8 @@ la connexion ou J1 reçus avant leur vérification réelle.
   formatage, lint, typage, build, 64 tests unitaires/composants et 30 scénarios
   Chromium passent. Revue Codex Security du diff terminée sans vulnérabilité
   relevée. Compatibilité réelle du fournisseur, du client autorisé par l’API et
-  de CORS réservée à T07 ; cycle de session T04 et transport API T05 restent à faire.
-  Aucun commit ni push de T03.
+  de CORS réservée à T07 ; cycle de session et transport API relèvent de T04 et T05.
+  Commit T03 créé après validation ; aucun push de ce commit.
 - Dépendances : T01–T02.
 - Livrer : bibliothèque OIDC maintenue, configuration publique validée, bouton
   Se connecter, code + PKCE S256, contrôle state/issuer et nonce si ID token utilisé.
@@ -193,6 +193,15 @@ la connexion ou J1 reçus avant leur vérification réelle.
 
 ### T04 — Cycle de session et effacement des données
 
+- Statut : **validée après relecture technique**. Session observable, garde des composants, expiration,
+  déconnexion, annulation et protection des générations implémentées. Format, lint,
+  typage, build, 86 tests unitaires/composants et 39 scénarios Chromium passent.
+  Revue Codex Security du diff terminée sans vulnérabilité relevée ; rapport conservé
+  hors du dépôt. Aucun cache ni transport métier n’existe
+  encore ; leur raccordement à la session relève de T05/T06. La suppression du
+  contenu protégé et des états locaux est testée avec des composants synthétiques.
+  Contrôles relancés avec succès après relecture ; aucune correction applicative
+  nécessaire et aucune modification du code couvert par la revue de sécurité.
 - Dépendances : T03.
 - Livrer : session en mémoire, garde des écrans, expiration effective, déconnexion,
   annulation et effacement des caches ; identifiant de génération de session ou

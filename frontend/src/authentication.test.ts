@@ -46,6 +46,7 @@ describe("browser PKCE with a synthetic signed provider", () => {
     });
   });
   afterEach(() => {
+    auth.logout();
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
@@ -196,5 +197,80 @@ describe("browser PKCE with a synthetic signed provider", () => {
     await expect(auth.signIn()).rejects.toThrow("Sign-in unavailable");
     expect(storage.length).toBe(0);
     expect(auth.session).toBeUndefined();
+  });
+
+  it("preserves only an intentional provider handoff and clears it on cancellation or restored page", async () => {
+    await auth.signIn();
+    auth.leaveDocument();
+    expect(storage.length).toBe(1);
+    expect(auth.session).toBeUndefined();
+    auth.logout();
+    expect(storage.length).toBe(0);
+    await auth.signIn();
+    auth.logout();
+    auth.leaveDocument();
+    expect(storage.length).toBe(0);
+  });
+
+  it("cancels pending discovery without a late redirect or write", async () => {
+    let resolve!: (response: Response) => void;
+    const pendingResponse = new Promise<Response>((done) => {
+      resolve = done;
+    });
+    const navigate = vi.fn();
+    auth = new Authentication(settings, storage, navigate);
+    vi.stubGlobal("fetch", () => pendingResponse);
+    const pending = auth.signIn();
+    const rejected = expect(pending).rejects.toThrow("Sign-in unavailable");
+    auth.logout();
+    resolve(
+      await fixture.fetch(
+        settings.issuer + "/.well-known/openid-configuration",
+        {},
+      ),
+    );
+    await rejected;
+    expect(navigate).not.toHaveBeenCalled();
+    expect(storage.length).toBe(0);
+    expect(auth.sessions.getSnapshot().phase).toBe("signed-out");
+  });
+
+  it("ignores a cancelled token exchange even after a second identity connects", async () => {
+    const url = await callback();
+    let release!: () => void;
+    let received!: () => void;
+    const requestReceived = new Promise<void>((done) => {
+      received = done;
+    });
+    const delayed = new Promise<void>((done) => {
+      release = done;
+    });
+    let firstToken = true;
+    let oldSignal!: AbortSignal;
+    vi.stubGlobal(
+      "fetch",
+      async (destination: string, options: RequestInit) => {
+        const response = await fixture.fetch(destination, options);
+        if (destination.endsWith("/token") && firstToken) {
+          firstToken = false;
+          oldSignal = options.signal!;
+          received();
+          await delayed;
+        }
+        return response;
+      },
+    );
+    const pending = auth.complete(url);
+    const rejected = expect(pending).rejects.toThrow("Sign-in unavailable");
+    await requestReceived;
+    auth.logout();
+    expect(oldSignal.aborted).toBe(true);
+    fixture.accessToken = "synthetic-second-access";
+    await auth.complete(await callback());
+    release();
+    await rejected;
+    expect(auth.session?.accessToken === fixture.accessToken).toBe(true);
+    expect(auth.sessions.getSnapshot().phase).toBe("authenticated");
+    expect(storage.length).toBe(0);
   });
 });

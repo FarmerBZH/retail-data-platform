@@ -15,12 +15,10 @@ import { SignIn } from "./SignIn";
 export default function App({
   configuration,
   authentication,
-  completion,
   oidcInvalid = false,
 }: {
   configuration: Configuration;
   authentication?: Authentication | undefined;
-  completion?: Promise<boolean> | undefined;
   oidcInvalid?: boolean;
 }) {
   const [showAccessDetails, setShowAccessDetails] = useState(false);
@@ -82,7 +80,6 @@ export default function App({
 
               <SignIn
                 authentication={authentication}
-                completion={completion}
                 invalid={configuration.status === "invalid" || oidcInvalid}
               />
               <Divider />

@@ -27,7 +27,16 @@ The callback URL is replaced before exchange; its transient state is consumed on
 Only state, nonce and verifier use sessionStorage during redirect, with a ten-minute
 acceptance deadline and cleanup on return or expired re-entry. Access tokens remain
 in memory; refresh-token fields are rejected. ID tokens are never retained as API
-credentials. The shell has no business-data access, telemetry or service worker.
+credentials. A generation-bound memory session expires by timer and is checked
+again on focus, visibility and page-show. Logout, replacement and document departure
+clear credentials, cancel outstanding operations and unmount protected content.
+Late OIDC responses cannot recreate an ended session. The session work boundary
+rejects results from old generations, including work that ignores cancellation.
+Page-hide clears protected content synchronously before caching; persisted restoration
+requires a new login. Intentional provider navigation preserves only transient PKCE
+state. Redirect-state removal is best-effort if browser storage throws; memory
+authority still ends and login/exchange refuse storage failures. The shell has no
+business-data access, telemetry or service worker.
 It is not connected to the read API in the context diagram below.
 
 Formatting, lint, strict typing, synthetic component/configuration tests and a
@@ -36,14 +45,18 @@ at 360/768/1440 px, including keyboard expansion/collapse, retained focus, empty
 browser storage and axe checks. Signed synthetic OIDC scenarios cover success,
 issuer/state/nonce/signature failures, refused exchange, unexpected refresh tokens,
 orphan callback cleanup and reload. Unit tests also verify replay, expiry and
-configuration binding. A dedicated build supplies public synthetic settings without
-reading local environment files; the normal production build is checked separately.
+configuration binding. Session tests cover late responses, synchronous abort handlers,
+protected component state reset, suspended timers and persisted page events. Browser
+scenarios verify expiry, logout, a second explicit login and history return; they do
+not establish that Chromium chose to use its back/forward cache. A dedicated build
+supplies public synthetic settings without reading local environment files;
+the normal production build is checked separately.
 The default harness aborts and fails unexpected requests; OIDC scenarios explicitly
 intercept their synthetic provider and callback routes. Traces, video and
 screenshots are disabled. These checks are not a complete accessibility audit.
 A GitHub workflow runs locked installation and the same local quality command;
 hosted execution has not yet been observed. Real provider compatibility, API
-authorization, UI expiry/logout lifecycle and production hosting remain later
+authorization, business transport/cache integration and production hosting remain later
 increments. Setup and actual scripts are in the
 [frontend guide](../frontend/README.md).
 

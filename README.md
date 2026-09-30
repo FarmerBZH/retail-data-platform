@@ -62,7 +62,7 @@ freshness checks and refresh behavior.
 
 ## Authenticated read API
 
-The global read API exposes all 13 application tables and 11 analytical views through
+The global read API exposes all 13 application tables and 15 analytical views through
 bounded, typed `/v1` endpoints. Every resource supports an exact primary-key lookup;
 store-related resources also support `store_id` filtering. It requires OAuth2 JWT access
 tokens and a dedicated PostgreSQL SELECT-only login. Start with the
@@ -75,3 +75,6 @@ Personal scripts use `retail-auth login`, then `retail-auth get` or the Python
 `PersonalClient`. Sessions stop at expiration and require fresh credentials;
 there is no automatic renewal. See [personal authentication](docs/personal-authentication.md)
 for provider configuration, native-vault storage and usage examples.
+
+Network totals, coverage and monthly comparisons are documented in
+[Network analytics](docs/network-analytics.md).

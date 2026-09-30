@@ -35,6 +35,7 @@ from retail_data_platform.api.resources import RESOURCES
 from retail_data_platform.database.models import (
     ImportRun,
     Product,
+    RegisterObservation,
     Store,
     StoreActivityMetric,
     StoreTypologyValue,
@@ -81,6 +82,23 @@ def database() -> Iterator[tuple[Settings, Engine, Engine]]:
                     "name": "Product",
                     "average_price": Decimal("12.30"),
                     "average_price_currency": "EUR",
+                },
+            )
+            c.execute(
+                insert(RegisterObservation),
+                {
+                    "id": uuid.UUID(int=150),
+                    "period": date(2025, 1, 1),
+                    "source_kind": "monthly",
+                    "source_store_reference": "synthetic",
+                    "store_id": stores[0],
+                    "store_match_status": "matched",
+                    "store_match_method": "synthetic",
+                    "source_gtin": "12345678",
+                    "product_id": uuid.UUID(int=100),
+                    "product_match_status": "matched",
+                    "revenue_value": Decimal("12.30"),
+                    "units_sold": 2,
                 },
             )
             c.execute(
@@ -168,7 +186,7 @@ def api(database: tuple[Settings, Engine, Engine]) -> Iterator[TestClient]:
 
 
 def test_all_resources_and_exact_serialization(api: TestClient) -> None:
-    assert len(api.get("/v1/resources").json()) == 24
+    assert len(api.get("/v1/resources").json()) == 28
     for resource in RESOURCES:
         response = api.get(f"/v1/data/{resource}")
         assert response.status_code == 200, (resource, response.text)
@@ -282,3 +300,29 @@ def test_typology_store_filter_and_nested_contract(api: TestClient) -> None:
     row["typology_details"][0]["future_private_field"] = "synthetic-secret"
     serialized = RESOURCES["analytics_store_month"].row_model.model_validate(row).model_dump_json()
     assert "future_private_field" not in serialized and "synthetic-secret" not in serialized
+
+
+def test_network_resources_coverage_filters_and_nulls(api: TestClient) -> None:
+    response = api.get("/v1/data/analytics_network_month", params={"period_from": "2025-01-01"})
+    assert response.status_code == 200
+    row = response.json()["items"][0]
+    assert row["expected_cell_count"] == row["calls_covered_cell_count"] == 4
+    assert row["calls"] == "6" and row["revenue"] is None
+    assert row["revenue_partial"] == "12.30" and row["revenue_covered_cell_count"] == 1
+    assert (
+        api.get("/v1/data/analytics_network_overview", params={"scope": "network"}).status_code
+        == 200
+    )
+    assert (
+        api.get(
+            "/v1/data/analytics_network_overview", params={"period_from": "2025-01-01"}
+        ).status_code
+        == 422
+    )
+    assert (
+        api.get(
+            "/v1/data/analytics_network_month", params={"store_id": str(uuid.UUID(int=1))}
+        ).status_code
+        == 422
+    )
+    assert api.get("/v1/data/analytics_network_year").json()["items"][0]["month_count"] == 1

@@ -74,7 +74,7 @@ def client(settings: Settings, key: rsa.RSAPrivateKey) -> Iterator[TestClient]:
 
 def test_complete_explicit_registry() -> None:
     assert set(RESOURCES) == set(Base.metadata.tables) | set(AnalyticsBase.metadata.tables)
-    assert len(RESOURCES) == 24
+    assert len(RESOURCES) == 28
     for resource in RESOURCES.values():
         assert resource.keys and set(resource.keys) <= set(resource.columns)
         assert not {"source_file_name", "source_sha256", "error_message"} & set(resource.columns)
@@ -155,7 +155,7 @@ def test_protected_routes(client: TestClient, key: rsa.RSAPrivateKey) -> None:
     client.headers["Authorization"] = "Bearer " + token(key)
     assert client.get("/v1/data/import_runs").status_code == 403
     resources = client.get("/v1/resources").json()
-    assert len(resources) == 22
+    assert len(resources) == 26
     schema = client.get("/v1/openapi.json").json()
     assert schema["paths"]["/v1/data/stores"]["get"]["security"] == [{"HTTPBearer": []}]
     assert "source_file_name" not in json.dumps(schema)
@@ -241,7 +241,7 @@ def test_configuration_and_grants(settings: Settings) -> None:
         with pytest.raises(ValueError):
             replace(settings, **changes)
     sql = grant_sql("synthetic_reader", "synthetic")
-    assert sql.count("GRANT SELECT") == 24
+    assert sql.count("GRANT SELECT") == 28
     assert "error_message" not in sql
     with pytest.raises(ValueError):
         grant_sql('reader";DROP', "public")

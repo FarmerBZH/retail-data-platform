@@ -188,3 +188,24 @@ def test_first_refresh_failure_leaves_snapshot_uninitialized(database: Engine) -
         )
     refresh_analytics(database)
     assert analytics_status(database)["state"] == "current"
+
+
+def test_network_publication_rolls_back_with_store_snapshot(database: Engine) -> None:
+    seed(database)
+    refresh_analytics(database)
+    with database.begin() as c:
+        c.execute(insert(Store).values(id=uuid.uuid4(), source_key="second", name="Second"))
+
+    def fail_after_network(view: str) -> None:
+        if view == "analytics_network_month_changes":
+            raise RuntimeError("synthetic network publication failure")
+
+    with pytest.raises(AnalyticsRefreshError):
+        refresh_analytics(database, progress=fail_after_network)
+    with database.connect() as c:
+        assert c.scalar(text("SELECT store_count FROM analytics_network_overview")) == 1
+        assert c.scalar(text("SELECT count(*) FROM analytics_store_month")) == 1
+    refresh_analytics(database)
+    with database.connect() as c:
+        assert c.scalar(text("SELECT store_count FROM analytics_network_overview")) == 2
+        assert c.scalar(text("SELECT count(*) FROM analytics_store_month")) == 2

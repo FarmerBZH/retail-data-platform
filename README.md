@@ -4,7 +4,8 @@ A portfolio project for building a reliable data platform from heterogeneous
 tabular sources.
 
 The project provides validated data ingestion, PostgreSQL analytics and an
-authenticated read API. A web application is outside the current scope.
+authenticated read API. The web application is being specified; it is not yet
+implemented. See the [SaaS frontend specification](docs/saas/README.md).
 
 ## Development
 

@@ -123,6 +123,25 @@ network reads.
 The [coverage manifest](../docs/saas/frontend-coverage.md) documents component/test
 associations, including the remaining operational-screen boundary.
 
+The Ventes et produits store tab reads the applied month window only after
+catalogue validation. Five pages and 500 cells bound the collection; incomplete
+reads show no table/chart and suggest a shorter period or the native explorer.
+The exact table paginates by 25 cells. Monthly bars explicitly identify their
+subset of at most 20 cells; selecting a source GTIN builds its calendar revenue
+line with null/absent months preserved. Unresolved GTINs stay distinct, negative
+returns stay visible and physical volumes remain at their original cell grain.
+No category filter, store total or cross-product volume total is inferred.
+Product IDs belong to the publication; null links may reflect conflicting
+attributions as well as unmatched rows. Bar series carry a partial qualifier where
+needed. Closing a detail restores its cell trigger or the table after pagination.
+Source/measure counts and unique observation IDs are checked for consistency.
+
+Details reuse the published renderer. Observation IDs are opened individually,
+and the current product lookup is explicit. All lookups follow the authorized
+catalogue and verify identity/freshness; a missing live product is unavailable,
+without hiding the published cell. Live evidence is not an immutable snapshot.
+Tab/period/session changes unmount data and cancel reads. The tab loads lazily.
+
 ## Run locally
 
 Use Node 24.15 or a later Node 24 release and npm. `.nvmrc` selects the verified

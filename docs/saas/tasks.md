@@ -3,7 +3,7 @@
 Statut : T01–T05 sont implémentées, validées et commitées.
 T06 est **commitée après relecture technique**, avec revue Security finale en attente ;
 T07 est **commitée après relecture technique, sécurité finale en attente** ;
-T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11 est **commitée après relecture technique, sécurité finale en attente** ; T12 est **commitée après relecture technique, sécurité finale en attente** ; T13 est **commitée après relecture technique, sécurité finale en attente** ; T14–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
+T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11 est **commitée après relecture technique, sécurité finale en attente** ; T12 est **commitée après relecture technique, sécurité finale en attente** ; T13 est **commitée après relecture technique, sécurité finale en attente** ; T14 est **commitée après relecture technique, sécurité finale en attente** ; T15–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
 pour les scripts réels et les limites du socle.
 Point de départ historique : branche `feat/saas-frontend`, API de lecture et client personnel
 existants ; aucun package frontend ni pipeline frontend à ce stade.
@@ -135,7 +135,7 @@ demande liens, cohérence et absence de divulgation, pas un faux audit applicati
 
 T01–T05 sont **validées**, T06 est **commitée, sécurité finale en attente**,
 T07 est **commitée, sécurité finale en attente**, T08 est **commitée après relecture technique, sécurité finale en attente**,
-T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11 est **commitée après relecture technique, sécurité finale en attente**, T12 est **commitée après relecture technique, sécurité finale en attente**, T13 est **commitée après relecture technique, sécurité finale en attente**, T14–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
+T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11 est **commitée après relecture technique, sécurité finale en attente**, T12 est **commitée après relecture technique, sécurité finale en attente**, T13 est **commitée après relecture technique, sécurité finale en attente**, T14 est **commitée après relecture technique, sécurité finale en attente**, T15–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
 satisfaites ; les tâches bloquées par l’identité réelle ne doivent pas empêcher
 les développements testables sur un environnement synthétique. Ne pas déclarer
 la connexion ou J1 reçus avant leur vérification réelle.
@@ -497,6 +497,29 @@ la connexion ou J1 reçus avant leur vérification réelle.
 
 ### T14 — Ventes et produits du magasin
 
+- Statut : **commitée après relecture technique, sécurité finale en attente**.
+  Onglet actif chargé à la demande, catalogue validé avant la lecture magasin/mois.
+  Collection bornée à cinq pages et 500 cellules ; lecture incomplète sans tableau
+  ni graphique, reprise manuelle ou consultation native dans Données.
+  Tableau exact paginé localement par 25 cellules ; barres sur un mois explicite
+  et un sous-ensemble nommé de 20 cellules, courbe du GTIN source sélectionné
+  avec calendrier complet et trous distincts de zéro. Retours négatifs conservés,
+  GTIN non rapprochés distincts, volumes au grain cellule uniquement.
+  Détail complet partagé, produit actuel et observations ouvertes individuellement
+  selon le catalogue, sans appels automatiques par ID. Identités et grain des
+  preuves vérifiés ; sources vivantes pouvant changer/disparaître, sans promesse
+  de preuve historique immuable. Fraîcheur avant/après, refus locaux et annulations.
+  Aucun filtre catégorie, total magasin ou total de volumes hétérogènes ajouté.
+  Relecture : lien produit explicitement daté à la publication ; lien nul distinct
+  de lignes non rapprochées ou contradictoires. Barres partielles qualifiées,
+  restauration du focus par identité ou vers le tableau après pagination.
+  Identifiants d’observation uniques, compteurs de sources/mesures et attribution
+  produit contrôlés selon le grain publié. Limite de réponse explicitement signalée.
+  `npm run check` réussi : **395 tests unitaires et 90 scénarios Chromium**
+  à 360/768/1440 px. Clavier, axe, zoom 200 %, stockage vide et déconnexion
+  vérifiés sur données synthétiques ; liens, cohérence et divulgation contrôlés.
+  Codex Security indisponible ; recette d’identité réelle et CI non revalidées.
+  L’avertissement de chunk applicatif supérieur à 500 kB reste suivi en T21.
 - Dépendances : T11 et T13.
 - Livrer : analytics_register_product_month, tableau par GTIN source/mois, barres
   sur périmètre explicite, courbe d’un produit sélectionné et preuves à la demande.

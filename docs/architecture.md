@@ -190,6 +190,28 @@ The coverage manifest associates 325 public fields and 74 nested paths with this
 renderer and synthetic tests. Operational component rendering tests are not
 proof that an operations screen has been delivered. See
 [coverage manifest notes](saas/frontend-coverage.md).
+The active store product-sales tab reads only the applied store/month window
+from `analytics_register_product_month`, after checking catalogue capabilities.
+It requires a complete bounded collection (five pages, 500 cells); an incomplete
+read exposes no product table or chart. Duplicate grains, unexpected store/month
+values and contradictory ambiguity/count metadata are rejected.
+Observation IDs must be unique and agree with available source counts; reported
+measure counts and product-link attribution are checked against the published grain.
+The exact table retains unresolved source GTINs separately and paginates locally
+by 25 cells. Horizontal revenue bars show an explicitly named month/subset of at
+most 20 cells; a selected source GTIN has a calendar revenue line and exact table
+with missing months left absent. Neither chart derives store turnover, aggregates
+heterogeneous physical volumes or introduces a category filter.
+Product links are labelled as publication metadata; a null link does not assert
+that every source row was unmatched. Partially covered bar series are named as such.
+Closing a cell detail restores its identity-based trigger or the table when that
+cell is no longer on the current local page.
+Every product cell retains its complete published detail. Individual observation
+and live product lookups are explicit, catalogue-authorized and bounded; their
+identities and the observation grain are checked, with freshness before/after.
+Missing live rows remain unavailable. They are not immutable historical evidence.
+Leaving the tab, changing applied months or ending the session unmounts its data
+and cancels pending reads. The tab code is loaded on demand.
 A GitHub workflow runs locked installation and the same local quality command;
 hosted execution has not yet been observed. Deployed provider/API compatibility,
 remaining analytical screens and production hosting remain later increments.

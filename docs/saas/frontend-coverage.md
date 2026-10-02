@@ -40,3 +40,12 @@ clé composite, liste multiple sans requêtes automatiques, accès refusé, HTML
 grande liste de 10 001 éléments, contexte magasin fixe et navigation conservée,
 clavier, axe, zoom et absence de stockage. Ces vérifications locales ne remplacent
 ni une recette d’identité réelle ni l’exécution de la CI hébergée.
+
+T14 complète la consultation native de `analytics_register_product_month` avec
+le tableau et les graphiques de `ProductSales`. Son détail utilise toujours
+`PublishedDetail`, puis ouvre explicitement `register_observations` et `products`
+selon le catalogue. Les scénarios de
+[ProductSales.test.tsx](../../frontend/src/ProductSales.test.tsx) et
+[product-sales.spec.ts](../../frontend/e2e/product-sales.spec.ts) vérifient les
+GTIN non rapprochés distincts, retours, mois absents, ambiguïtés, lectures
+incomplètes et disparition du produit vivant, sans appels automatiques par ID.

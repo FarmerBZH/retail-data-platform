@@ -18,6 +18,7 @@ import type { StoreHeader } from "./api-validation";
 import type { ReadQueries } from "./read-queries";
 import { formatMonth } from "./exact-values";
 import { MonthlySales } from "./MonthlySales";
+import { ProductSalesEntry as ProductSales } from "./ExplorerEntry";
 import { SalesComparisons } from "./SalesComparisons";
 import { ApiError } from "./read-api";
 import { MAX_PERIOD_MONTHS, validatePeriod } from "./month-period";
@@ -59,6 +60,7 @@ export function StoreDetail({
             resources: reads.resources.bind(reads),
             page: reads.page.bind(reads),
             status: reads.status.bind(reads),
+            collect: reads.collect.bind(reads),
           }
         : undefined,
     [reads],
@@ -214,7 +216,7 @@ export function StoreDetail({
           <Tab
             key={name}
             label={name}
-            disabled={index !== 0 && index !== 5}
+            disabled={index !== 0 && index !== 1 && index !== 5}
             id={`store-tab-${index}`}
             aria-controls={`store-panel-${index}`}
           />
@@ -246,6 +248,20 @@ export function StoreDetail({
             <Alert severity="info">
               Appliquez deux mois pour consulter la synthèse. La période choisie
               ne garantit pas la présence de données.
+            </Alert>
+          )
+        ) : context.tab === 1 ? (
+          applied && explorerReads ? (
+            <ProductSales
+              key={`products:${store.id}:${applied.from}:${applied.to}`}
+              storeId={store.id}
+              period={applied}
+              reads={explorerReads}
+            />
+          ) : (
+            <Alert severity="info">
+              Appliquez deux mois pour consulter les ventes produit ; le
+              catalogue doit permettre cette lecture.
             </Alert>
           )
         ) : (
@@ -323,8 +339,8 @@ export function StoreDetail({
         )}
       </Box>
       <Typography color="text.secondary">
-        Les détails des ventes, de la présence, de l’activité et des typologies
-        seront consultables dans les prochaines étapes.
+        Les détails de la présence, de l’activité et des typologies seront
+        consultables dans les prochaines étapes.
       </Typography>
     </Stack>
   );

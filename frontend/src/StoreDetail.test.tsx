@@ -44,7 +44,15 @@ function setup(
     return (
       <StoreDetail
         store={storeHeader(row)}
-        reads={reads}
+        reads={{
+          page: reads.page.bind(reads),
+          collect: reads.collect.bind(reads),
+          status: async () => ({
+            state: "uninitialized",
+            lastCompletedAt: null,
+            lastAttemptStatus: null,
+          }),
+        }}
         context={context}
         onContext={setContext}
       />
@@ -82,7 +90,9 @@ it("keeps entered and applied periods separate and invents no observation covera
   expect(
     screen.getByText(/Période appliquée : décembre 2025 à février 2026/),
   ).toBeVisible();
-  expect(screen.getByText(/la période choisie ne garantit pas/)).toBeVisible();
+  expect(
+    await screen.findByText(/Les indicateurs mensuels sont indisponibles/),
+  ).toBeVisible();
   expect(request).not.toHaveBeenCalled();
 });
 

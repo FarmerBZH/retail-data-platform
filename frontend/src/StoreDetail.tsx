@@ -13,6 +13,7 @@ import {
 import type { StoreHeader } from "./api-validation";
 import type { ReadQueries } from "./read-queries";
 import { formatExact, formatMonth } from "./exact-values";
+import { MonthlySales } from "./MonthlySales";
 import { ApiError } from "./read-api";
 import { MAX_PERIOD_MONTHS, validatePeriod } from "./month-period";
 import type { StoreContext } from "./month-period";
@@ -41,7 +42,7 @@ export function StoreDetail({
   onContext,
 }: {
   store: StoreHeader;
-  reads: Pick<ReadQueries, "page">;
+  reads: Pick<ReadQueries, "page" | "status" | "collect">;
   context: StoreContext;
   onContext: (context: StoreContext) => void;
 }) {
@@ -207,11 +208,19 @@ export function StoreDetail({
         aria-labelledby={`store-tab-${context.tab}`}
       >
         {context.tab === 0 ? (
-          <Alert severity="info">
-            Les analyses mensuelles seront disponibles dans une prochaine étape.
-            Aucune observation n’est chargée sur cet onglet ; la période choisie
-            ne garantit pas la présence de données.
-          </Alert>
+          applied ? (
+            <MonthlySales
+              key={`${store.id}:${applied.from}:${applied.to}`}
+              storeId={store.id}
+              period={applied}
+              reads={reads}
+            />
+          ) : (
+            <Alert severity="info">
+              Appliquez deux mois pour consulter la synthèse. La période choisie
+              ne garantit pas la présence de données.
+            </Alert>
+          )
         ) : (
           <Stack spacing={2}>
             <Typography>
@@ -300,8 +309,8 @@ export function StoreDetail({
         )}
       </Box>
       <Typography color="text.secondary">
-        Ventes, présence, activité et typologies seront consultables dans les
-        prochaines étapes.
+        Les détails des ventes, de la présence, de l’activité et des typologies
+        seront consultables dans les prochaines étapes.
       </Typography>
     </Stack>
   );

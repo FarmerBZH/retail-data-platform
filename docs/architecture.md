@@ -110,8 +110,9 @@ its pending read. Null, zero, false and exact decimal strings remain distinct.
 Draft and applied inclusive calendar months survive list/detail navigation in
 session memory. The period starts empty and accepts at most 120 inclusive months
 from 0001-01 through 9999-12 without timezone conversion. This is a client bound,
-not evidence of observation coverage. No monthly observations are requested yet;
-monthly analysis and the shared navigation remain subsequent work.
+not evidence of observation coverage. Only the active store synthesis reads the
+existing monthly analytical collection after an explicit period is applied;
+other analytical tabs and shared navigation remain subsequent work.
 The authenticated screen checks analytical publication status on entry and manual
 request, without polling or starting a refresh. It distinguishes freshness from
 coverage and the last refresh attempt from a failed status read. The last known
@@ -126,10 +127,28 @@ denominators as unavailable. Division rounds half away from zero with an explici
 0–18-place precision (default six); no business calculation uses binary numbers.
 No currency or tax basis is inferred. Collection tests verify discard and reload
 when publication changes across two pages; this is not a snapshot guarantee.
+The single-store synthesis filters `analytics_store_month` by store and inclusive
+months, checks initialization and surrounds its bounded collection with freshness
+reads. It cancels on departure, and a changed or incomplete publication exposes
+neither a total nor a false missing month. Explicit retry loads again. The full
+read is projected into the expected calendar grid; null/missing remain distinct
+from zero and negative sales. Exact sums state their own month coverage, and
+non-ambiguous reported sales remain separate partial diagnostics. Revenue per
+unit uses identical complete months and a nonzero denominator. No category or
+nested detail is joined or summed. Decimal validation and summary arithmetic run
+before the ready state; failures remain local and retryable.
+The MUI X Charts Community curve uses binary
+numbers only for finite geometry and axis span, preserves gaps with straight
+segments, labels partial coverage and disables animation; its
+exact tooltip and a keyboard-accessible scrollable table expose the source
+values. Out-of-range geometry remains available in the table with a warning.
+The read limits are five pages and 120 rows; separate pages remain separate
+snapshots. Other analytical screens and full nested publication inspection are
+not implemented by this increment.
 A GitHub workflow runs locked installation and the same local quality command;
 hosted execution has not yet been observed. Deployed provider/API compatibility,
-analytical screens and production hosting remain later
-increments. Setup and actual scripts are in the
+remaining analytical screens and production hosting remain later increments.
+Setup and actual scripts are in the
 [frontend guide](../frontend/README.md).
 
 ## Context

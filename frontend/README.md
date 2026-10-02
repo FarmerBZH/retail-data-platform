@@ -21,10 +21,11 @@ The reference describes current attributes independently of the selected period.
 The period starts empty. Draft months and applied inclusive months remain separate
 in session memory through list/detail navigation. Valid months range from 0001-01
 to 9999-12, with a maximum interval of 120 inclusive months. Calendar arithmetic
-uses month indexes without timezone conversion. This client limit bounds future
-reads and makes no claim about available months. No observation is read yet; monthly
-views remain subsequent work. Network and comparison actions are unavailable
-because their server aggregations are not implemented.
+uses month indexes without timezone conversion. This client limit bounds reads
+and makes no claim about available months. The active synthesis tab reads the
+existing single-store monthly publication only after Apply; other monthly views
+remain subsequent work. Network and comparison actions are unavailable because
+their server aggregations are not implemented.
 
 The authenticated screen reads `/v1/analytics/status` once on entry and on an
 explicit “Vérifier la fraîcheur” action. It distinguishes current, stale and
@@ -44,7 +45,31 @@ use calendar strings, without timezone conversion. Helpers bound input/output to
 1024 characters and exponent/scale magnitude to 512, rejecting excessive values.
 Collection checks discard a batch and its cache when status changes between pages;
 a subsequent explicit read loads again, without guaranteeing a database snapshot.
-Monthly KPI and chart screens remain later work.
+The store synthesis reads only `analytics_store_month` with an explicit store ID
+and inclusive applied months. It projects sales, separate activity measures and
+product diagnostics, without summing nested category/product/typology detail.
+It checks initialization before reading and freshness around the bounded collection
+(maximum five pages / 120 rows). Incomplete or changed publications display no
+total or inferred missing month; recovery is an explicit read. Decimal bounds
+and summary arithmetic are checked before publishing the result, so an excessive
+value or combined result stays a local retryable error.
+
+The complete read becomes a grid of expected months. Missing rows and null values
+remain unavailable, zero and negative sales remain exact. Every sum states its
+own covered/expected months; no valid value means unavailable. Non-ambiguous
+reported sales are separate partial diagnostics. Revenue per unit requires all
+expected months valid for both measures and nonzero units, with the documented
+six-place division precision. Units are not physical volumes; currency and HT/TTC
+remain unconfirmed. The live store header is independent of publication attributes.
+
+MUI X Charts Community supplies a revenue curve with straight segments, marked
+points, explicit coverage and partial-series labels, theme color and disabled
+animation. Only finite plot coordinates use binary numbers; an infinite axis span
+is omitted as well. Tooltips and the
+scrollable keyboard-accessible table use exact values. Values outside finite
+geometry remain in the table with a warning. See the
+[MUI line chart contract](https://mui.com/x/react-charts/lines/).
+Other analytics tabs, comparisons and complete nested details remain later work.
 
 ## Run locally
 
@@ -290,6 +315,7 @@ execution does not establish that the hosted job has run or that branch protecti
 is configured. Production CSP and hosting checks are later tasks.
 Vite dev/preview are local tools, not production servers.
 No token storage, service worker, external font or telemetry is added here.
-MUI uses its MIT-licensed components and Emotion engine; charts and commercial
-components are not installed in this increment. Versions are pinned in the
-manifest and lockfile; review dependency changes deliberately.
+MUI uses its MIT-licensed components and Emotion engine. MUI X Charts Community
+is installed for the store synthesis; commercial components are not installed.
+Versions are pinned in the manifest and lockfile; review dependency changes
+deliberately.

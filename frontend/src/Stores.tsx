@@ -27,7 +27,7 @@ import type { ReadPage } from "./read-queries";
 import { StoreDetail } from "./StoreDetail";
 import { initialStoreContext } from "./month-period";
 
-type Reads = Pick<ReadQueries, "page">;
+type Reads = Pick<ReadQueries, "page" | "status" | "collect">;
 type State =
   | { phase: "loading" }
   | { phase: "error"; message: string; request: string }

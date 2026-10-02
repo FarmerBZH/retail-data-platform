@@ -3,7 +3,7 @@
 Statut : T01–T05 sont implémentées, validées et commitées.
 T06 est **commitée après relecture technique**, avec revue Security finale en attente ;
 T07 est **commitée après relecture technique, sécurité finale en attente** ;
-T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
+T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11 est **commitée après relecture technique, sécurité finale en attente** ; T12–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
 pour les scripts réels et les limites du socle.
 Point de départ historique : branche `feat/saas-frontend`, API de lecture et client personnel
 existants ; aucun package frontend ni pipeline frontend à ce stade.
@@ -135,7 +135,7 @@ demande liens, cohérence et absence de divulgation, pas un faux audit applicati
 
 T01–T05 sont **validées**, T06 est **commitée, sécurité finale en attente**,
 T07 est **commitée, sécurité finale en attente**, T08 est **commitée après relecture technique, sécurité finale en attente**,
-T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
+T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11 est **commitée après relecture technique, sécurité finale en attente**, T12–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
 satisfaites ; les tâches bloquées par l’identité réelle ne doivent pas empêcher
 les développements testables sur un environnement synthétique. Ne pas déclarer
 la connexion ou J1 reçus avant leur vérification réelle.
@@ -386,6 +386,27 @@ la connexion ou J1 reçus avant leur vérification réelle.
 
 ### T11 — Synthèse mensuelle d’un magasin
 
+- Statut : **commitée après relecture technique ; sécurité finale en attente**. Lecture analytics_store_month
+  filtrée par magasin et période appliquée, seulement sur Synthèse. Initialisation
+  vérifiée avant lecture ; contrôle de publication autour des pages, annulation
+  sur départ et reprise explicite. Maximum cinq pages / 120 lignes ; aucune carte
+  ou faux mois absent si le résultat est incomplet ou la publication a changé.
+  Grille calendaire, null/zéro/négatifs distincts, sommes exactes et couverture
+  propre au CA, aux unités et à chaque activité. Rapport CA/unités seulement avec
+  les mêmes mois complets et base non nulle ; diagnostics rapportés séparés.
+  Premier graphique MUI X Charts Community (MIT), sans interpolation des trous
+  ni animation, coordonnées seules approximatives ; table accessible et valeurs
+  exactes, y compris diagnostics d’ambiguïté. Autres onglets et détails imbriqués
+  restent les tâches suivantes. Aucun nouvel endpoint ni calcul réseau.
+  Validation locale : `npm run check` réussi, **290 tests unitaires et
+  69 scénarios Chromium** sur 360/768/1440 px ; axe, clavier et réduction
+  de mouvement contrôlés sur fixtures entièrement synthétiques.
+  Relecture : validation des bornes décimales et calculs avant affichage, erreur
+  locale avec reprise si le résultat dépasse les bornes ; ambiguïté inconnue
+  jamais assimilée à zéro. Accès refusé explicite, sans reprise automatique.
+  Graphique à segments droits, couleur du thème, série partielle et couverture
+  indiquées, taille mobile et grille KPI alignées sur DESIGN.md.
+  Recette d’identité réelle et CI non revalidées ; Codex Security indisponible.
 - Dépendances : T09–T10.
 - Livrer : analytics_store_month, KPI qualifiés, premier graphique MUI X Charts
   Community et tableau accessible ; grille des mois avec trous explicites.

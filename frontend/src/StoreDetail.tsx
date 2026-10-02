@@ -14,6 +14,7 @@ import type { StoreHeader } from "./api-validation";
 import type { ReadQueries } from "./read-queries";
 import { formatExact, formatMonth } from "./exact-values";
 import { MonthlySales } from "./MonthlySales";
+import { SalesComparisons } from "./SalesComparisons";
 import { ApiError } from "./read-api";
 import { MAX_PERIOD_MONTHS, validatePeriod } from "./month-period";
 import type { StoreContext } from "./month-period";
@@ -209,12 +210,20 @@ export function StoreDetail({
       >
         {context.tab === 0 ? (
           applied ? (
-            <MonthlySales
-              key={`${store.id}:${applied.from}:${applied.to}`}
-              storeId={store.id}
-              period={applied}
-              reads={reads}
-            />
+            <Stack spacing={3}>
+              <MonthlySales
+                key={`${store.id}:${applied.from}:${applied.to}`}
+                storeId={store.id}
+                period={applied}
+                reads={reads}
+              />
+              <SalesComparisons
+                key={`comparisons:${store.id}:${applied.from}:${applied.to}`}
+                storeId={store.id}
+                period={applied}
+                reads={reads}
+              />
+            </Stack>
           ) : (
             <Alert severity="info">
               Appliquez deux mois pour consulter la synthèse. La période choisie

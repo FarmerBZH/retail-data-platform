@@ -145,6 +145,22 @@ values. Out-of-range geometry remains available in the table with a warning.
 The read limits are five pages and 120 rows; separate pages remain separate
 snapshots. Other analytical screens and full nested publication inspection are
 not implemented by this increment.
+An explicit single-store comparison read uses complete revenue amounts from
+`analytics_store_month_changes` for M-1/N-1 and the selected current window.
+The reference window comes from `analytics_store_month`: k immediately preceding
+months or both bounds shifted by twelve months. Each collection is bounded by
+five pages and 120 rows; initialization and freshness checks surround both reads.
+Incomplete/changed batches expose no comparison. Amounts for the same months
+across current/reference reads and known M-1/N-1 cells must agree exactly,
+including null/zero distinctions and overlapping year windows; contradictions
+produce a local retryable error. This check does not establish a snapshot.
+Window sums require every
+expected month in each period; exact subtraction and decimal division never
+aggregate published percentages. Zero/missing bases suppress percentages,
+negative bases retain absolute differences with an explicit qualifier. Calendar
+underflow avoids a reference query. Mode/context changes cancel pending reads
+and discard previous comparison results. These collections and the independently
+loaded synthesis have no cross-request snapshot guarantee.
 A GitHub workflow runs locked installation and the same local quality command;
 hosted execution has not yet been observed. Deployed provider/API compatibility,
 remaining analytical screens and production hosting remain later increments.

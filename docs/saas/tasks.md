@@ -3,7 +3,7 @@
 Statut : T01–T05 sont implémentées, validées et commitées.
 T06 est **commitée après relecture technique**, avec revue Security finale en attente ;
 T07 est **commitée après relecture technique, sécurité finale en attente** ;
-T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11 est **commitée après relecture technique, sécurité finale en attente** ; T12–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
+T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11 est **commitée après relecture technique, sécurité finale en attente** ; T12 est **commitée après relecture technique, sécurité finale en attente** ; T13–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
 pour les scripts réels et les limites du socle.
 Point de départ historique : branche `feat/saas-frontend`, API de lecture et client personnel
 existants ; aucun package frontend ni pipeline frontend à ce stade.
@@ -135,7 +135,7 @@ demande liens, cohérence et absence de divulgation, pas un faux audit applicati
 
 T01–T05 sont **validées**, T06 est **commitée, sécurité finale en attente**,
 T07 est **commitée, sécurité finale en attente**, T08 est **commitée après relecture technique, sécurité finale en attente**,
-T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11 est **commitée après relecture technique, sécurité finale en attente**, T12–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
+T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11 est **commitée après relecture technique, sécurité finale en attente**, T12 est **commitée après relecture technique, sécurité finale en attente**, T13–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
 satisfaites ; les tâches bloquées par l’identité réelle ne doivent pas empêcher
 les développements testables sur un environnement synthétique. Ne pas déclarer
 la connexion ou J1 reçus avant leur vérification réelle.
@@ -419,6 +419,26 @@ la connexion ou J1 reçus avant leur vérification réelle.
 
 ### T12 — Comparaisons calendaires du magasin
 
+- Statut : **commitée après relecture technique ; sécurité finale en attente**. Comparaisons du CA d’un
+  magasin à la demande, depuis analytics_store_month_changes pour M-1/N-1 et
+  le courant ; fenêtre de référence depuis analytics_store_month (k mois
+  précédents ou décalage de douze mois). Aucun ratio publié sommé ou moyenné.
+  Dates, couvertures et univers observé explicités ; fenêtres complètes requises.
+  Différences exactes, divisions à six décimales ; base nulle/manquante indisponible,
+  base négative qualifiée avec différence absolue et pourcentage non interprété.
+  Deux collections bornées chacune à cinq pages / 120 lignes ; initialisation
+  et fraîcheur contrôlées autour du lot, aucun résultat si lecture incomplète ou
+  publication changée. Annulation et effacement sur changement de référence,
+  magasin, période appliquée ou onglet ; aucun appel lors de l’édition des mois.
+  Références hors calendrier prises en charge sans requête invalide. Tableau
+  exact accessible, défilement local, aucune comparaison réseau ajoutée.
+  Relecture : montants des mois communs et références M-1/N-1 déjà lus comparés
+  exactement, y compris fenêtres chevauchantes. Contradictions rejetées avec
+  erreur locale et reprise ; décimaux équivalents acceptés, null distinct de zéro.
+  Validation locale : `npm run check` réussi, **321 tests unitaires et
+  75 scénarios Chromium** sur 360/768/1440 px ; axe, clavier, absence de
+  débordement et effacement des données à la déconnexion vérifiés.
+  Recette d’identité réelle et CI non revalidées ; Codex Security indisponible.
 - Dépendances : T11.
 - Livrer : lecture analytics_store_month_changes pour M-1/N-1 ; comparaisons de
   fenêtres uniquement depuis les montants complets du magasin, jamais une moyenne

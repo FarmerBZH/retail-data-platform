@@ -7,7 +7,7 @@ import {
   uuid,
 } from "./api-validation";
 import { addExact, formatExact, ratioExact } from "./exact-values";
-import { periodQuery } from "./month-period";
+import { calendarMonths } from "./month-period";
 import type { MonthPeriod } from "./month-period";
 
 function count(value: unknown): number {
@@ -57,13 +57,7 @@ export function monthlyGrid(
   storeId: string,
   period: MonthPeriod,
 ) {
-  periodQuery(period);
-  const first =
-    Number(period.from.slice(0, 4)) * 12 + Number(period.from.slice(5)) - 1;
-  const months = Array.from({ length: period.months }, (_, index) => {
-    const n = first + index;
-    return `${String(Math.floor(n / 12)).padStart(4, "0")}-${String((n % 12) + 1).padStart(2, "0")}`;
-  });
+  const months = calendarMonths(period);
   const rows = new Map<string, MonthlySale>();
   for (const row of items) {
     if (

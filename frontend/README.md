@@ -69,7 +69,30 @@ is omitted as well. Tooltips and the
 scrollable keyboard-accessible table use exact values. Values outside finite
 geometry remain in the table with a warning. See the
 [MUI line chart contract](https://mui.com/x/react-charts/lines/).
-Other analytics tabs, comparisons and complete nested details remain later work.
+Single-store revenue comparisons are loaded explicitly from the applied period.
+`analytics_store_month_changes` supplies current, previous calendar month and
+previous-year complete revenue amounts; published ratios are never aggregated.
+A second bounded `analytics_store_month` read supplies the chosen reference window:
+the k immediately preceding months or both bounds shifted by twelve months.
+Each collection is limited to five pages and 120 rows. Initialization and freshness
+are checked around both reads; an incomplete collection or changed publication
+hides every comparison. Shared month amounts and known M-1/N-1 references are
+checked for decimal equality, including overlapping windows. A contradiction
+hides the comparison with a local retryable error; equivalent decimal encodings
+remain valid and null is distinct from zero. Separate pages/collections, including
+the synthesis above,
+are not a guaranteed snapshot.
+
+Window totals require every expected month in each period. Differences use exact
+subtraction and ratios use six-place decimal division before percentage display.
+Zero/missing references make percentages unavailable; negative bases show an
+explicit label and the absolute difference without interpreting the percentage.
+Reference dates and coverage remain visible. Calendar underflow does not generate
+an invalid request. Changing the reference, store, applied period or tab cancels
+pending reads and clears old results; draft months do not trigger comparison reads.
+No store-network comparison or inferred missing-as-zero value is added.
+Other analytics tabs, multi-store comparisons and complete nested details remain
+later work.
 
 ## Run locally
 

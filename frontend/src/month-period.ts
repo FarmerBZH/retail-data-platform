@@ -42,6 +42,22 @@ export function periodQuery(period: MonthPeriod) {
   return { period_from: `${period.from}-01`, period_to: `${period.to}-01` };
 }
 
+export function shiftMonth(month: string, offset: number): string | undefined {
+  const start = monthIndex(month);
+  if (start === undefined || !Number.isSafeInteger(offset))
+    throw new Error("Invalid month shift");
+  const index = start + offset;
+  if (index < 12 || index > 9999 * 12 + 11) return undefined;
+  return `${String(Math.floor(index / 12)).padStart(4, "0")}-${String((index % 12) + 1).padStart(2, "0")}`;
+}
+
+export function calendarMonths(period: MonthPeriod): string[] {
+  periodQuery(period);
+  return Array.from({ length: period.months }, (_, i) =>
+    shiftMonth(period.from, i)!,
+  );
+}
+
 export type StoreContext = Readonly<{
   from: string;
   to: string;

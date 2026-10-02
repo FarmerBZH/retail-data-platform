@@ -97,12 +97,14 @@ def create_user(admin: httpx.Client, username: str, password: str) -> str:
     return response.headers["Location"].rsplit("/", 1)[-1]
 
 
-def user_token(username: str, password: str, *, approved: bool) -> dict[str, Any]:
+def user_token(
+    username: str, password: str, *, approved: bool, client_id: str = "retail-personal"
+) -> dict[str, Any]:
     settings = ClientSettings(
         issuer=f"{BASE}/realms/{REALM}",
         audience="retail-api",
         jwks_url=f"{BASE}/realms/{REALM}/protocol/openid-connect/certs",
-        client_id="retail-personal",
+        client_id=client_id,
         authorization_url=f"{BASE}/realms/{REALM}/protocol/openid-connect/auth",
         token_url=f"{BASE}/realms/{REALM}/protocol/openid-connect/token",
         api_url="http://127.0.0.1:8000",

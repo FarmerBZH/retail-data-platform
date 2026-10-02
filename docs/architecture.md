@@ -67,8 +67,16 @@ total attempts including freshness checks; repeated cursors fail and partial res
 are identified. A freshness change discards the batch and invalidates the cache;
 unchanged freshness is not a snapshot guarantee. No background/exhaustive loading,
 persistent business storage or new backend endpoint is introduced.
-Synthetic transport tests verify these boundaries; real API/CORS integration and
-rendered business-data flows remain unverified.
+Synthetic transport tests verify these boundaries. An opt-in local smoke additionally
+uses Chromium with the production entry screen and a real Keycloak realm, then
+exercises the query modules against the actual API and a disposable synthetic
+PostgreSQL schema. It verifies web code exchange, two API pages, missing-scope/CORS/
+callback refusal, wrong-client/audience/expired signed-token refusal, and the original
+CLI token/vault contract with a test memory vault. Temporary identity/database objects
+are removed after the run; the existing realm and CLI configuration are preserved.
+This does not verify a deployed provider, native OS vault or rendered business-data
+flows. The [local recipe](local-identity.md#browser-and-api-integration-smoke) documents
+the prerequisites and cleanup boundary.
 
 Formatting, lint, strict typing, synthetic component/configuration tests and a
 production build have been verified. Playwright Chromium tests exercise that build

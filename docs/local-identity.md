@@ -131,6 +131,53 @@ docker compose -p retail-identity -f compose.identity.yaml up -d
 The main project `compose.yaml` is separate. Do not run `down -v` for the identity
 stack: that deletes its users, configuration and signing keys.
 
+## Browser and API integration smoke
+
+Run the opt-in browser smoke from the repository root on a POSIX system with Node 24.15+ on PATH,
+the locked Python/frontend dependencies and Playwright Chromium installed. The
+local identity stack above must be running. Supply `TEST_DATABASE_URL` through
+your private shell configuration: a local PostgreSQL administration connection
+using `postgresql+psycopg`, with permission to create/drop a test schema and role.
+Do not paste a credential-bearing URL into shared output or versioned files.
+
+```sh
+.venv/bin/python scripts/smoke-browser-identity.py
+```
+
+The runner uses the ignored local identity certificate and administrator settings.
+It creates a new realm, two synthetic users, an exact web callback/origin and the
+existing CLI callback on the same public client ID. It leaves the existing application
+realm, clients, users, API configuration and native credential vault untouched.
+It migrates a unique disposable schema and grants a unique role only the existing
+API SELECT projections. It starts the real API on loopback port 8181 and Vite on
+4181; occupied ports fail rather than reusing another service.
+
+Chromium uses the production entry screen and OIDC code; a test-only in-page closure
+then exercises the real `ReadQueries`/decoder modules against two synthetic store
+pages. Tokens remain inside the page and are never returned to the runner. Synthetic
+passwords reach the browser through stdin and only populate the provider's login form.
+No traces, screenshots, videos, browser storage state or business output are saved.
+Python verifies TLS with the local certificate; Chromium trusts only its SPKI pin
+for this disposable context, without a global certificate-ignore option.
+
+The smoke verifies PKCE/prompt/max-age, cross-origin code exchange, cleared callback
+and redirect storage, API pagination, refusal without `data:read`, API CORS refusal,
+HTTP 400 for an unregistered callback, and logout. The original CLI request builder,
+token validator and test memory vault also read this API. Separately generated real
+signed tokens for a wrong client, wrong audience and one-second expiry receive 401.
+The API's existing unit tests cover the RS256, `at+jwt`, `azp` and `auth_time` guards;
+the valid real-provider reads exercise those guards together without replacing them.
+
+All child services are stopped and the temporary realm/users/schema/role are removed
+in cleanup, including ordinary test failures. Final success requires completed cleanup.
+The browser runner has a bounded deadline and its process group is included in cleanup;
+descendants are terminated even if the parent has already exited. A failed service
+stop does not skip the remaining service or identity/database cleanup attempts.
+A hard process kill or unavailable dependency during cleanup can leave temporary
+resources; retain the local administrative ability to inspect and remove them.
+This local recipe does not validate a deployed provider, native OS vault or rendered
+business-data screens, and does not run automatically in the synthetic browser suite.
+
 ## Moving to a server later
 
 Keep the identity database separate and back it up before moving it. Restore it

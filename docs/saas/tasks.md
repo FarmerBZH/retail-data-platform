@@ -2,7 +2,7 @@
 
 Statut : T01–T05 sont implémentées, validées et commitées.
 T06 est **commitée après relecture technique**, avec revue Security finale en attente ;
-T07–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
+T07 est **commitée après relecture technique, sécurité finale en attente** ; T08–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
 pour les scripts réels et les limites du socle.
 Point de départ historique : branche `feat/saas-frontend`, API de lecture et client personnel
 existants ; aucun package frontend ni pipeline frontend à ce stade.
@@ -133,7 +133,7 @@ demande liens, cohérence et absence de divulgation, pas un faux audit applicati
 ## Tâches ordonnées
 
 T01–T05 sont **validées**, T06 est **commitée, sécurité finale en attente**,
-T07–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
+T07 est **commitée, sécurité finale en attente**, T08–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
 satisfaites ; les tâches bloquées par l’identité réelle ne doivent pas empêcher
 les développements testables sur un environnement synthétique. Ne pas déclarer
 la connexion ou J1 reçus avant leur vérification réelle.
@@ -249,7 +249,8 @@ la connexion ou J1 reçus avant leur vérification réelle.
   correction : **sécurité non vérifiée sur le diff final**, plugin indisponible
   dans cette session. Ne pas assimiler les tests à une nouvelle revue Security.
   Le service reste à raccorder
-  aux écrans métier ; fournisseur/API/CORS réels non vérifiés, réservés à T07.
+  aux écrans métier ; recette locale fournisseur/API/CORS réalisée par T07,
+  déploiement réel encore non vérifié.
   Aucun push de T06 effectué.
 - Dépendances : T05.
 - Livrer : pagination par curseur opaque, annulation/déduplication, cache de session,
@@ -265,6 +266,22 @@ la connexion ou J1 reçus avant leur vérification réelle.
 
 ### T07 — Connexion réelle au fournisseur et à l’API
 
+- Statut : **commitée après relecture technique, sécurité finale en attente**. Smoke local Chromium/Keycloak/API/PostgreSQL
+  réel sur realm et schéma jetables ; comptes et magasins entièrement synthétiques.
+  Connexion web, échange CORS, deux pages API, refus de scope/origine/callback,
+  refus de jetons signés mauvais client/audience/expirés et contrat CLI passent.
+  Format/lint/typage et build passent ; 185 tests frontend, 39 scénarios Chromium,
+  138 tests Python (27 ignorés faute de prérequis), puis 9 tests PostgreSQL/loopback
+  explicitement activés passent. Le smoke fournisseur réel est opt-in et a été exécuté.
+  Le client existant et la configuration API ne sont pas modifiés ; aucun
+  élargissement de la liste des clients autorisés. Nettoyage exécuté après la recette.
+  Relecture : groupes de processus nettoyés après timeout ou sortie du parent,
+  poursuite du nettoyage après un échec d’arrêt (3 tests de régression), et refus
+  CORS HTTP 400 sans origine autorisée vérifié en complément du blocage navigateur.
+  Recette reproductible dans le [guide local](../local-identity.md#browser-and-api-integration-smoke).
+  Fournisseur déployé, coffre natif et écrans métier restent non vérifiés.
+  **Sécurité non vérifiée par Codex Security**, plugin indisponible dans cette session.
+  Commit autorisé après relecture ; aucun push de T07 effectué.
 - Dépendances : T03–T06 ; configuration OIDC de test et PostgreSQL isolé disponibles.
 - Livrer : smoke test navigateur reproductible avec utilisateurs synthétiques et
   nettoyage. Valider le client autorisé unique, redirects exacts, origines API et

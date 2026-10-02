@@ -98,7 +98,9 @@ handoff preserves the transient PKCE record across departure. These controls do 
 revoke a copied JWT or end the identity provider's own session; a new login still
 requests `prompt=login` and `max_age=0`.
 
-Real provider compatibility is unverified (T07). Configure the public client with
+Local Keycloak compatibility is verified by the opt-in
+[browser/API smoke](../docs/local-identity.md#browser-and-api-integration-smoke).
+Deployment compatibility remains unverified. Configure the public client with
 the exact redirect, web origin and token-endpoint CORS. Its ID must match the API's
 single allowed `API_CLIENT_ID`; do not silently introduce a second client or change
 the CLI identity contract. The API remains responsible for validating RS256
@@ -135,7 +137,9 @@ owns eligible retries. Network failure and cancellation are distinct.
 Consumers must publish only after guarded completion and bind any retained state
 to the current session generation; protected components already unmount on logout.
 The transport has synthetic unit contract tests and the existing browser regression
-suite. Real provider/API/CORS integration remains unverified until T07.
+suite. The opt-in local browser/API smoke verifies real Keycloak exchange and API
+reads on disposable synthetic state; deployed integration and business screens remain
+unverified.
 
 ## Bounded queries and collections
 

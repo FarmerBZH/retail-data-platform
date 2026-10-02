@@ -14,7 +14,9 @@ import { SignIn } from "./SignIn";
 import { SessionBoundary } from "./SessionBoundary";
 import { FreshnessBanner } from "./FreshnessBanner";
 import { StoreList } from "./Stores";
+import { initialStoreNavigation } from "./store-navigation";
 import type { ReadQueries } from "./read-queries";
+import { DataExplorerEntry as DataExplorer } from "./ExplorerEntry";
 import { useSession } from "./use-session";
 
 export default function App({
@@ -65,7 +67,7 @@ export default function App({
           {reads ? (
             <>
               <FreshnessBanner reads={reads} />
-              <StoreList reads={reads} />
+              <Workspace reads={reads} />
             </>
           ) : (
             <Typography role="status">
@@ -167,5 +169,39 @@ export default function App({
         </Stack>
       </Box>
     </Box>
+  );
+}
+
+function Workspace({ reads }: { reads: ReadQueries }) {
+  const [view, setView] = useState("stores");
+  const [navigation, setNavigation] = useState(initialStoreNavigation);
+  return (
+    <Stack spacing={3}>
+      <Box component="nav" aria-label="Navigation principale">
+        <Stack direction="row" spacing={2}>
+          <Button
+            aria-current={view === "stores" ? "page" : undefined}
+            onClick={() => setView("stores")}
+          >
+            Magasins
+          </Button>
+          <Button
+            aria-current={view === "data" ? "page" : undefined}
+            onClick={() => setView("data")}
+          >
+            Données
+          </Button>
+        </Stack>
+      </Box>
+      {view === "stores" ? (
+        <StoreList
+          reads={reads}
+          navigation={navigation}
+          onNavigation={setNavigation}
+        />
+      ) : (
+        <DataExplorer reads={reads} />
+      )}
+    </Stack>
   );
 }

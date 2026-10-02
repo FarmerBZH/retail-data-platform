@@ -25,9 +25,13 @@ import type { ReadQueries } from "./read-queries";
 import type { ReadPage } from "./read-queries";
 
 import { StoreDetail } from "./StoreDetail";
-import { initialStoreContext } from "./month-period";
+import { initialStoreNavigation } from "./store-navigation";
+import type { StoreNavigation } from "./store-navigation";
+import type { StoreContext } from "./month-period";
+import type { Dispatch, SetStateAction } from "react";
 
-type Reads = Pick<ReadQueries, "page" | "status" | "collect">;
+type Reads = Pick<ReadQueries, "page" | "status" | "collect"> &
+  Partial<Pick<ReadQueries, "resources">>;
 type State =
   | { phase: "loading" }
   | { phase: "error"; message: string; request: string }
@@ -52,15 +56,34 @@ function errorMessage(error: unknown): string {
 const label = (store: StoreSummary) => store.name ?? "Nom indisponible";
 const value = (text: string | null) => text ?? "Indisponible";
 
-export function StoreList({ reads }: { reads: Reads }) {
-  const [position, setPosition] = useState({
-    index: 0,
-    cursors: [undefined] as (string | undefined)[],
-  });
-  const [selected, setSelected] = useState<Set<string>>(() => new Set());
-  const [opened, setOpened] = useState<string>();
-  const [context, setContext] = useState(initialStoreContext);
-  const [sort, setSort] = useState("api");
+export function StoreList({
+  reads,
+  navigation,
+  onNavigation,
+}: {
+  reads: Reads;
+  navigation?: StoreNavigation;
+  onNavigation?: Dispatch<SetStateAction<StoreNavigation>>;
+}) {
+  const [local, setLocal] = useState(initialStoreNavigation);
+  const { position, selected, opened, context, sort } = navigation ?? local;
+  const update = onNavigation ?? setLocal;
+  function change<K extends keyof StoreNavigation>(
+    key: K,
+    value: SetStateAction<StoreNavigation[K]>,
+  ) {
+    update((previous) => ({
+      ...previous,
+      [key]: typeof value === "function" ? value(previous[key]) : value,
+    }));
+  }
+  const setPosition = (value: SetStateAction<StoreNavigation["position"]>) =>
+    change("position", value);
+  const setSelected = (value: SetStateAction<Set<string>>) =>
+    change("selected", value);
+  const setOpened = (value: string | undefined) => change("opened", value);
+  const setContext = (value: StoreContext) => change("context", value);
+  const setSort = (value: string) => change("sort", value);
   const [revision, setRevision] = useState(0);
   const [state, setState] = useState<State>({ phase: "loading" });
   const heading = useRef<HTMLHeadingElement>(null);
@@ -186,7 +209,10 @@ export function StoreList({ reads }: { reads: Reads }) {
       {opened && (
         <Button
           variant="outlined"
-          onClick={() => setOpened(undefined)}
+          onClick={() => {
+            returnTo.current = opened;
+            setOpened(undefined);
+          }}
           sx={{ alignSelf: "flex-start" }}
         >
           Retour aux magasins

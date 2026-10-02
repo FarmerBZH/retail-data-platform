@@ -143,8 +143,7 @@ segments, labels partial coverage and disables animation; its
 exact tooltip and a keyboard-accessible scrollable table expose the source
 values. Out-of-range geometry remains available in the table with a warning.
 The read limits are five pages and 120 rows; separate pages remain separate
-snapshots. Other analytical screens and full nested publication inspection are
-not implemented by this increment.
+snapshots. Other analytical screens are not implemented by the synthesis increment.
 An explicit single-store comparison read uses complete revenue amounts from
 `analytics_store_month_changes` for M-1/N-1 and the selected current window.
 The reference window comes from `analytics_store_month`: k immediately preceding
@@ -161,6 +160,36 @@ negative bases retain absolute differences with an explicit qualifier. Calendar
 underflow avoids a reference query. Mode/context changes cancel pending reads
 and discard previous comparison results. These collections and the independently
 loaded synthesis have no cross-request snapshot guarantee.
+The published data explorer discovers authorized business collections from the
+catalogue and offers references, observations and monthly analyses. The client
+intersects catalogue capabilities with a fixed public projection snapshot;
+unknown fields, keys and filters are rejected. Operational collections are not
+exposed or requested by this explorer; their screen remains deferred.
+Pages contain at most 25 rows and are followed manually using unchanged opaque
+cursors and applied filters. Repeated/empty continuation cursors and duplicate
+keys within a page are rejected; no whole-network extraction or total is derived.
+Opening a row issues a separate request with its complete primary key (including
+both exact month bounds for composite keys). It accepts at most one matching row.
+Freshness checks surround every page/detail read, hide changed publications and
+block uninitialized analytic reads without claiming a cross-page snapshot.
+The shared PublishedDetail renderer displays every permitted field and recursively
+projects nested objects/lists. French labels retain technical names; decimal
+strings remain exact, HTML stays text, null/zero/empty strings/lists remain distinct.
+The transport bounds responses at 2 MB; list rendering uses local pages of 50
+elements, retaining every decoded element without imposing a separate list cap.
+Known varchar limits and exact-value validation remain enforced.
+Expanding lists never triggers per-element requests. Store reference inspection
+uses the same renderer; additional store collections are loaded explicitly and
+receive a fixed store_id only where the catalogue permits it. Global collections
+remain labelled as global. Store selection, page/sort, opened store and draft/applied
+months survive navigation through Données in session memory; business components
+still unmount and cancel their reads. A rejected later cursor can restart at page one.
+Leaving an explorer cancels its reads and removes its results;
+session termination unmounts the workspace and clears the transport cache.
+The coverage manifest associates 325 public fields and 74 nested paths with this
+renderer and synthetic tests. Operational component rendering tests are not
+proof that an operations screen has been delivered. See
+[coverage manifest notes](saas/frontend-coverage.md).
 A GitHub workflow runs locked installation and the same local quality command;
 hosted execution has not yet been observed. Deployed provider/API compatibility,
 remaining analytical screens and production hosting remain later increments.

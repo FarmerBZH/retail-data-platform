@@ -91,8 +91,37 @@ Reference dates and coverage remain visible. Calendar underflow does not generat
 an invalid request. Changing the reference, store, applied period or tab cancels
 pending reads and clears old results; draft months do not trigger comparison reads.
 No store-network comparison or inferred missing-as-zero value is added.
-Other analytics tabs, multi-store comparisons and complete nested details remain
-later work.
+Other analytics tabs and multi-store comparisons remain later work.
+
+The Données navigation opens a catalogue-driven explorer of business references,
+observations and monthly analyses. Public projection metadata is fixed in
+`src/published-contract.ts`; catalogue fields, keys and filters must be compatible.
+Responses remain bounded by the 2 MB transport limit. Large lists retain all
+elements and render in local pages of 50, with first/last-page controls and no
+per-element API calls. Published varchar limits and exact-value checks still apply.
+Only published fields are retained, including the projected children of current
+store, activity, category and typology details. Operational routes remain deferred
+to the protected operations screen and are never requested here.
+
+Pagination reads one page of at most 25 rows per action, without deriving totals.
+Filters are explicitly applied and carried through opaque cursors. A row opens a
+fresh complete-key lookup, including all composite members and exact monthly bounds.
+Read cancellation, duplicate-key/cursor rejection, local errors and before/after
+freshness checks protect navigation; pages are not a guaranteed snapshot.
+Uninitialized analytic collections are unavailable. Reference collections can
+still be read with no analytic publication.
+
+`PublishedDetail` renders French labels and technical names, exact decimals,
+null/zero and empty text/list distinctions, recursively expandable lists and inert
+HTML text. It also serves the store reference. Other store collections are opened
+on demand; a fixed store filter comes only from the catalogue and global resources
+stay explicitly global. Selection, store page/sort, opened store, monthly drafts and
+applied bounds survive navigation through Données in session memory. Leaving each
+screen still cancels its reads and unmounts its business results. A rejected later
+cursor can be reset to the first page. Expanding evidence ID lists performs no
+network reads.
+The [coverage manifest](../docs/saas/frontend-coverage.md) documents component/test
+associations, including the remaining operational-screen boundary.
 
 ## Run locally
 

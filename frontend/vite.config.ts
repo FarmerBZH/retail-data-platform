@@ -16,6 +16,8 @@ export default defineConfig(({ mode }) => ({
   test: {
     include: ["src/**/*.test.{ts,tsx}"],
     environment: "jsdom",
+    // Bound concurrent DOM workers so short session tests are not starved by full-detail rendering.
+    maxWorkers: 2,
     setupFiles: ["./src/test-setup.ts"],
     clearMocks: true,
     restoreMocks: true,

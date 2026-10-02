@@ -1,4 +1,8 @@
-import { useEffect, useState } from "react";
+import { DataExplorerEntry as DataExplorer } from "./ExplorerEntry";
+import { PublishedDetail } from "./PublishedDetail";
+import { publishedContract } from "./published-contract";
+import type { Resource } from "./read-api";
+import { useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Box,
@@ -12,13 +16,13 @@ import {
 } from "@mui/material";
 import type { StoreHeader } from "./api-validation";
 import type { ReadQueries } from "./read-queries";
-import { formatExact, formatMonth } from "./exact-values";
+import { formatMonth } from "./exact-values";
 import { MonthlySales } from "./MonthlySales";
 import { SalesComparisons } from "./SalesComparisons";
 import { ApiError } from "./read-api";
 import { MAX_PERIOD_MONTHS, validatePeriod } from "./month-period";
 import type { StoreContext } from "./month-period";
-import { referenceValue, storeFields, storeReference } from "./store-reference";
+import { storeReference } from "./store-reference";
 import type { StoreReference } from "./store-reference";
 
 type ReferenceState =
@@ -43,10 +47,23 @@ export function StoreDetail({
   onContext,
 }: {
   store: StoreHeader;
-  reads: Pick<ReadQueries, "page" | "status" | "collect">;
+  reads: Pick<ReadQueries, "page" | "status" | "collect"> &
+    Partial<Pick<ReadQueries, "resources">>;
   context: StoreContext;
   onContext: (context: StoreContext) => void;
 }) {
+  const explorerReads = useMemo(
+    () =>
+      reads.resources
+        ? {
+            resources: reads.resources.bind(reads),
+            page: reads.page.bind(reads),
+            status: reads.status.bind(reads),
+          }
+        : undefined,
+    [reads],
+  );
+  const [showCollections, setShowCollections] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const [revision, setRevision] = useState(0);
   const [reference, setReference] = useState<ReferenceState>({
@@ -183,6 +200,7 @@ export function StoreDetail({
         value={context.tab}
         onChange={(_event, tab: number) => {
           setExpanded(false);
+          setShowCollections(false);
           setReference({ phase: "loading" });
           onContext({ ...context, tab });
         }}
@@ -232,6 +250,19 @@ export function StoreDetail({
           )
         ) : (
           <Stack spacing={2}>
+            {explorerReads && (
+              <>
+                <Button
+                  aria-expanded={showCollections}
+                  onClick={() => setShowCollections((value) => !value)}
+                >
+                  Autres collections publiées
+                </Button>
+                {showCollections && (
+                  <DataExplorer reads={explorerReads} storeId={store.id} />
+                )}
+              </>
+            )}
             <Typography>
               Référentiel actuel, indépendant de la période appliquée. Les
               personnes et identifiants ci-dessous appartiennent au référentiel,
@@ -280,36 +311,10 @@ export function StoreDetail({
                       mensuel observé. Devise et HT/TTC non confirmés. Les
                       horodatages techniques ne prouvent pas la période métier.
                     </Typography>
-                    <Box component="dl" sx={{ m: 0 }}>
-                      {Object.entries(storeFields).map(([key, field]) => (
-                        <Box
-                          key={key}
-                          sx={{
-                            py: 1,
-                            borderBottom: 1,
-                            borderColor: "divider",
-                          }}
-                        >
-                          <Typography component="dt" sx={{ fontWeight: 600 }}>
-                            {field.label}
-                          </Typography>
-                          <Typography
-                            component="dd"
-                            sx={{ m: 0, overflowWrap: "anywhere" }}
-                          >
-                            {key.endsWith("_millions")
-                              ? formatExact(
-                                  reference.data[
-                                    key as keyof StoreReference
-                                  ] as string | null,
-                                )
-                              : referenceValue(
-                                  reference.data[key as keyof StoreReference],
-                                )}
-                          </Typography>
-                        </Box>
-                      ))}
-                    </Box>
+                    <PublishedDetail
+                      resource={storeResource}
+                      row={reference.data}
+                    />
                   </>
                 )}
               </Box>
@@ -324,3 +329,11 @@ export function StoreDetail({
     </Stack>
   );
 }
+
+const storeResource: Resource = {
+  name: "stores",
+  path: "/v1/data/stores",
+  keys: publishedContract.stores.keys,
+  filters: publishedContract.stores.filters,
+  columns: Object.keys(publishedContract.stores.fields),
+};

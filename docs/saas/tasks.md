@@ -3,7 +3,7 @@
 Statut : T01–T05 sont implémentées, validées et commitées.
 T06 est **commitée après relecture technique**, avec revue Security finale en attente ;
 T07 est **commitée après relecture technique, sécurité finale en attente** ;
-T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11 est **commitée après relecture technique, sécurité finale en attente** ; T12 est **commitée après relecture technique, sécurité finale en attente** ; T13–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
+T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11 est **commitée après relecture technique, sécurité finale en attente** ; T12 est **commitée après relecture technique, sécurité finale en attente** ; T13 est **commitée après relecture technique, sécurité finale en attente** ; T14–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
 pour les scripts réels et les limites du socle.
 Point de départ historique : branche `feat/saas-frontend`, API de lecture et client personnel
 existants ; aucun package frontend ni pipeline frontend à ce stade.
@@ -135,7 +135,7 @@ demande liens, cohérence et absence de divulgation, pas un faux audit applicati
 
 T01–T05 sont **validées**, T06 est **commitée, sécurité finale en attente**,
 T07 est **commitée, sécurité finale en attente**, T08 est **commitée après relecture technique, sécurité finale en attente**,
-T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11 est **commitée après relecture technique, sécurité finale en attente**, T12 est **commitée après relecture technique, sécurité finale en attente**, T13–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
+T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11 est **commitée après relecture technique, sécurité finale en attente**, T12 est **commitée après relecture technique, sécurité finale en attente**, T13 est **commitée après relecture technique, sécurité finale en attente**, T14–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
 satisfaites ; les tâches bloquées par l’identité réelle ne doivent pas empêcher
 les développements testables sur un environnement synthétique. Ne pas déclarer
 la connexion ou J1 reçus avant leur vérification réelle.
@@ -451,6 +451,38 @@ la connexion ou J1 reçus avant leur vérification réelle.
 
 ### T13 — Explorateur de collections et détails complets
 
+- Statut : **commitée après relecture technique, sécurité finale en attente**. Navigation Données,
+  catalogue métier autorisé, référentiels/observations/analyses mensuelles, filtres
+  appliqués depuis les seules capacités du catalogue et pages manuelles de 25 lignes.
+  Fiche relue à clé complète, y compris toutes les composantes et les deux bornes
+  exactes du mois. Doublons intra-page, curseurs incohérents, clés et filtres visibles
+  contradictoires rejetés ; aucune agrégation réseau ou lecture automatique par ID.
+  Fraîcheur avant/après, analyses non initialisées indisponibles, erreurs locales,
+  annulation et effacement au changement de collection/fiche/navigation/session.
+  Détail récursif partagé avec le référentiel magasin : libellés français et noms
+  techniques, décimaux exacts, null/zéro/texte vide/listes vides distincts, HTML inerte.
+  Collections du magasin à la demande ; filtre store_id uniquement si autorisé,
+  référentiels globaux explicitement qualifiés. Code explorateur chargé à la demande.
+  [Manifeste de couverture](frontend-coverage.md) : 325 champs et 74 chemins enfants
+  associés au composant et à leur test synthétique. Les deux routes opérationnelles
+  sont exclues de cet explorateur ; leur écran habilité reste T20.
+  Relecture : sélection, page/tri, magasin ouvert et mois brouillon/appliqués
+  conservés lors du passage par Données ; écrans métier démontés et lectures annulées.
+  Filtre du magasin fixe, reprise depuis la première page sur curseur refusé, focus
+  restauré par identité plutôt que par position et mois non calendaires rejetés.
+  Grandes listes conservées intégralement et paginées localement par 50 éléments,
+  sans appels supplémentaires ; suppression des plafonds arbitraires de liste/texte.
+  Les lectures restent bornées à 2 MB par le transport ; limites varchar et valeurs
+  exactes validées. Les pages/fiches ne constituent pas un instantané garanti.
+  Types, nullabilité, longueurs, clés et filtres des 24 ressources publiques
+  confrontés aux modèles API. Qualification de charge restante en T21 ;
+  le build signale encore un chunk applicatif supérieur à 500 kB malgré le chargement
+  différé de l’explorateur. Workers Vitest bornés à deux après une expiration de
+  fixture courte sous forte concurrence ; aucune limite de session produit modifiée.
+  Validation finale : `npm run check` réussi, **364 tests unitaires et 84 scénarios
+  Chromium** sur 360/768/1440 px ; clavier, axe, zoom, stockage vide et
+  effacement après déconnexion vérifiés. Liens locaux, cohérence et divulgation contrôlés.
+  Codex Security indisponible ; recette d’identité réelle et CI non revalidées.
 - Dépendances : T06, T08 et T10.
 - Livrer : Données → référentiels/observations/analyses, catalogue selon droits,
   liste paginée et fiche de ligne à clé complète, rendu récursif des objets/listes

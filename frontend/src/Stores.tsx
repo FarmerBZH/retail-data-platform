@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import {
   Alert,
-  Box,
   Button,
   Checkbox,
   Chip,
@@ -19,17 +18,25 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { storeSummary } from "./api-validation";
-import type { StoreSummary } from "./api-validation";
+import { storeSummary, storeHeader } from "./api-validation";
+import type { StoreSummary, StoreHeader } from "./api-validation";
 import { ApiError } from "./read-api";
 import type { ReadQueries } from "./read-queries";
 import type { ReadPage } from "./read-queries";
+
+import { StoreDetail } from "./StoreDetail";
+import { initialStoreContext } from "./month-period";
 
 type Reads = Pick<ReadQueries, "page">;
 type State =
   | { phase: "loading" }
   | { phase: "error"; message: string; request: string }
-  | { phase: "ready"; page: ReadPage<StoreSummary>; request: string };
+  | {
+      phase: "ready";
+      page: ReadPage<StoreSummary>;
+      request: string;
+      header: StoreHeader | undefined;
+    };
 
 function errorMessage(error: unknown): string {
   if (error instanceof ApiError) {
@@ -52,6 +59,7 @@ export function StoreList({ reads }: { reads: Reads }) {
   });
   const [selected, setSelected] = useState<Set<string>>(() => new Set());
   const [opened, setOpened] = useState<string>();
+  const [context, setContext] = useState(initialStoreContext);
   const [sort, setSort] = useState("api");
   const [revision, setRevision] = useState(0);
   const [state, setState] = useState<State>({ phase: "loading" });
@@ -66,19 +74,24 @@ export function StoreList({ reads }: { reads: Reads }) {
 
   useEffect(() => {
     const controller = new AbortController();
-    void reads
-      .page(
-        "stores",
-        opened
-          ? { id: opened, limit: 1 }
-          : { limit: 25, ...(cursor ? { after: cursor } : {}) },
-        storeSummary,
-        {
-          signal: controller.signal,
-          refresh: revision > 0 || opened !== undefined,
-        },
-      )
-      .then((page) => {
+    const options = {
+      signal: controller.signal,
+      refresh: revision > 0 || opened !== undefined,
+    };
+    const load = opened
+      ? reads
+          .page("stores", { id: opened, limit: 1 }, storeHeader, options)
+          .then((page) => ({ page, header: page.items[0] }))
+      : reads
+          .page(
+            "stores",
+            { limit: 25, ...(cursor ? { after: cursor } : {}) },
+            storeSummary,
+            options,
+          )
+          .then((page) => ({ page, header: undefined }));
+    void load
+      .then(({ page, header }) => {
         if (controller.signal.aborted) return;
         if (
           new Set(page.items.map((item) => item.id)).size !==
@@ -94,7 +107,7 @@ export function StoreList({ reads }: { reads: Reads }) {
                 .includes(page.nextCursor)))
         )
           throw new ApiError("invalid-response");
-        setState({ phase: "ready", page, request });
+        setState({ phase: "ready", page, request, header });
       })
       .catch((error: unknown) => {
         if (!controller.signal.aborted)
@@ -199,30 +212,16 @@ export function StoreList({ reads }: { reads: Reads }) {
       {page &&
         opened &&
         (page.items[0] ? (
-          <Paper variant="outlined" sx={{ p: 3 }}>
-            <Stack spacing={2}>
-              <Typography variant="h2">{label(page.items[0])}</Typography>
-              <Typography>
-                Enseigne actuelle : {value(page.items[0].retailerName)}
-              </Typography>
-              <Typography>
-                Ville actuelle : {value(page.items[0].city)}
-              </Typography>
-              <Typography>
-                Statut actuel : {page.items[0].isActive ? "Actif" : "Inactif"}
-              </Typography>
-              <Box component="details">
-                <Box component="summary">Identité du magasin</Box>
-                <Typography sx={{ overflowWrap: "anywhere" }}>
-                  {page.items[0].id}
-                </Typography>
-              </Box>
-              <Typography color="text.secondary">
-                Le référentiel complet et les analyses mensuelles seront
-                disponibles dans une prochaine étape.
-              </Typography>
-            </Stack>
-          </Paper>
+          current.phase === "ready" &&
+          current.header && (
+            <StoreDetail
+              key={opened}
+              store={current.header}
+              reads={reads}
+              context={context}
+              onContext={setContext}
+            />
+          )
         ) : (
           <Alert severity="info">
             Ce magasin n’est plus disponible dans le référentiel actuel.

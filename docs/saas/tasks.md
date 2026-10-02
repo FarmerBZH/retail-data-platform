@@ -3,7 +3,7 @@
 Statut : T01–T05 sont implémentées, validées et commitées.
 T06 est **commitée après relecture technique**, avec revue Security finale en attente ;
 T07 est **commitée après relecture technique, sécurité finale en attente** ;
-T08 est **commitée après relecture technique, sécurité finale en attente** ; T09–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
+T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
 pour les scripts réels et les limites du socle.
 Point de départ historique : branche `feat/saas-frontend`, API de lecture et client personnel
 existants ; aucun package frontend ni pipeline frontend à ce stade.
@@ -135,7 +135,7 @@ demande liens, cohérence et absence de divulgation, pas un faux audit applicati
 
 T01–T05 sont **validées**, T06 est **commitée, sécurité finale en attente**,
 T07 est **commitée, sécurité finale en attente**, T08 est **commitée après relecture technique, sécurité finale en attente**,
-T09–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
+T09 est **commitée après relecture technique, sécurité finale en attente**, T10–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
 satisfaites ; les tâches bloquées par l’identité réelle ne doivent pas empêcher
 les développements testables sur un environnement synthétique. Ne pas déclarer
 la connexion ou J1 reçus avant leur vérification réelle.
@@ -327,6 +327,23 @@ la connexion ou J1 reçus avant leur vérification réelle.
 
 ### T09 — Fiche magasin et contexte de période
 
+- Statut : **commitée après relecture technique, sécurité finale en attente**. En-tête avec attributs actuels,
+  référentiel complet validé champ par champ et dépliable sur l’onglet actif,
+  annulation des lectures devenues inutiles et reprise manuelle des erreurs.
+  Période initialement vide, brouillon distinct des mois appliqués, conservée avec
+  l’onglet en mémoire lors des retours liste/détail. Limite frontend : 120 mois
+  inclusifs, entre 0001-01 et 9999-12, calculés sans conversion de fuseau.
+  Aucune disponibilité présumée et aucune lecture mensuelle avant les tâches suivantes.
+  Les autres onglets d’analyse restent explicitement indisponibles.
+  Format/lint/typage/build et tests automatisés vérifiés : 227 tests unitaires,
+  51 scénarios Chromium, axe et absence de débordement à 360/768/1440 px.
+  La recette locale d’identité tentée pour T09 a échoué sans diagnostic exploitable ;
+  sa réussite antérieure ne valide pas cette évolution. La vérification de l’état
+  des services Docker locaux expire également pendant la relecture.
+  Exécution CI non observée.
+  Relecture : panneau d’onglet accessible au clavier ; refus éprouvé des réponses
+  sans magasin, avec un autre ID ou avec un curseur inattendu.
+  **Revue Codex Security en attente**, plugin indisponible dans cette session.
 - Dépendances : T08.
 - Livrer : en-tête, référentiel complet dépliable, onglets, mois inclusifs explicites,
   validation des bornes et limites de période documentées. Séparer filtres saisis et

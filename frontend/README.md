@@ -10,11 +10,21 @@ Loading and render failures have accessible, generic fallback screens.
 The store screen loads one cursor page at a time, initially requesting 25 rows.
 Checkboxes retain an explicit selection across pages in session memory. “Trier cette
 page” sorts only the displayed rows without an API request. Opening a store rereads
-its current summary by ID; returning preserves the page, sort and selection.
+its current header by ID; returning preserves the page, sort and selection.
 Missing stores and failed reads have explicit states. Logout and expiry remove all
 rows and selection. No business IDs enter navigation URLs or persistent storage.
-The full reference and monthly views remain subsequent work; network and comparison
-actions are unavailable because their server aggregations are not implemented.
+The detail screen validates and displays all published store reference fields on
+explicit expansion of the active detailed-data tab. Unknown fields are discarded;
+null, zero, false, leading-zero codes and exact decimal strings remain distinct.
+The reference describes current attributes independently of the selected period.
+
+The period starts empty. Draft months and applied inclusive months remain separate
+in session memory through list/detail navigation. Valid months range from 0001-01
+to 9999-12, with a maximum interval of 120 inclusive months. Calendar arithmetic
+uses month indexes without timezone conversion. This client limit bounds future
+reads and makes no claim about available months. No observation is read yet; monthly
+views remain subsequent work. Network and comparison actions are unavailable
+because their server aggregations are not implemented.
 
 ## Run locally
 
@@ -95,7 +105,7 @@ expiry before work starts and after it completes, including rejected work.
 Its work callback must publish data only after guarded completion and must not
 retain credentials or write an external cache before that check.
 The read transport and query service use this boundary; their cache is confined
-to the current memory session. Business screens are not connected yet.
+to the current memory session. The store screen uses this query service.
 
 A timer ends the session at its deadline; focus, visibility changes and page-show
 also check expiry after a suspended tab. Page-hide removes credentials and protected

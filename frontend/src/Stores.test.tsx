@@ -12,6 +12,8 @@ const first = {
   id,
   name: "Magasin synthétique A",
   retailer_name: null,
+  region_name: null,
+  store_format: null,
   city: null,
   is_active: false,
 };

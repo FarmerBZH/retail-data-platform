@@ -72,3 +72,13 @@ export function storeSummary(value: unknown) {
   };
 }
 export type StoreSummary = ReturnType<typeof storeSummary>;
+
+export function storeHeader(value: unknown) {
+  const row = object(value);
+  return {
+    ...storeSummary(value),
+    regionName: nullable((v) => text(v, 128))(row.region_name),
+    storeFormat: nullable((v) => text(v, 64))(row.store_format),
+  };
+}
+export type StoreHeader = ReturnType<typeof storeHeader>;

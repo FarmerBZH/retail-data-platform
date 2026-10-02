@@ -99,11 +99,18 @@ The authenticated store list requests one cursor page at a time (initial limit 2
 Selection uses explicit IDs in component memory and survives page/detail navigation
 only within the current session. Local sorting is labelled as applying to this page;
 no network total, implicit all-store selection, unsupported filter or aggregation
-request is introduced. Opening a store rereads its summary by ID and distinguishes
+request is introduced. Opening a store rereads its header by ID and distinguishes
 an absent row from an invalid response. Duplicate IDs within a page, empty/repeated cursors and mismatched
 detail IDs fail closed. Obsolete requests are cancelled and their results cannot
 replace another view. The previous page remains reachable during a load or failure.
-Logout/expiry unmount this state. Full store reference fields,
+Logout/expiry unmount this state. The active detailed-data tab reads the full
+published store reference only on explicit expansion, validates each field and
+discards unknown fields. Closing it, changing tabs or leaving the detail cancels
+its pending read. Null, zero, false and exact decimal strings remain distinct.
+Draft and applied inclusive calendar months survive list/detail navigation in
+session memory. The period starts empty and accepts at most 120 inclusive months
+from 0001-01 through 9999-12 without timezone conversion. This is a client bound,
+not evidence of observation coverage. No monthly observations are requested yet;
 monthly analysis and the shared navigation remain subsequent work.
 A GitHub workflow runs locked installation and the same local quality command;
 hosted execution has not yet been observed. Deployed provider/API compatibility,

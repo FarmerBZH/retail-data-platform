@@ -10,6 +10,8 @@ const first = {
   id: a,
   name: long,
   retailer_name: null,
+  region_name: null,
+  store_format: null,
   city: "Ville synthétique",
   is_active: false,
 };

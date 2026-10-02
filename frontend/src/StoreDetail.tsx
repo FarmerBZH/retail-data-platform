@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import type { StoreHeader } from "./api-validation";
 import type { ReadQueries } from "./read-queries";
+import { formatExact, formatMonth } from "./exact-values";
 import { ApiError } from "./read-api";
 import { MAX_PERIOD_MONTHS, validatePeriod } from "./month-period";
 import type { StoreContext } from "./month-period";
@@ -165,7 +166,7 @@ export function StoreDetail({
           {validationError && <Alert severity="error">{validationError}</Alert>}
           <Typography role="status">
             {applied
-              ? `Période appliquée : ${applied.from} à ${applied.to}, bornes incluses (${applied.months} mois).`
+              ? `Période appliquée : ${formatMonth(applied.from)} à ${formatMonth(applied.to)}, bornes incluses (${applied.months} mois).`
               : "Aucune période appliquée. Choisissez explicitement deux mois."}
           </Typography>
           {changed && applied && (
@@ -278,9 +279,15 @@ export function StoreDetail({
                             component="dd"
                             sx={{ m: 0, overflowWrap: "anywhere" }}
                           >
-                            {referenceValue(
-                              reference.data[key as keyof StoreReference],
-                            )}
+                            {key.endsWith("_millions")
+                              ? formatExact(
+                                  reference.data[
+                                    key as keyof StoreReference
+                                  ] as string | null,
+                                )
+                              : referenceValue(
+                                  reference.data[key as keyof StoreReference],
+                                )}
                           </Typography>
                         </Box>
                       ))}

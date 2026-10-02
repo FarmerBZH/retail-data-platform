@@ -112,6 +112,20 @@ session memory. The period starts empty and accepts at most 120 inclusive months
 from 0001-01 through 9999-12 without timezone conversion. This is a client bound,
 not evidence of observation coverage. No monthly observations are requested yet;
 monthly analysis and the shared navigation remain subsequent work.
+The authenticated screen checks analytical publication status on entry and manual
+request, without polling or starting a refresh. It distinguishes freshness from
+coverage and the last refresh attempt from a failed status read. The last known
+status survives a failed check with an explicit warning; logout/expiry remove it.
+Current/stale status without a completion timestamp is rejected; an uninitialized
+status may still report an older successful completion without implying readability.
+Completion timestamps are displayed in UTC. The live store reference remains
+independent of analytical initialization. Published decimal amounts and counts
+use French formatting; identifiers keep their exact text. Decimal arithmetic uses
+BigInt coefficients with bounded decimal scales, propagates null and treats zero
+denominators as unavailable. Division rounds half away from zero with an explicit
+0–18-place precision (default six); no business calculation uses binary numbers.
+No currency or tax basis is inferred. Collection tests verify discard and reload
+when publication changes across two pages; this is not a snapshot guarantee.
 A GitHub workflow runs locked installation and the same local quality command;
 hosted execution has not yet been observed. Deployed provider/API compatibility,
 analytical screens and production hosting remain later

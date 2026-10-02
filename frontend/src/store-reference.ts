@@ -1,3 +1,4 @@
+import { formatExact } from "./exact-values";
 import {
   boolean,
   decimal,
@@ -130,5 +131,5 @@ export function referenceValue(
   if (value === null) return "Indisponible";
   if (value === "") return "Texte vide";
   if (typeof value === "boolean") return value ? "Oui" : "Non";
-  return String(value);
+  return typeof value === "number" ? formatExact(String(value)) : value;
 }

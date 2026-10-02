@@ -17,22 +17,24 @@ test("detail preserves explicit inclusive months and reads its reference only on
 }) => {
   await installProvider(page);
   let requests = 0;
-  await page.context().route("https://api.example.test/**", async (route) => {
-    requests++;
-    const url = new URL(route.request().url());
-    expect(url.pathname).toBe("/v1/data/stores");
-    expect(route.request().method()).toBe("GET");
-    expect(
-      [...url.searchParams.keys()].every((key) =>
-        ["id", "limit"].includes(key),
-      ),
-    ).toBe(true);
-    await route.fulfill({
-      contentType: "application/json",
-      headers: { "access-control-allow-origin": "http://127.0.0.1:4180" },
-      body: JSON.stringify({ items: [store], next_cursor: null }),
+  await page
+    .context()
+    .route("https://api.example.test/v1/data/stores?**", async (route) => {
+      requests++;
+      const url = new URL(route.request().url());
+      expect(url.pathname).toBe("/v1/data/stores");
+      expect(route.request().method()).toBe("GET");
+      expect(
+        [...url.searchParams.keys()].every((key) =>
+          ["id", "limit"].includes(key),
+        ),
+      ).toBe(true);
+      await route.fulfill({
+        contentType: "application/json",
+        headers: { "access-control-allow-origin": "http://127.0.0.1:4180" },
+        body: JSON.stringify({ items: [store], next_cursor: null }),
+      });
     });
-  });
   await page.goto("/");
   await page.getByRole("button", { name: "Se connecter", exact: true }).click();
   await page
@@ -47,7 +49,7 @@ test("detail preserves explicit inclusive months and reads its reference only on
   await page.getByLabel("Mois de fin").fill("2026-02");
   await page.getByRole("button", { name: "Appliquer", exact: true }).click();
   await expect(
-    page.getByText(/Période appliquée : 2025-12 à 2026-02/),
+    page.getByText(/Période appliquée : décembre 2025 à février 2026/),
   ).toContainText("3 mois");
   await page.getByLabel("Mois de début").fill("2026-03");
   await page.getByRole("button", { name: "Appliquer", exact: true }).click();
@@ -57,7 +59,7 @@ test("detail preserves explicit inclusive months and reads its reference only on
       .filter({ hasText: /Le mois de début doit précéder/ }),
   ).toBeVisible();
   await expect(
-    page.getByText(/Période appliquée : 2025-12 à 2026-02/),
+    page.getByText(/Période appliquée : décembre 2025 à février 2026/),
   ).toBeVisible();
   await page.getByLabel("Mois de début").fill("2016-02");
   await page.getByRole("button", { name: "Appliquer", exact: true }).click();
@@ -71,7 +73,9 @@ test("detail preserves explicit inclusive months and reads its reference only on
   expect(requests).toBe(2);
   await page.getByRole("button", { name: "Référentiel complet" }).click();
   await expect(page.getByText("00123", { exact: true })).toBeVisible();
-  await expect(page.getByText("1234567890.12", { exact: true })).toBeVisible();
+  await expect(
+    page.getByText("1\u202f234\u202f567\u202f890,12", { exact: true }),
+  ).toBeVisible();
   await expect(page.locator("dt")).toHaveCount(Object.keys(store).length - 1);
   await expect(page.getByText("synthetic-unpublished-field")).toHaveCount(0);
   expect(requests).toBe(3);
@@ -88,7 +92,7 @@ test("detail preserves explicit inclusive months and reads its reference only on
   await page.getByRole("button", { name: store.name, exact: true }).click();
   await expect(page.getByLabel("Mois de début")).toHaveValue("2016-02");
   await expect(
-    page.getByText(/Période appliquée : 2025-12 à 2026-02/),
+    page.getByText(/Période appliquée : décembre 2025 à février 2026/),
   ).toBeVisible();
   await expect(
     page.getByRole("tab", { name: "Données détaillées" }),

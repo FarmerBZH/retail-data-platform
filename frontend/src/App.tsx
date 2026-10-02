@@ -12,6 +12,7 @@ import type { Configuration } from "./config";
 import type { Authentication } from "./authentication";
 import { SignIn } from "./SignIn";
 import { SessionBoundary } from "./SessionBoundary";
+import { FreshnessBanner } from "./FreshnessBanner";
 import { StoreList } from "./Stores";
 import type { ReadQueries } from "./read-queries";
 import { useSession } from "./use-session";
@@ -62,7 +63,10 @@ export default function App({
           }}
         >
           {reads ? (
-            <StoreList reads={reads} />
+            <>
+              <FreshnessBanner reads={reads} />
+              <StoreList reads={reads} />
+            </>
           ) : (
             <Typography role="status">
               La consultation des magasins est indisponible.

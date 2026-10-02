@@ -33,31 +33,33 @@ test("store pages preserve selection, local sort and keyboard return; logout rem
 }) => {
   await installProvider(page);
   let requests = 0;
-  await page.context().route("https://api.example.test/**", async (route) => {
-    requests++;
-    const url = new URL(route.request().url());
-    expect(url.pathname).toBe("/v1/data/stores");
-    expect(route.request().method()).toBe("GET");
-    expect(
-      [...url.searchParams.keys()].every((key) =>
-        ["id", "after", "limit"].includes(key),
-      ),
-    ).toBe(true);
-    const detail = url.searchParams.get("id");
-    await route.fulfill({
-      contentType: "application/json",
-      headers: { "access-control-allow-origin": "http://127.0.0.1:4180" },
-      body: JSON.stringify({
-        items: detail
-          ? [second]
-          : url.searchParams.has("after")
+  await page
+    .context()
+    .route("https://api.example.test/v1/data/stores?**", async (route) => {
+      requests++;
+      const url = new URL(route.request().url());
+      expect(url.pathname).toBe("/v1/data/stores");
+      expect(route.request().method()).toBe("GET");
+      expect(
+        [...url.searchParams.keys()].every((key) =>
+          ["id", "after", "limit"].includes(key),
+        ),
+      ).toBe(true);
+      const detail = url.searchParams.get("id");
+      await route.fulfill({
+        contentType: "application/json",
+        headers: { "access-control-allow-origin": "http://127.0.0.1:4180" },
+        body: JSON.stringify({
+          items: detail
             ? [second]
-            : [first, third],
-        next_cursor:
-          detail || url.searchParams.has("after") ? null : "synthetic-next",
-      }),
+            : url.searchParams.has("after")
+              ? [second]
+              : [first, third],
+          next_cursor:
+            detail || url.searchParams.has("after") ? null : "synthetic-next",
+        }),
+      });
     });
-  });
   await page.goto("/");
   await page.getByRole("button", { name: "Se connecter", exact: true }).click();
   await page.getByRole("checkbox", { name: `Sélectionner ${long}` }).check();

@@ -42,6 +42,7 @@ describe("published store reference", () => {
     expect(referenceValue(reference.has_direct_sales_potential)).toBe("Non");
     expect(referenceValue(reference.city)).toBe("Indisponible");
     expect(referenceValue("")).toBe("Texte vide");
+    expect(referenceValue(1234)).toBe("1\u202f234");
   });
   it.each([
     { checkout_count: 0.5 },

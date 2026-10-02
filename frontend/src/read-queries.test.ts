@@ -502,6 +502,42 @@ describe("bounded collections", () => {
     });
     await queries.page("stores", {}, storeSummary);
     expect(request).toHaveBeenCalledTimes(5);
+    const reloaded = await finish(queries.collect("stores", {}, storeSummary));
+    expect(reloaded).toMatchObject({ complete: true, reason: null });
+    expect(reloaded.items).toHaveLength(1);
+    expect(request).toHaveBeenCalledTimes(8);
+  });
+  it("rejects two pages spanning publications and reloads a newly stable publication", async () => {
+    const { queries, request } = setup();
+    let checks = 0;
+    request.mockImplementation(async (destination) => {
+      const url = new URL(String(destination));
+      if (url.pathname.endsWith("status"))
+        return body({
+          ...freshness,
+          last_completed_at:
+            ++checks === 1 ? "2026-09-01T00:00:00Z" : "2026-09-02T00:00:00Z",
+        });
+      const second = url.searchParams.has("after");
+      return body({
+        items: [{ ...row, id: second ? other : id }],
+        next_cursor: second ? null : "synthetic-next",
+      });
+    });
+    const discarded = await finish(
+      queries.collect("stores", { limit: 1 }, storeSummary),
+    );
+    expect(discarded).toMatchObject({
+      complete: false,
+      reason: "freshness-changed",
+      items: [],
+    });
+    const reloaded = await finish(
+      queries.collect("stores", { limit: 1 }, storeSummary),
+    );
+    expect(reloaded.complete).toBe(true);
+    expect(reloaded.items.map((item) => item.id)).toEqual([id, other]);
+    expect(request).toHaveBeenCalledTimes(8);
   });
   it("never exceeds 24 total attempts including freshness and reductions", async () => {
     const { queries, request } = setup();

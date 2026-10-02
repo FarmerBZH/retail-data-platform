@@ -26,6 +26,26 @@ reads and makes no claim about available months. No observation is read yet; mon
 views remain subsequent work. Network and comparison actions are unavailable
 because their server aggregations are not implemented.
 
+The authenticated screen reads `/v1/analytics/status` once on entry and on an
+explicit “Vérifier la fraîcheur” action. It distinguishes current, stale and
+uninitialized publications, the latest failed/running attempt, and the last
+successful completion (shown in UTC). A failed status read preserves a clearly
+qualified last known state, without confirming current freshness. Coverage is
+separate and remains unknown; the live reference can be read independently.
+This read-only action checks status and never starts an analytical refresh.
+
+Exact decimal helpers use BigInt coefficients and decimal scales for addition,
+subtraction and division. Division explicitly rounds half away from zero to six
+decimal places by default (caller-selected 0–18); null inputs or a zero denominator
+remain unavailable. Displayed published decimals and percentages retain their
+exact magnitude without binary-number conversion, currency or HT/TTC assumptions.
+Identifiers keep their original text; counts use French separators. Month labels
+use calendar strings, without timezone conversion. Helpers bound input/output to
+1024 characters and exponent/scale magnitude to 512, rejecting excessive values.
+Collection checks discard a batch and its cache when status changes between pages;
+a subsequent explicit read loads again, without guaranteeing a database snapshot.
+Monthly KPI and chart screens remain later work.
+
 ## Run locally
 
 Use Node 24.15 or a later Node 24 release and npm. `.nvmrc` selects the verified

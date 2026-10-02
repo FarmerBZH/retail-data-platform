@@ -72,7 +72,7 @@ it("keeps entered and applied periods separate and invents no observation covera
   expect(screen.getByText(/Aucune période appliquée/)).toBeVisible();
   await userEvent.click(screen.getByRole("button", { name: "Appliquer" }));
   expect(
-    screen.getByText(/Période appliquée : 2025-12 à 2026-02/),
+    screen.getByText(/Période appliquée : décembre 2025 à février 2026/),
   ).toHaveTextContent("3 mois");
   fireEvent.change(screen.getByLabelText("Mois de début"), {
     target: { value: "2026-03" },
@@ -80,7 +80,7 @@ it("keeps entered and applied periods separate and invents no observation covera
   await userEvent.click(screen.getByRole("button", { name: "Appliquer" }));
   expect(screen.getByText(/Le mois de début doit précéder/)).toBeVisible();
   expect(
-    screen.getByText(/Période appliquée : 2025-12 à 2026-02/),
+    screen.getByText(/Période appliquée : décembre 2025 à février 2026/),
   ).toBeVisible();
   expect(screen.getByText(/la période choisie ne garantit pas/)).toBeVisible();
   expect(request).not.toHaveBeenCalled();
@@ -96,7 +96,7 @@ it("reads the full reference only on explicit expansion and renders every publis
     screen.getByRole("button", { name: "Référentiel complet" }),
   );
   expect(await screen.findByText("00123")).toBeVisible();
-  expect(screen.getByText("1234567890.12")).toBeVisible();
+  expect(screen.getByText("1 234 567 890,12")).toBeVisible();
   expect(document.querySelectorAll("dt")).toHaveLength(Object.keys(row).length);
   const url = new URL(String(request.mock.calls[0]![0]));
   expect([...url.searchParams.keys()].sort()).toEqual(["id", "limit"]);

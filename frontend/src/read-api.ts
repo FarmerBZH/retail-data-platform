@@ -140,9 +140,12 @@ function freshness(value: unknown) {
     lastAttemptStatus !== "failed"
   )
     throw new Error("Invalid response");
+  const lastCompletedAt = nullable(timestamp)(row.last_completed_at);
+  if (state !== "uninitialized" && lastCompletedAt === null)
+    throw new Error("Invalid response");
   return {
     state,
-    lastCompletedAt: nullable(timestamp)(row.last_completed_at),
+    lastCompletedAt,
     lastAttemptStatus,
   };
 }

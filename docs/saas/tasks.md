@@ -3,7 +3,7 @@
 Statut : T01–T05 sont implémentées, validées et commitées.
 T06 est **commitée après relecture technique**, avec revue Security finale en attente ;
 T07 est **commitée après relecture technique, sécurité finale en attente** ;
-T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
+T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
 pour les scripts réels et les limites du socle.
 Point de départ historique : branche `feat/saas-frontend`, API de lecture et client personnel
 existants ; aucun package frontend ni pipeline frontend à ce stade.
@@ -135,7 +135,7 @@ demande liens, cohérence et absence de divulgation, pas un faux audit applicati
 
 T01–T05 sont **validées**, T06 est **commitée, sécurité finale en attente**,
 T07 est **commitée, sécurité finale en attente**, T08 est **commitée après relecture technique, sécurité finale en attente**,
-T09 est **commitée après relecture technique, sécurité finale en attente**, T10–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
+T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
 satisfaites ; les tâches bloquées par l’identité réelle ne doivent pas empêcher
 les développements testables sur un environnement synthétique. Ne pas déclarer
 la connexion ou J1 reçus avant leur vérification réelle.
@@ -356,6 +356,24 @@ la connexion ou J1 reçus avant leur vérification réelle.
 
 ### T10 — Valeurs exactes et fraîcheur
 
+- Statut : **commitée après relecture technique, sécurité finale en attente**. Calculs décimaux en BigInt,
+  affichage français des montants/comptages et des mois, identifiants inchangés.
+  Division avec arrondi décimal à mi-distance éloigné de zéro, six décimales par
+  défaut et précision explicite de 0 à 18 ; null et dénominateur nul indisponibles.
+  Calculs bornés : entrées/sorties de 1024 caractères, exposant/échelle jusqu’à 512.
+  Bandeau de publication depuis analytics/status, vérification manuelle sans lancer
+  de refresh, états current/stale/uninitialized distincts de la couverture.
+  Dernière publication connue conservée et qualifiée si une vérification échoue ;
+  dernier refresh échoué annoncé séparément. Horodatages en UTC explicite.
+  Invalidation et relecture éprouvées lors d’un changement de publication sur deux
+  pages. Les analyses mensuelles et graphiques restent T11 et suivantes.
+  Format/lint/typage/build, 262 tests unitaires et 63 scénarios Chromium passent,
+  avec axe et absence de débordement à 360/768/1440 px.
+  Relecture : statuts current/stale sans date de publication refusés ; une ancienne
+  réussite reste compatible avec un état uninitialized, sans annoncer sa disponibilité.
+  Arrondis positifs/négatifs, précision entière et division de haute précision éprouvés.
+  Aucun changement backend ni nouvelle dépendance. Recette d’identité réelle et
+  exécution CI non revalidées pour cette tâche. Codex Security reste indisponible.
 - Dépendances : T05–T06 et T09.
 - Livrer : fonctions pures de décimaux, mois, ratios et affichage français nécessaires
   à la fiche unitaire ; bandeau basé sur analytics/status, couverture distincte.

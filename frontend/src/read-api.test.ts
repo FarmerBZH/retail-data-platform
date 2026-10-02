@@ -178,6 +178,33 @@ describe("read transport", () => {
       calls: null,
     });
   });
+  it.each(["current", "stale"])(
+    "rejects %s status without a successful publication time",
+    async (state) => {
+      const { api, request } = setup();
+      request.mockResolvedValue(
+        body({ state, last_completed_at: null, last_attempt_status: "failed" }),
+      );
+      await expect(api.status()).rejects.toHaveProperty(
+        "code",
+        "invalid-response",
+      );
+    },
+  );
+  it("allows an uninitialized status with a prior successful publication", async () => {
+    const { api, request } = setup();
+    request.mockResolvedValue(
+      body({
+        state: "uninitialized",
+        last_completed_at: "2026-01-01T00:00:00Z",
+        last_attempt_status: "failed",
+      }),
+    );
+    expect(await api.status()).toMatchObject({
+      state: "uninitialized",
+      lastCompletedAt: "2026-01-01T00:00:00Z",
+    });
+  });
   it("validates freshness without converting its timestamp", async () => {
     const { api, request } = setup();
     request

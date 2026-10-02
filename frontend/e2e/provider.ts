@@ -17,6 +17,19 @@ export async function installProvider(page: Page, failure = "") {
         body: JSON.stringify({ items: [], next_cursor: null }),
       }),
     );
+  await page
+    .context()
+    .route("https://api.example.test/v1/analytics/status", (route) =>
+      route.fulfill({
+        contentType: "application/json",
+        headers: { "access-control-allow-origin": "http://127.0.0.1:4180" },
+        body: JSON.stringify({
+          state: "uninitialized",
+          last_completed_at: null,
+          last_attempt_status: null,
+        }),
+      }),
+    );
   const provider = await providerFixture(settings);
   provider.failure = failure;
   await page.context().route(`${settings.issuer}/**`, async (route) => {

@@ -45,6 +45,22 @@ afterEach(() => {
 });
 
 describe("read transport", () => {
+  it("preserves the native fetch receiver for the default browser transport", async () => {
+    const session = new Session();
+    sessions.push(session);
+    login(session);
+    const native = vi.spyOn(globalThis, "fetch").mockImplementation(function (
+      this: unknown,
+    ) {
+      expect(this).toBe(globalThis);
+      return Promise.resolve(body({ items: [store], next_cursor: null }));
+    });
+    const api = new ReadApi(origin, session);
+    expect(
+      (await api.page("stores", { limit: 1 }, storeSummary)).items,
+    ).toHaveLength(1);
+    expect(native).toHaveBeenCalledOnce();
+  });
   it("keeps its fixed resource list aligned with the public backend registry", () => {
     const registry = JSON.parse(
       readFileSync("../src/retail_data_platform/api/resources.json", "utf8"),

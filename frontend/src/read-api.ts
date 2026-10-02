@@ -267,7 +267,8 @@ export class ReadApi {
       throw new ApiError("invalid-request");
     this.#origin = configuration.apiOrigin;
     this.#sessions = sessions;
-    this.#fetch = request;
+    // Native browser fetch requires its Window receiver when called as a field.
+    this.#fetch = request.bind(globalThis);
   }
 
   resources(signal?: AbortSignal): Promise<readonly Resource[]> {

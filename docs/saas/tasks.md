@@ -2,7 +2,8 @@
 
 Statut : T01–T05 sont implémentées, validées et commitées.
 T06 est **commitée après relecture technique**, avec revue Security finale en attente ;
-T07 est **commitée après relecture technique, sécurité finale en attente** ; T08–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
+T07 est **commitée après relecture technique, sécurité finale en attente** ;
+T08 est **commitée après relecture technique, sécurité finale en attente** ; T09–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
 pour les scripts réels et les limites du socle.
 Point de départ historique : branche `feat/saas-frontend`, API de lecture et client personnel
 existants ; aucun package frontend ni pipeline frontend à ce stade.
@@ -133,7 +134,8 @@ demande liens, cohérence et absence de divulgation, pas un faux audit applicati
 ## Tâches ordonnées
 
 T01–T05 sont **validées**, T06 est **commitée, sécurité finale en attente**,
-T07 est **commitée, sécurité finale en attente**, T08–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
+T07 est **commitée, sécurité finale en attente**, T08 est **commitée après relecture technique, sécurité finale en attente**,
+T09–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
 satisfaites ; les tâches bloquées par l’identité réelle ne doivent pas empêcher
 les développements testables sur un environnement synthétique. Ne pas déclarer
 la connexion ou J1 reçus avant leur vérification réelle.
@@ -296,6 +298,23 @@ la connexion ou J1 reçus avant leur vérification réelle.
 
 ### T08 — Liste des magasins et sélection en mémoire
 
+- Statut : **commitée après relecture technique, sécurité finale en attente**. Table MUI, pagination explicite (25 lignes
+  demandées initialement), sélection entre pages, tri de la page et ouverture d’un
+  résumé relu par ID. Retour conservant page/tri/sélection et restaurant le focus.
+  États vide, magasin disparu et erreur avec reprise manuelle ; doublons et curseurs
+  répétés refusés. Sélection et résultats retirés avec la session, aucun stockage
+  persistant ni identifiant métier dans l’URL de navigation. Aucune agrégation réseau.
+  Correction du contexte d’appel du `fetch` natif révélée par les scénarios navigateur.
+  Format/lint/typage/build, 196 tests unitaires et 48 scénarios Chromium passent,
+  avec axe et absence de débordement à 360/768/1440 px. La recette locale réelle
+  vérifie également ouverture/retour/sélection/déconnexion sur fixtures jetables.
+  Le référentiel complet, les périodes, les analyses et la navigation commune
+  restent les tâches suivantes ; le zoom navigateur à 200 % reste à recetter.
+  **Sécurité non vérifiée par Codex Security**, plugin indisponible dans cette session.
+  Relecture : curseurs vides refusés, retour à la page précédente maintenu pendant
+  un chargement ou une erreur, et repli du focus si la ligne de retour a disparu.
+  Trois tests de régression supplémentaires passent. Commit autorisé après relecture ;
+  aucun push de T08 effectué.
 - Dépendances : T05–T06 ; T07 nécessaire à la recette réelle, pas aux mocks.
 - Livrer : table MUI paginée depuis stores, sélection explicite, ouverture d’un
   magasin et retour conservant le contexte ; attributs marqués actuels.

@@ -48,7 +48,7 @@ disable caching, reject redirects and have a ten-second timeout. JSON is limited
 2,000,000 streamed bytes with strict UTF-8 decoding. Errors retain no response payload
 or credential. Current 401 responses end the session; late refusals cannot end a
 new session. A separate `ReadQueries` service deduplicates and caches reads in the
-current memory session; it is not wired to the entry screen yet. Consumer results
+current memory session; authenticated store screens use that service. Consumer results
 are cloned and retained state must be bound to the current generation and selection.
 Every raw read shares a session queue with two active reads, thirty-two waiting jobs,
 a thirty-second queue deadline, and sixty starts per rolling minute at one-second
@@ -74,8 +74,9 @@ PostgreSQL schema. It verifies web code exchange, two API pages, missing-scope/C
 callback refusal, wrong-client/audience/expired signed-token refusal, and the original
 CLI token/vault contract with a test memory vault. Temporary identity/database objects
 are removed after the run; the existing realm and CLI configuration are preserved.
-This does not verify a deployed provider, native OS vault or rendered business-data
-flows. The [local recipe](local-identity.md#browser-and-api-integration-smoke) documents
+The local smoke also renders the store list, opens a store, retains its selection
+on return and removes its rows after logout. This does not verify a deployed provider,
+native OS vault or analytical business-data flows. The [local recipe](local-identity.md#browser-and-api-integration-smoke) documents
 the prerequisites and cleanup boundary.
 
 Formatting, lint, strict typing, synthetic component/configuration tests and a
@@ -93,9 +94,20 @@ the normal production build is checked separately.
 The default harness aborts and fails unexpected requests; OIDC scenarios explicitly
 intercept their synthetic provider and callback routes. Traces, video and
 screenshots are disabled. These checks are not a complete accessibility audit.
+
+The authenticated store list requests one cursor page at a time (initial limit 25).
+Selection uses explicit IDs in component memory and survives page/detail navigation
+only within the current session. Local sorting is labelled as applying to this page;
+no network total, implicit all-store selection, unsupported filter or aggregation
+request is introduced. Opening a store rereads its summary by ID and distinguishes
+an absent row from an invalid response. Duplicate IDs within a page, empty/repeated cursors and mismatched
+detail IDs fail closed. Obsolete requests are cancelled and their results cannot
+replace another view. The previous page remains reachable during a load or failure.
+Logout/expiry unmount this state. Full store reference fields,
+monthly analysis and the shared navigation remain subsequent work.
 A GitHub workflow runs locked installation and the same local quality command;
-hosted execution has not yet been observed. Real provider compatibility, API
-authorization, business cache integration and production hosting remain later
+hosted execution has not yet been observed. Deployed provider/API compatibility,
+analytical screens and production hosting remain later
 increments. Setup and actual scripts are in the
 [frontend guide](../frontend/README.md).
 

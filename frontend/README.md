@@ -2,10 +2,19 @@
 
 React, strict TypeScript, Vite and Material UI provide the French entry screen
 and shared theme from [DESIGN.md](../DESIGN.md). Public OIDC configuration enables
-personal sign-in with Authorization Code and PKCE. A tested read transport is
-available for future data screens; the entry screen makes no business API calls.
+personal sign-in with Authorization Code and PKCE. The authenticated store screen
+uses the read transport; the unauthenticated entry screen makes no business API calls.
 Missing configuration keeps sign-in unavailable.
 Loading and render failures have accessible, generic fallback screens.
+
+The store screen loads one cursor page at a time, initially requesting 25 rows.
+Checkboxes retain an explicit selection across pages in session memory. “Trier cette
+page” sorts only the displayed rows without an API request. Opening a store rereads
+its current summary by ID; returning preserves the page, sort and selection.
+Missing stores and failed reads have explicit states. Logout and expiry remove all
+rows and selection. No business IDs enter navigation URLs or persistent storage.
+The full reference and monthly views remain subsequent work; network and comparison
+actions are unavailable because their server aggregations are not implemented.
 
 ## Run locally
 
@@ -138,7 +147,7 @@ Consumers must publish only after guarded completion and bind any retained state
 to the current session generation; protected components already unmount on logout.
 The transport has synthetic unit contract tests and the existing browser regression
 suite. The opt-in local browser/API smoke verifies real Keycloak exchange and API
-reads on disposable synthetic state; deployed integration and business screens remain
+reads on disposable synthetic state; deployed integration and analytical screens remain
 unverified.
 
 ## Bounded queries and collections

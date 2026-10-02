@@ -156,6 +156,8 @@ Chromium uses the production entry screen and OIDC code; a test-only in-page clo
 then exercises the real `ReadQueries`/decoder modules against two synthetic store
 pages. Tokens remain inside the page and are never returned to the runner. Synthetic
 passwords reach the browser through stdin and only populate the provider's login form.
+The rendered store list also retains a checkbox selection through opening a current
+store summary and returning, and removes its rows after logout.
 No traces, screenshots, videos, browser storage state or business output are saved.
 Python verifies TLS with the local certificate; Chromium trusts only its SPKI pin
 for this disposable context, without a global certificate-ignore option.
@@ -176,7 +178,7 @@ stop does not skip the remaining service or identity/database cleanup attempts.
 A hard process kill or unavailable dependency during cleanup can leave temporary
 resources; retain the local administrative ability to inspect and remove them.
 This local recipe does not validate a deployed provider, native OS vault or rendered
-business-data screens, and does not run automatically in the synthetic browser suite.
+analytical screens, and does not run automatically in the synthetic browser suite.
 
 ## Moving to a server later
 

@@ -27,8 +27,7 @@ export function SignIn({
         <SessionBoundary session={authentication.sessions}>
           <Alert severity="success">
             <AlertTitle>Connexion vérifiée</AlertTitle>
-            Votre connexion a été vérifiée. Les écrans de consultation seront
-            disponibles dans une prochaine étape.
+            Votre connexion personnelle a été vérifiée.
           </Alert>
           <Button
             variant="outlined"

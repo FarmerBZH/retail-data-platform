@@ -143,6 +143,30 @@ try {
   await prepare(page);
   const authorization = await login(page, input.allowed);
   stage = "read";
+  await page
+    .getByRole("checkbox", {
+      name: "Sélectionner Synthetic store 1",
+      exact: true,
+    })
+    .check();
+  await page
+    .getByRole("button", { name: "Synthetic store 1", exact: true })
+    .click();
+  await page
+    .getByRole("heading", { name: "Synthetic store 1", exact: true })
+    .waitFor();
+  await page
+    .getByRole("button", { name: "Retour aux magasins", exact: true })
+    .click();
+  check(
+    await page
+      .getByRole("checkbox", {
+        name: "Sélectionner Synthetic store 1",
+        exact: true,
+      })
+      .isChecked(),
+    "rendered selection return",
+  );
   const result = await page.evaluate(async () => {
     const probe = (
       window as unknown as {
@@ -169,6 +193,12 @@ try {
   await page
     .getByRole("button", { name: "Se connecter", exact: true })
     .waitFor();
+  check(
+    (await page
+      .getByRole("button", { name: "Synthetic store 1", exact: true })
+      .count()) === 0,
+    "rendered logout cleanup",
+  );
   authorization.searchParams.set(
     "redirect_uri",
     `${input.origin}/unregistered`,

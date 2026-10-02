@@ -11,17 +11,67 @@ import {
 import type { Configuration } from "./config";
 import type { Authentication } from "./authentication";
 import { SignIn } from "./SignIn";
+import { SessionBoundary } from "./SessionBoundary";
+import { StoreList } from "./Stores";
+import type { ReadQueries } from "./read-queries";
+import { useSession } from "./use-session";
 
 export default function App({
   configuration,
   authentication,
   oidcInvalid = false,
+  reads,
 }: {
   configuration: Configuration;
   authentication?: Authentication | undefined;
   oidcInvalid?: boolean;
+  reads?: ReadQueries | undefined;
 }) {
   const [showAccessDetails, setShowAccessDetails] = useState(false);
+  const session = useSession(authentication?.sessions);
+
+  if (
+    authentication &&
+    session.phase === "authenticated" &&
+    configuration.status === "configured"
+  ) {
+    return (
+      <SessionBoundary session={authentication.sessions}>
+        <Box
+          component="header"
+          sx={{
+            bgcolor: "background.paper",
+            borderBottom: 1,
+            borderColor: "divider",
+            px: { xs: 2, sm: 3, lg: 4 },
+            py: 2,
+          }}
+        >
+          <Typography variant="h3" component="p">
+            Plateforme analytique
+          </Typography>
+          <SignIn authentication={authentication} invalid={false} />
+        </Box>
+        <Box
+          component="main"
+          sx={{
+            maxWidth: 1600,
+            mx: "auto",
+            px: { xs: 2, sm: 3, lg: 4 },
+            py: 4,
+          }}
+        >
+          {reads ? (
+            <StoreList reads={reads} />
+          ) : (
+            <Typography role="status">
+              La consultation des magasins est indisponible.
+            </Typography>
+          )}
+        </Box>
+      </SessionBoundary>
+    );
+  }
 
   return (
     <Box sx={{ minHeight: "100dvh" }}>

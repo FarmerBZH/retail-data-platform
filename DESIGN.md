@@ -1,7 +1,7 @@
 # Design de la plateforme analytique
 
 Statut : référence visuelle cible. Le socle frontend applique le thème à l’écran
-d’entrée ; les écrans métier et graphiques restent à implémenter.
+d’entrée et à la liste des magasins ; les analyses et graphiques restent à implémenter.
 MUI, le responsive et une interface agréable et simple sont confirmés. Les valeurs
 ci-dessous fixent une base commune pour l’implémentation ; elles pourront évoluer
 ensemble après une revue des premiers écrans.

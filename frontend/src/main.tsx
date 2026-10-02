@@ -12,6 +12,7 @@ import {
 } from "./authentication";
 import { readOidcConfiguration } from "./oidc-config";
 import { bindBrowserSession } from "./browser-session";
+import { ReadQueries } from "./read-queries";
 
 const callback = captureCallback(window.location, window.history);
 const App = lazy(() => import("./App"));
@@ -45,6 +46,11 @@ if (authentication) {
 }
 const root = document.getElementById("root");
 if (!root) throw new Error("Application root unavailable");
+// One in-memory service per document; constructing it performs no API read.
+const reads =
+  authentication && configuration.status === "configured"
+    ? new ReadQueries(configuration.apiOrigin, authentication.sessions)
+    : undefined;
 
 createRoot(root, {
   // Never forward exception objects or component props to logs/telemetry.
@@ -59,6 +65,7 @@ createRoot(root, {
             configuration={configuration}
             authentication={authentication}
             oidcInvalid={oidc.status === "invalid"}
+            reads={reads}
           />
         </Suspense>
       </ErrorBoundary>

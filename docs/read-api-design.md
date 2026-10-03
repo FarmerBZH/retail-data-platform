@@ -40,7 +40,7 @@ not instructions; API authorization does not authorize sending it to another ser
 ## Resource and query contract
 
 Routes are versioned under `/v1`. An explicit, checked-in registry exposes all 13
-base tables and 11 analytical views. New model columns cannot become public implicitly.
+base tables and 15 analytical views. New model columns cannot become public implicitly.
 The authenticated resource catalog describes columns, grain and supported filters.
 Typed OpenAPI response models are generated for each resource. Protected OpenAPI is the
 machine contract for frontend, agents and notebooks. `/docs` is a public Swagger

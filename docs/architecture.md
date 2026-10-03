@@ -155,6 +155,13 @@ in to a post-publication refresh or a bundle can refresh once after its final
 import. A refresh failure preserves the prior analytical snapshot and does not
 undo a completed source import.
 
+Network month, year and whole-calendar summaries aggregate only the canonical
+store-month grain, with separate complete and partial measures and explicit
+coverage counts. Monthly comparisons propagate missing coverage and zero-base
+ratios. Their typed read resources preserve global access and existing grants;
+no frontend fan-out or arbitrary multi-store aggregation was introduced. See
+[Network analytics](network-analytics.md) for the published contract and limits.
+
 SQLAlchemy view mappings use separate metadata from the base tables. The refresh
 audit is a normal mapped table. Migration lifecycle, analytical contracts,
 concurrent readers, source snapshot consistency and failure rollback are verified
@@ -164,7 +171,7 @@ for grains, joins, refresh operations and temporal limitations.
 ## Authenticated read API boundary
 
 The FastAPI resource server exposes explicit projections of all 13 application
-tables and 11 analytical views through versioned, typed collection routes. A
+tables and 15 analytical views through versioned, typed collection routes. A
 checked-in registry fixes allowed columns. Nested analytical objects are validated
 against explicit models, so additional database fields are not published implicitly.
 Operational audit collections require an additional scope and exclude source

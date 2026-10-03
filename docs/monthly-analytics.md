@@ -9,7 +9,7 @@ six dated datasets. Empty sources produce no months. The spine is an analytical
 calendar, not evidence that a store existed, was open, or was covered in a month.
 
 These are indexed PostgreSQL materialized views over the imported tables. All
-eleven results are refreshed in dependency order and published in one transaction
+fifteen results are refreshed in dependency order and published in one transaction
 from a repeatable-read source snapshot. Reads reuse stored results. Unique indexes
 enforce each grain; period indexes support monthly selection across stores.
 The previous successful snapshot remains readable during subsequent concurrent
@@ -22,6 +22,9 @@ that import. There is no background scheduler. Imports replace source datasets,
 and refreshes replace the analytical snapshot: prior analytical versions are not
 retained. Use a read-only repeatable-read transaction when several queries must
 share the same published snapshot.
+
+The four network summaries and their coverage contract are documented in
+[Network analytics](network-analytics.md).
 
 ## Relations and detail
 

@@ -226,6 +226,22 @@ incomplete reads and freshness changes hide that block's values. Source IDs and
 all public fields remain consultable without automatic per-ID requests. Local
 pagination, detail focus restoration and cancellation preserve the existing
 session-memory boundary. The tab code is loaded on demand.
+The active activity tab reads `analytics_activity_month` for the applied store/month
+window, capped at five pages/360 cells. Calls, field visits and crowdsourced visits
+have separate calendar series and exact monthly rows. Missing types, declared zero
+and ambiguous source groups remain distinct; activities are never added across
+types. An independent, bounded `analytics_store_month` read aligns observed revenue
+on the same calendar without joining rows or claiming causality or a common snapshot.
+Each block gates catalogue support, completeness and before/after freshness;
+local failures and retries leave the other block usable. Existing shared read
+services enforce the session and transport boundaries.
+Activity detail renders every public field and source identifier. An explicit
+per-ID action reads `store_activity_metrics` after catalogue validation and checks
+its identity, store, month, type, matched attribution and single-source value.
+Changed or missing live observations cannot replace the published cell. Source
+lists paginate locally without eager reads; detail focus is restored on close.
+Tab, applied-period and session departure cancel reads and remove component data.
+The tab loads lazily; current planning fields are not treated as observed activity.
 A GitHub workflow runs locked installation and the same local quality command;
 hosted execution has not yet been observed. Deployed provider/API compatibility,
 remaining analytical screens and production hosting remain later increments.

@@ -3,7 +3,7 @@
 Statut : T01–T05 sont implémentées, validées et commitées.
 T06 est **commitée après relecture technique**, avec revue Security finale en attente ;
 T07 est **commitée après relecture technique, sécurité finale en attente** ;
-T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11 est **commitée après relecture technique, sécurité finale en attente** ; T12 est **commitée après relecture technique, sécurité finale en attente** ; T13 est **commitée après relecture technique, sécurité finale en attente** ; T14 est **commitée après relecture technique, sécurité finale en attente** ; T15 est **commitée après relecture technique et sécurité** ; T16–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
+T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11 est **commitée après relecture technique, sécurité finale en attente** ; T12 est **commitée après relecture technique, sécurité finale en attente** ; T13 est **commitée après relecture technique, sécurité finale en attente** ; T14 est **commitée après relecture technique, sécurité finale en attente** ; T15 est **commitée après relecture technique et sécurité** ; T16 est **commitée après relecture technique et sécurité** ; T17–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
 pour les scripts réels et les limites du socle.
 Point de départ historique : branche `feat/saas-frontend`, API de lecture et client personnel
 existants ; aucun package frontend ni pipeline frontend à ce stade.
@@ -135,7 +135,7 @@ demande liens, cohérence et absence de divulgation, pas un faux audit applicati
 
 T01–T05 sont **validées**, T06 est **commitée, sécurité finale en attente**,
 T07 est **commitée, sécurité finale en attente**, T08 est **commitée après relecture technique, sécurité finale en attente**,
-T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11 est **commitée après relecture technique, sécurité finale en attente**, T12 est **commitée après relecture technique, sécurité finale en attente**, T13 est **commitée après relecture technique, sécurité finale en attente**, T14 est **commitée après relecture technique, sécurité finale en attente**, T15 est **commitée après relecture technique et sécurité**, T16–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
+T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11 est **commitée après relecture technique, sécurité finale en attente**, T12 est **commitée après relecture technique, sécurité finale en attente**, T13 est **commitée après relecture technique, sécurité finale en attente**, T14 est **commitée après relecture technique, sécurité finale en attente**, T15 est **commitée après relecture technique et sécurité**, T16 est **commitée après relecture technique et sécurité**, T17–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
 satisfaites ; les tâches bloquées par l’identité réelle ne doivent pas empêcher
 les développements testables sur un environnement synthétique. Ne pas déclarer
 la connexion ou J1 reçus avant leur vérification réelle.
@@ -566,6 +566,29 @@ la connexion ou J1 reçus avant leur vérification réelle.
 
 ### T16 — Activité commerciale par type
 
+- Statut : **commitée après relecture technique et sécurité**.
+  Onglet chargé à la demande, trois séries séparées appels/terrain/participatif
+  et grille mensuelle exacte. Type absent, zéro et ambiguïté restent distincts.
+  Collection magasin/mois complète, bornée à cinq pages/360 cellules, catalogue
+  et fraîcheur avant/après vérifiés. Contexte CA lu indépendamment, même calendrier,
+  cinq pages/120 mois, sans jointure, addition intertypes, score causal ou ROI.
+  Planification du référentiel actuel séparée de l’activité observée.
+  Tous les champs et identifiants restent consultables ; preuves vivantes lues
+  une par une à la demande, avec contrôle ID/magasin/mois/type/attribution et
+  valeur à source unique. Preuve absente ou changée indisponible sans retirer la
+  cellule publiée. Listes paginées localement par 50, focus rendu à la fermeture.
+  Erreurs et reprises locales, annulation au changement de période/onglet/session.
+  Relecture : une publication non initialisée bloque désormais la preuve vivante
+  avant sa requête, évitant une qualification de fraîcheur incorrecte. Sept tests
+  supplémentaires couvrent cet état, le changement de fraîcheur, les réponses
+  multiples/avec curseur, la preuve tardive annulée et le focus après pagination.
+  `npm run check` réussi : **479 tests unitaires et 105 scénarios Chromium**,
+  dont neuf nouveaux scénarios T16 à 360/768/1440 px (clavier, axe, zoom 200 %,
+  stockage vide, déconnexion et réponse tardive). Build sans avertissement de
+  chunk supérieur à 500 kB dans cette exécution ; qualification T21 toujours requise.
+  Revue Codex Security du diff applicatif T16 finalisée sans vulnérabilité signalée
+  sur les douze fichiers revus. Le présent suivi est actualisé après le scan ;
+  déploiement réel, CI hébergée et tâches précédentes hors de cette revue.
 - Dépendances : T11 et T13.
 - Livrer : analytics_activity_month et observations liées, trois séries distinctes
   appels/terrain/participatif, tableau et alignement temporel avec les ventes.

@@ -158,6 +158,22 @@ all published fields and source identifiers use the shared renderer without
 per-ID reads. Freshness changes, incomplete reads and refusals hide values only
 in the affected block. Leaving the tab or session cancels reads and removes data.
 
+The Activité store tab reads `analytics_activity_month` within the applied
+store/month window, capped at five pages/360 cells. Calls, field visits and
+crowdsourced visits have three separate calendar series and exact monthly rows;
+missing types, zero and ambiguous groups remain distinct. An independent bounded
+monthly-sales read shows observed revenue on the same calendar, without a join,
+shared snapshot, causal score or return-on-investment claim. Planning fields remain
+current reference attributes, not observed activity.
+
+Every block requires catalogue support, complete reads and stable exposed freshness.
+Failures and retries are local. Detail fields/source lists reuse the published row;
+only an explicit per-ID action reads `store_activity_metrics`. Live evidence must
+match the requested identity, store, month, type and single-source count. Missing
+or changed observations remain unavailable without hiding the publication. Source
+lists paginate locally; focus returns on close. Leaving the tab, applied scope or
+session cancels reads. The tab code loads on demand.
+
 ## Run locally
 
 Use Node 24.15 or a later Node 24 release and npm. `.nvmrc` selects the verified

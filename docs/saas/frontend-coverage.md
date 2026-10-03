@@ -59,3 +59,13 @@ se lisent explicitement par catégorie, avec leurs champs et identifiants dans
 ambiguïtés, catégories inconnues, mois absents, dénominateur nul, ratios supérieurs
 à 100 %, lectures incomplètes et absence d'appels automatiques par identifiant.
 Aucune moyenne de ratios ni comparaison d'unités de linéaire inconnues n'est créée.
+
+T16 ajoute les trois séries distinctes de `Activity` pour `analytics_activity_month`,
+alignées sur un contexte ventes lu indépendamment. `PublishedDetail` conserve chaque
+champ et identifiant ; les observations `store_activity_metrics` s’ouvrent une par
+une, à la demande. Les tests [Activity.test.tsx](../../frontend/src/Activity.test.tsx),
+[activity-data.test.ts](../../frontend/src/activity-data.test.ts) et
+[activity.spec.ts](../../frontend/e2e/activity.spec.ts) couvrent types/mois absents,
+zéro, ambiguïtés, preuves multiples, changement de période, erreurs locales et
+observations disparues ou incohérentes. Aucune somme intertypes ou causalité n’est
+déduite de l’alignement temporel ; la planification reste séparée de l’observation.

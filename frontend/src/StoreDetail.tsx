@@ -21,6 +21,7 @@ import { MonthlySales } from "./MonthlySales";
 import {
   ProductSalesEntry as ProductSales,
   PresenceEntry as Presence,
+  ActivityEntry as Activity,
 } from "./ExplorerEntry";
 import { SalesComparisons } from "./SalesComparisons";
 import { ApiError } from "./read-api";
@@ -219,7 +220,13 @@ export function StoreDetail({
           <Tab
             key={name}
             label={name}
-            disabled={index !== 0 && index !== 1 && index !== 2 && index !== 5}
+            disabled={
+              index !== 0 &&
+              index !== 1 &&
+              index !== 2 &&
+              index !== 3 &&
+              index !== 5
+            }
             id={`store-tab-${index}`}
             aria-controls={`store-panel-${index}`}
           />
@@ -279,6 +286,20 @@ export function StoreDetail({
             <Alert severity="info">
               Appliquez deux mois pour consulter la présence et le linéaire ; le
               catalogue doit permettre cette lecture.
+            </Alert>
+          )
+        ) : context.tab === 3 ? (
+          applied && explorerReads ? (
+            <Activity
+              key={`activity:${store.id}:${applied.from}:${applied.to}`}
+              storeId={store.id}
+              period={applied}
+              reads={explorerReads}
+            />
+          ) : (
+            <Alert severity="info">
+              Appliquez deux mois pour consulter l’activité ; le catalogue doit
+              permettre cette lecture.
             </Alert>
           )
         ) : (
@@ -356,8 +377,8 @@ export function StoreDetail({
         )}
       </Box>
       <Typography color="text.secondary">
-        Les détails de l’activité et des typologies seront consultables dans les
-        prochaines étapes.
+        Les détails des typologies seront consultables dans les prochaines
+        étapes.
       </Typography>
     </Stack>
   );

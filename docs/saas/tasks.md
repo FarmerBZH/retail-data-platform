@@ -3,7 +3,7 @@
 Statut : T01–T05 sont implémentées, validées et commitées.
 T06 est **commitée après relecture technique**, avec revue Security finale en attente ;
 T07 est **commitée après relecture technique, sécurité finale en attente** ;
-T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11 est **commitée après relecture technique, sécurité finale en attente** ; T12 est **commitée après relecture technique, sécurité finale en attente** ; T13 est **commitée après relecture technique, sécurité finale en attente** ; T14 est **commitée après relecture technique, sécurité finale en attente** ; T15–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
+T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11 est **commitée après relecture technique, sécurité finale en attente** ; T12 est **commitée après relecture technique, sécurité finale en attente** ; T13 est **commitée après relecture technique, sécurité finale en attente** ; T14 est **commitée après relecture technique, sécurité finale en attente** ; T15 est **commitée après relecture technique et sécurité** ; T16–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
 pour les scripts réels et les limites du socle.
 Point de départ historique : branche `feat/saas-frontend`, API de lecture et client personnel
 existants ; aucun package frontend ni pipeline frontend à ce stade.
@@ -135,7 +135,7 @@ demande liens, cohérence et absence de divulgation, pas un faux audit applicati
 
 T01–T05 sont **validées**, T06 est **commitée, sécurité finale en attente**,
 T07 est **commitée, sécurité finale en attente**, T08 est **commitée après relecture technique, sécurité finale en attente**,
-T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11 est **commitée après relecture technique, sécurité finale en attente**, T12 est **commitée après relecture technique, sécurité finale en attente**, T13 est **commitée après relecture technique, sécurité finale en attente**, T14 est **commitée après relecture technique, sécurité finale en attente**, T15–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
+T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11 est **commitée après relecture technique, sécurité finale en attente**, T12 est **commitée après relecture technique, sécurité finale en attente**, T13 est **commitée après relecture technique, sécurité finale en attente**, T14 est **commitée après relecture technique, sécurité finale en attente**, T15 est **commitée après relecture technique et sécurité**, T16–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
 satisfaites ; les tâches bloquées par l’identité réelle ne doivent pas empêcher
 les développements testables sur un environnement synthétique. Ne pas déclarer
 la connexion ou J1 reçus avant leur vérification réelle.
@@ -531,6 +531,30 @@ la connexion ou J1 reçus avant leur vérification réelle.
 
 ### T15 — Présence et linéaire par catégorie
 
+- Statut : **commitée après relecture technique et sécurité**.
+  Synthèse magasin/mois et deux courbes séparées par catégorie, calendrier complet,
+  valeurs exactes et dénominateurs publiés. Codes inconnus conservés sans libellé
+  inventé ; absences inférées, clés non rapprochées et ambiguïtés explicites.
+  Linéaire sans unité physique présumée, sans plafonnement à 100 %, sans somme
+  entre catégories ni moyenne de ratios. Dénominateur nul distinct de zéro déclaré.
+  Collections de présence et linéaire ouvertes à la demande avec filtre catégorie ;
+  lecture complète bornée à cinq pages et 500 cellules, pagination locale par 25,
+  champs et identifiants source consultables sans appels automatiques par ID.
+  Catalogue, grain, fraîcheur avant/après, refus locaux et annulation vérifiés
+  par tests synthétiques. `npm run check` réussi : **440 tests unitaires et
+  96 scénarios Chromium** à 360/768/1440 px, avec clavier, axe, zoom 200 %,
+  stockage vide et déconnexion. Un délai de pagination de l’explorateur existant
+  a échoué lors du premier passage ; deux répétitions ciblées puis la nouvelle
+  suite complète passent sans modification. Recette réelle et CI hébergée
+  non revalidées ; avertissement de chunk supérieur à 500 kB suivi en T21.
+  Relecture : rejet exact des taux de présence hors de 0–1, valeurs de linéaire
+  négatives, comptes d’absences fractionnaires, clés produit incohérentes et
+  présences positives avec absence inférée. Régressions ajoutées pour ces
+  invariants, la pagination locale avec retour de focus et le filtre catégorie vide.
+  Nouvelle suite complète réussie après corrections.
+  Revue Codex Security du diff T15 finalisée après corrections, sans vulnérabilité
+  signalée sur les douze fichiers modifiés ;
+  les tâches précédentes et la configuration déployée restent hors de ce scan.
 - Dépendances : T11 et T13.
 - Livrer : analytics_store_category_month, analytics_distribution_product_month et
   analytics_shelf_category_month, courbes séparées et dénominateurs consultables.

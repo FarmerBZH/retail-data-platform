@@ -35,3 +35,22 @@ export function ProductSalesEntry(
     </Suspense>
   );
 }
+
+const PresenceView = lazy(() =>
+  import("./Presence").then((module) => ({ default: module.Presence })),
+);
+export function PresenceEntry(
+  props: ComponentProps<typeof import("./Presence").Presence>,
+) {
+  return (
+    <Suspense
+      fallback={
+        <Typography role="status">
+          Chargement de la présence et du linéaire…
+        </Typography>
+      }
+    >
+      <PresenceView {...props} />
+    </Suspense>
+  );
+}

@@ -142,6 +142,22 @@ catalogue and verify identity/freshness; a missing live product is unavailable,
 without hiding the published cell. Live evidence is not an immutable snapshot.
 Tab/period/session changes unmount data and cancel reads. The tab loads lazily.
 
+The Présence et linéaire store tab reads the applied store/month window from
+`analytics_store_category_month` after catalogue validation. Presence and shelf
+share have separate calendar lines, exact values and published denominators.
+Missing months, null values, declared zeros and inferred absences remain distinct.
+Presence describes observed product keys, without a network-distribution or
+assortment-compliance claim. Unknown category codes remain literal; physical
+shelf units are unknown. Ratios above 100% are retained; no cross-category sums
+or averages are calculated.
+
+The distribution-product and shelf-category collections are loaded only on
+explicit request, scoped to the selected category. Every collection must be
+complete within five pages and 500 cells. Detail tables paginate locally by 25;
+all published fields and source identifiers use the shared renderer without
+per-ID reads. Freshness changes, incomplete reads and refusals hide values only
+in the affected block. Leaving the tab or session cancels reads and removes data.
+
 ## Run locally
 
 Use Node 24.15 or a later Node 24 release and npm. `.nvmrc` selects the verified

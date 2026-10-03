@@ -49,3 +49,13 @@ selon le catalogue. Les scénarios de
 [product-sales.spec.ts](../../frontend/e2e/product-sales.spec.ts) vérifient les
 GTIN non rapprochés distincts, retours, mois absents, ambiguïtés, lectures
 incomplètes et disparition du produit vivant, sans appels automatiques par ID.
+
+T15 ajoute les courbes séparées et dénominateurs de `Presence` pour
+`analytics_store_category_month`. Les collections produit de présence et linéaire
+se lisent explicitement par catégorie, avec leurs champs et identifiants dans
+`PublishedDetail`. Les tests [Presence.test.tsx](../../frontend/src/Presence.test.tsx),
+[presence-data.test.ts](../../frontend/src/presence-data.test.ts) et
+[presence.spec.ts](../../frontend/e2e/presence.spec.ts) couvrent absence inférée,
+ambiguïtés, catégories inconnues, mois absents, dénominateur nul, ratios supérieurs
+à 100 %, lectures incomplètes et absence d'appels automatiques par identifiant.
+Aucune moyenne de ratios ni comparaison d'unités de linéaire inconnues n'est créée.

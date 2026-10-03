@@ -212,6 +212,20 @@ identities and the observation grain are checked, with freshness before/after.
 Missing live rows remain unavailable. They are not immutable historical evidence.
 Leaving the tab, changing applied months or ending the session unmounts its data
 and cancels pending reads. The tab code is loaded on demand.
+The active store presence/shelf tab reads `analytics_store_category_month` for
+only the applied store/month window. Calendar presence and shelf-share lines are
+separate, with exact denominators and coverage; null, zero, inferred absence and
+missing cells remain distinct. Source category codes and unresolved product keys
+are rendered literally. Unknown shelf units preclude cross-category aggregation;
+ratios above 100% remain visible. No network-distribution or assortment-compliance
+claim is derived from observed presence.
+Explicit collection actions read `analytics_distribution_product_month` or
+`analytics_shelf_category_month` with the selected category filter. Each read
+requires catalogue support and a complete collection within five pages/500 cells;
+incomplete reads and freshness changes hide that block's values. Source IDs and
+all public fields remain consultable without automatic per-ID requests. Local
+pagination, detail focus restoration and cancellation preserve the existing
+session-memory boundary. The tab code is loaded on demand.
 A GitHub workflow runs locked installation and the same local quality command;
 hosted execution has not yet been observed. Deployed provider/API compatibility,
 remaining analytical screens and production hosting remain later increments.

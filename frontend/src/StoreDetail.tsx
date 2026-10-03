@@ -18,7 +18,10 @@ import type { StoreHeader } from "./api-validation";
 import type { ReadQueries } from "./read-queries";
 import { formatMonth } from "./exact-values";
 import { MonthlySales } from "./MonthlySales";
-import { ProductSalesEntry as ProductSales } from "./ExplorerEntry";
+import {
+  ProductSalesEntry as ProductSales,
+  PresenceEntry as Presence,
+} from "./ExplorerEntry";
 import { SalesComparisons } from "./SalesComparisons";
 import { ApiError } from "./read-api";
 import { MAX_PERIOD_MONTHS, validatePeriod } from "./month-period";
@@ -216,7 +219,7 @@ export function StoreDetail({
           <Tab
             key={name}
             label={name}
-            disabled={index !== 0 && index !== 1 && index !== 5}
+            disabled={index !== 0 && index !== 1 && index !== 2 && index !== 5}
             id={`store-tab-${index}`}
             aria-controls={`store-panel-${index}`}
           />
@@ -261,6 +264,20 @@ export function StoreDetail({
           ) : (
             <Alert severity="info">
               Appliquez deux mois pour consulter les ventes produit ; le
+              catalogue doit permettre cette lecture.
+            </Alert>
+          )
+        ) : context.tab === 2 ? (
+          applied && explorerReads ? (
+            <Presence
+              key={`presence:${store.id}:${applied.from}:${applied.to}`}
+              storeId={store.id}
+              period={applied}
+              reads={explorerReads}
+            />
+          ) : (
+            <Alert severity="info">
+              Appliquez deux mois pour consulter la présence et le linéaire ; le
               catalogue doit permettre cette lecture.
             </Alert>
           )
@@ -339,8 +356,8 @@ export function StoreDetail({
         )}
       </Box>
       <Typography color="text.secondary">
-        Les détails de la présence, de l’activité et des typologies seront
-        consultables dans les prochaines étapes.
+        Les détails de l’activité et des typologies seront consultables dans les
+        prochaines étapes.
       </Typography>
     </Stack>
   );

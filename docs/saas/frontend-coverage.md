@@ -69,3 +69,10 @@ une, à la demande. Les tests [Activity.test.tsx](../../frontend/src/Activity.te
 zéro, ambiguïtés, preuves multiples, changement de période, erreurs locales et
 observations disparues ou incohérentes. Aucune somme intertypes ou causalité n’est
 déduite de l’alignement temporel ; la planification reste séparée de l’observation.
+
+T17 ajoute `Typologies` : tables mensuelles distinctes pour `analytics_typology_month`,
+`analytics_assortment_candidates` et `analytics_retailer_assortment_month`.
+Chaque ligne conserve ses champs et listes dans `PublishedDetail`. Les références
+vivantes, y compris les règles d'un assortiment, s'ouvrent explicitement par ID.
+Les scénarios synthétiques couvrent contradictions, mapping ambigu, règles multiples,
+mois absents, contexte enseigne sans candidat, lots incomplets et annulation.

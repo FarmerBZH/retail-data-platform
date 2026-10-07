@@ -22,6 +22,7 @@ import {
   ProductSalesEntry as ProductSales,
   PresenceEntry as Presence,
   ActivityEntry as Activity,
+  TypologiesEntry as Typologies,
 } from "./ExplorerEntry";
 import { SalesComparisons } from "./SalesComparisons";
 import { ApiError } from "./read-api";
@@ -225,6 +226,7 @@ export function StoreDetail({
               index !== 1 &&
               index !== 2 &&
               index !== 3 &&
+              index !== 4 &&
               index !== 5
             }
             id={`store-tab-${index}`}
@@ -302,6 +304,20 @@ export function StoreDetail({
               permettre cette lecture.
             </Alert>
           )
+        ) : context.tab === 4 ? (
+          applied && explorerReads ? (
+            <Typologies
+              key={`typologies:${store.id}:${applied.from}:${applied.to}`}
+              storeId={store.id}
+              period={applied}
+              reads={explorerReads}
+            />
+          ) : (
+            <Alert severity="info">
+              Appliquez deux mois pour consulter les typologies et assortiments
+              ; le catalogue doit permettre cette lecture.
+            </Alert>
+          )
         ) : (
           <Stack spacing={2}>
             {explorerReads && (
@@ -376,10 +392,6 @@ export function StoreDetail({
           </Stack>
         )}
       </Box>
-      <Typography color="text.secondary">
-        Les détails des typologies seront consultables dans les prochaines
-        étapes.
-      </Typography>
     </Stack>
   );
 }

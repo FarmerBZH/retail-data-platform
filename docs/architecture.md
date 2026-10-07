@@ -242,6 +242,19 @@ Changed or missing live observations cannot replace the published cell. Source
 lists paginate locally without eager reads; detail focus is restored on close.
 Tab, applied-period and session departure cancel reads and remove component data.
 The tab loads lazily; current planning fields are not treated as observed activity.
+The lazy typology/assortment tab reads three independent published collections
+for the applied store/month window, each capped at five pages/500 rows. Catalogue,
+initialized publication, scoped row identity, completeness and before/after exposed
+freshness gate each block. Monthly values and contradictory snapshots remain
+separate; absent months have no carried value. Exact candidates are distinct from
+retailer context, without compliance or required-product claims. Local tables and
+reference lists paginate by 50. Every public field remains consultable.
+Explicit ID actions inspect live values, snapshots, rules, assortments and products,
+checking catalogue, unique response, identity and available owner context. An
+assortment can expose its mapping/rank rules through one additional explicit level.
+These mutable references do not replace published rows or claim historical binding.
+Component and session departure cancel reads; labels render as inert text through
+existing published-value components. No backend or identity boundary changes.
 A GitHub workflow runs locked installation and the same local quality command;
 hosted execution has not yet been observed. Deployed provider/API compatibility,
 remaining analytical screens and production hosting remain later increments.

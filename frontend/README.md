@@ -174,6 +174,20 @@ or changed observations remain unavailable without hiding the publication. Sourc
 lists paginate locally; focus returns on close. Leaving the tab, applied scope or
 session cancels reads. The tab code loads on demand.
 
+The Typologies et assortiments tab reads three independent monthly collections
+within the applied store/calendar scope, each capped at five pages/500 rows.
+Catalogue support, initialized publication, complete scoped reads and stable exposed
+freshness are required. Contradictory values remain visible; missing months have no
+carried value. Exact candidates remain distinct from retailer assortment context,
+without compliance or required-product claims. Tables and reference lists paginate
+locally by 50. Every public field uses the shared detail renderer.
+
+Live values, snapshots, rules, assortments and products require explicit ID actions,
+with identity, unique response, catalogue, available owner context and freshness
+checks. Assortment mapping/rank rules can be opened through one additional level.
+Live references are mutable, with no universal historical association guarantee.
+Leaving the applied scope, tab or session cancels reads and removes component data.
+
 ## Run locally
 
 Use Node 24.15 or a later Node 24 release and npm. `.nvmrc` selects the verified

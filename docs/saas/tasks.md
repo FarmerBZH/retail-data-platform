@@ -3,7 +3,7 @@
 Statut : T01–T05 sont implémentées, validées et commitées.
 T06 est **commitée après relecture technique**, avec revue Security finale en attente ;
 T07 est **commitée après relecture technique, sécurité finale en attente** ;
-T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11 est **commitée après relecture technique, sécurité finale en attente** ; T12 est **commitée après relecture technique, sécurité finale en attente** ; T13 est **commitée après relecture technique, sécurité finale en attente** ; T14 est **commitée après relecture technique, sécurité finale en attente** ; T15 est **commitée après relecture technique et sécurité** ; T16 est **commitée après relecture technique et sécurité** ; T17–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
+T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11 est **commitée après relecture technique, sécurité finale en attente** ; T12 est **commitée après relecture technique, sécurité finale en attente** ; T13 est **commitée après relecture technique, sécurité finale en attente** ; T14 est **commitée après relecture technique, sécurité finale en attente** ; T15 est **commitée après relecture technique et sécurité** ; T16 est **commitée après relecture technique et sécurité** ; T17 est **commitée après relecture technique et sécurité** ; T18–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
 pour les scripts réels et les limites du socle.
 Point de départ historique : branche `feat/saas-frontend`, API de lecture et client personnel
 existants ; aucun package frontend ni pipeline frontend à ce stade.
@@ -135,7 +135,7 @@ demande liens, cohérence et absence de divulgation, pas un faux audit applicati
 
 T01–T05 sont **validées**, T06 est **commitée, sécurité finale en attente**,
 T07 est **commitée, sécurité finale en attente**, T08 est **commitée après relecture technique, sécurité finale en attente**,
-T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11 est **commitée après relecture technique, sécurité finale en attente**, T12 est **commitée après relecture technique, sécurité finale en attente**, T13 est **commitée après relecture technique, sécurité finale en attente**, T14 est **commitée après relecture technique, sécurité finale en attente**, T15 est **commitée après relecture technique et sécurité**, T16 est **commitée après relecture technique et sécurité**, T17–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
+T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11 est **commitée après relecture technique, sécurité finale en attente**, T12 est **commitée après relecture technique, sécurité finale en attente**, T13 est **commitée après relecture technique, sécurité finale en attente**, T14 est **commitée après relecture technique, sécurité finale en attente**, T15 est **commitée après relecture technique et sécurité**, T16 est **commitée après relecture technique et sécurité**, T17 est **commitée après relecture technique et sécurité**, T18–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
 satisfaites ; les tâches bloquées par l’identité réelle ne doivent pas empêcher
 les développements testables sur un environnement synthétique. Ne pas déclarer
 la connexion ou J1 reçus avant leur vérification réelle.
@@ -599,6 +599,25 @@ la connexion ou J1 reçus avant leur vérification réelle.
 - Commit proposé : `Add store activity by source type`.
 
 ### T17 — Typologies et assortiments
+
+- Statut : **commitée après relecture technique et sécurité**.
+  Trois collections indépendantes magasin/mois, catalogue et fraîcheur vérifiés,
+  extraction complète bornée à cinq pages/500 lignes par bloc ; aucune valeur
+  ni absence confirmée sur un lot incomplet. Tables paginées localement par 50,
+  valeurs contradictoires conservées, mois absents explicites sans propagation.
+  Candidats exacts distincts du contexte enseigne, sans conformité ni nombre
+  présumé de produits obligatoires. Champs/listes publiés intégralement consultables.
+  Références vivantes par identifiant à la demande, avec catalogue, unicité,
+  identité, contexte connu et fraîcheur contrôlés. Snapshots, valeurs, produits,
+  assortiments et règles de rang/correspondance ; aucun appel automatique par ID.
+  Annulation lors du départ, retour du focus et erreurs/reprises locales.
+  `npm run check` réussi : **505 tests unitaires et 114 scénarios Chromium**,
+  dont 26 nouveaux tests unitaires/composants et neuf scénarios T17 aux trois
+  largeurs 360/768/1440 px ; clavier, axe, zoom 200 %, stockage vide, déconnexion.
+  Scan Codex Security du diff applicatif terminé sans vulnérabilité signalée
+  sur les dix fichiers revus. Le suivi et la documentation des frontières sont
+  actualisés après le scan ; relecture finale effectuée et commit autorisé.
+  Fournisseur/déploiement réels, CI hébergée et audit cumulatif non vérifiés.
 
 - Dépendances : T13 et T09.
 - Livrer : analytics_typology_month, analytics_assortment_candidates et

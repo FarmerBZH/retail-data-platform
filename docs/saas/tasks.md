@@ -3,7 +3,7 @@
 Statut : T01–T05 sont implémentées, validées et commitées.
 T06 est **commitée après relecture technique**, avec revue Security finale en attente ;
 T07 est **commitée après relecture technique, sécurité finale en attente** ;
-T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11 est **commitée après relecture technique, sécurité finale en attente** ; T12 est **commitée après relecture technique, sécurité finale en attente** ; T13 est **commitée après relecture technique, sécurité finale en attente** ; T14 est **commitée après relecture technique, sécurité finale en attente** ; T15 est **commitée après relecture technique et sécurité** ; T16 est **commitée après relecture technique et sécurité** ; T17 est **commitée après relecture technique et sécurité** ; T18 est **commitée après relecture technique et sécurité** ; T19 est **commitée après relecture technique et sécurité** ; T20–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
+T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11 est **commitée après relecture technique, sécurité finale en attente** ; T12 est **commitée après relecture technique, sécurité finale en attente** ; T13 est **commitée après relecture technique, sécurité finale en attente** ; T14 est **commitée après relecture technique, sécurité finale en attente** ; T15 est **commitée après relecture technique et sécurité** ; T16 est **commitée après relecture technique et sécurité** ; T17 est **commitée après relecture technique et sécurité** ; T18 est **commitée après relecture technique et sécurité** ; T19 est **commitée après relecture technique et sécurité** ; T20 est **partie automatisée commitée après relecture technique et sécurité, recette humaine requise** ; T21–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
 pour les scripts réels et les limites du socle.
 Point de départ historique : branche `feat/saas-frontend`, API de lecture et client personnel
 existants ; aucun package frontend ni pipeline frontend à ce stade.
@@ -135,7 +135,7 @@ demande liens, cohérence et absence de divulgation, pas un faux audit applicati
 
 T01–T05 sont **validées**, T06 est **commitée, sécurité finale en attente**,
 T07 est **commitée, sécurité finale en attente**, T08 est **commitée après relecture technique, sécurité finale en attente**,
-T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11 est **commitée après relecture technique, sécurité finale en attente**, T12 est **commitée après relecture technique, sécurité finale en attente**, T13 est **commitée après relecture technique, sécurité finale en attente**, T14 est **commitée après relecture technique, sécurité finale en attente**, T15 est **commitée après relecture technique et sécurité**, T16 est **commitée après relecture technique et sécurité**, T17 est **commitée après relecture technique et sécurité**, T18 est **commitée après relecture technique et sécurité**, T19 est **commitée après relecture technique et sécurité**, T20–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
+T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11 est **commitée après relecture technique, sécurité finale en attente**, T12 est **commitée après relecture technique, sécurité finale en attente**, T13 est **commitée après relecture technique, sécurité finale en attente**, T14 est **commitée après relecture technique, sécurité finale en attente**, T15 est **commitée après relecture technique et sécurité**, T16 est **commitée après relecture technique et sécurité**, T17 est **commitée après relecture technique et sécurité**, T18 est **commitée après relecture technique et sécurité**, T19 est **commitée après relecture technique et sécurité**, T20 est **partie automatisée commitée après relecture technique et sécurité, recette humaine requise**, T21–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
 satisfaites ; les tâches bloquées par l’identité réelle ne doivent pas empêcher
 les développements testables sur un environnement synthétique. Ne pas déclarer
 la connexion ou J1 reçus avant leur vérification réelle.
@@ -695,6 +695,17 @@ la connexion ou J1 reçus avant leur vérification réelle.
 - Commit proposé : `Verify complete published field coverage`.
 
 ### T20 — Qualification responsive et accessibilité des parcours
+
+- Statut : **partie automatisée commitée après relecture technique et sécurité, recette humaine requise**.
+  Parcours clavier natif Tab/Entrée, contrôle des focus et libellés longs,
+  chargement/erreur/reprise, texte agrandi, contrastes axe et mouvement réduit.
+  Aucun résultat automatisé ne remplace le zoom navigateur réel ni les annonces
+  d’un lecteur d’écran. La recette humaine reste à réaliser sur données synthétiques.
+  Validation locale : `npm run check` réussi (format, lint, types, 585 tests
+  unitaires/composants, build, 132 scénarios navigateur dont 9 nouveaux).
+  15 scénarios ciblés réussis ; aucune correction runtime nécessaire.
+  Revue Codex Security du diff T20 clôturée sans vulnérabilité relevée dans ce périmètre.
+  CI hébergée, zoom natif et lecteur d’écran réel non vérifiés.
 
 - Dépendances : T19 ; les contrôles de base existent depuis T02.
 - Livrer : compléter les tests transversaux et corriger les écarts observés, sans

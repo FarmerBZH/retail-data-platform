@@ -125,6 +125,24 @@ test("monthly chart and exact table distinguish holes, zero and ambiguous sales;
   await keyboardChart.focus();
   await expect(keyboardChart).toBeFocused();
   await page.keyboard.press("ArrowRight");
+  expect(
+    await page.evaluate(
+      () => matchMedia("(prefers-reduced-motion: reduce)").matches,
+    ),
+  ).toBe(true);
+  expect(
+    await page.locator("svg").evaluateAll((nodes) =>
+      nodes.every((node) => {
+        const style = getComputedStyle(node);
+        return (
+          style.animationName === "none" &&
+          style.transitionDuration
+            .split(",")
+            .every((value) => parseFloat(value) === 0)
+        );
+      }),
+    ),
+  ).toBe(true);
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
   expect(
     await page.evaluate(

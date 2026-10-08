@@ -473,3 +473,32 @@ MUI uses its MIT-licensed components and Emotion engine. MUI X Charts Community
 is installed for the store synthesis; commercial components are not installed.
 Versions are pinned in the manifest and lockfile; review dependency changes
 deliberately.
+
+## Responsive and accessibility qualification
+
+T20 adds a synthetic keyboard-only journey through sign-in, a long store label,
+reference details, native product details, return navigation and logout. Controls
+are reached by bounded Tab traversal; the harness does not assign focus or click
+through this journey. It checks focus transfers, complete detail fields, page
+reflow and WCAG A/AA axe rules including rendered contrast. A separate delayed
+failure scenario checks loading/status and alert semantics, then retries by keyboard.
+Reduced-motion media and computed CSS animation/transition styles are checked
+on the public shell and monthly chart. Text enlarged to 200% is checked on the
+shell at 360/768/1440 px; it is not native browser zoom.
+
+Automated results do not establish what a screen reader actually announces.
+Full T20 reception requires a human using synthetic data to record browser,
+operating system, assistive technology and versions, and confirm:
+
+- Native browser zoom at 200%, with the browser's zoom indicator observed:
+  public entry, store list/detail, all analytical tabs, native collections and
+  ordinary/OPS quality; page reflow, readable long labels and every action.
+- Keyboard-only operation and horizontal scrolling inside tables; chart/table
+  alternatives, tab changes, evidence panels and return-focus behavior.
+- Screen-reader announcements for loading, errors, retry, applied period,
+  selection changes, opened evidence and logout, without repeated stale content.
+- Visible focus and rendered contrast in normal, error, selected and reduced-motion
+  states. Any issue must be reproduced and corrected before reception.
+
+This human receipt is pending. Existing CSS zoom checks and axe results must not
+be reported as native zoom, assistive-technology acceptance or certification.

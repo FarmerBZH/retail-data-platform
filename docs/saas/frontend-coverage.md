@@ -107,3 +107,12 @@ Les codes R/S sont explicitement différés, conformément au périmètre backen
 leur présence dans la matrice cible n’est pas une preuve de livraison. Les audits
 ont leur secours dans Qualité ; les autres collections dans Données. Cette
 réconciliation ne garantit ni identité réelle, ni charge, ni réception du P0 complet.
+
+T20 ajoute un parcours clavier de bout en bout par Tab/Entrée, sans focus imposé,
+avec libellés longs, référentiel, détails natifs et retour à la connexion. Les tests
+[accessibility.spec.ts](../../frontend/e2e/accessibility.spec.ts) contrôlent aussi
+les rôles de chargement/erreur, la reprise au clavier, le texte agrandi et le mouvement
+réduit. Les graphiques mensuels conservent leurs alternatives et leurs tests axe.
+Le zoom CSS ou le texte agrandi ne prouvent pas le zoom navigateur réel. La recette
+humaine du zoom 200 % et des annonces du lecteur d’écran reste requise ; voir le
+[guide frontend](../../frontend/README.md#responsive-and-accessibility-qualification).

@@ -1,3 +1,4 @@
+import { assertDetail } from "../test/coverage-render";
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
@@ -106,6 +107,10 @@ it("opens a snapshot explicitly and restores focus without replacing published r
   expect(
     screen.getByRole("heading", { name: "Détail — Typologies mensuelles" }),
   ).toHaveFocus();
+  assertDetail(
+    "analytics_typology_month",
+    syntheticTypology("analytics_typology_month"),
+  );
   expect(reads.page).not.toHaveBeenCalled();
   const proof = screen.getByRole("button", {
     name: new RegExp(
@@ -328,3 +333,29 @@ it("rejects freshness changing during an analytical collection", async () => {
     screen.queryByRole("region", { name: "Typologies mensuelles" }),
   ).toBeNull();
 });
+
+it.each(typologyNames)(
+  "renders all public %s fields in its specialized detail",
+  async (name) => {
+    const reads = services();
+    const raw = syntheticTypology(name);
+    reads.collect.mockImplementation(async (resource, _query, decode) => ({
+      items: [
+        decode(syntheticTypology(resource as (typeof typologyNames)[number])),
+      ],
+      complete: true,
+      reason: null,
+      nextCursor: null,
+      attempts: 1,
+    }));
+    view(reads);
+    const labels = {
+      analytics_typology_month: "Typologies mensuelles",
+      analytics_assortment_candidates: "Candidats exacts d’assortiment",
+      analytics_retailer_assortment_month: "Assortiments mensuels par enseigne",
+    };
+    const region = await screen.findByRole("region", { name: labels[name] });
+    await userEvent.click(within(region).getAllByRole("button")[0]!);
+    assertDetail(name, raw);
+  },
+);

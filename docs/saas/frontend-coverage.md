@@ -88,3 +88,22 @@ de l’identité, de l’unicité et de la fraîcheur. Les tests
 [quality.spec.ts](../../frontend/e2e/quality.spec.ts) vérifient l’accès ordinaire/OPS,
 la révocation, les refus locaux, les secondes pages, null/zéro, le changement de
 lecteur, les champs privés exclus et l’absence de requêtes anticipées par ID.
+
+T19 réconcilie les ensembles avec les modèles publics API réellement chargés,
+leurs types sérialisés, nullabilité, clés, filtres et droits, sans connexion base.
+[coverage-contract.test.ts](../../frontend/src/coverage-contract.test.ts) compare
+ces modèles, le registre, la projection, le manifeste et la matrice cible.
+[coverage-render.test.tsx](../../frontend/src/coverage-render.test.tsx) vérifie
+chaque état admis (null, texte/liste vide, booléen), y compris les chemins enfants,
+et prouve que retirer un champ affiché fait échouer le contrôle de rendu.
+[coverage-journeys.test.tsx](../../frontend/src/coverage-journeys.test.tsx) ouvre
+le détail natif de chaque collection, sous catalogue ordinaire ou OPS approprié.
+Les tests des détails spécialisés vérifient chaque valeur sous son champ, pas
+uniquement le nombre de libellés. La synthèse et les comparaisons conservent leurs
+tests de calculs propres ; leurs champs supplémentaires restent dans le détail natif.
+
+Le manifeste indique les destinations métier et le secours natif de chaque champ.
+Les codes R/S sont explicitement différés, conformément au périmètre backend :
+leur présence dans la matrice cible n’est pas une preuve de livraison. Les audits
+ont leur secours dans Qualité ; les autres collections dans Données. Cette
+réconciliation ne garantit ni identité réelle, ni charge, ni réception du P0 complet.

@@ -3,7 +3,7 @@
 Statut : T01–T05 sont implémentées, validées et commitées.
 T06 est **commitée après relecture technique**, avec revue Security finale en attente ;
 T07 est **commitée après relecture technique, sécurité finale en attente** ;
-T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11 est **commitée après relecture technique, sécurité finale en attente** ; T12 est **commitée après relecture technique, sécurité finale en attente** ; T13 est **commitée après relecture technique, sécurité finale en attente** ; T14 est **commitée après relecture technique, sécurité finale en attente** ; T15 est **commitée après relecture technique et sécurité** ; T16 est **commitée après relecture technique et sécurité** ; T17 est **commitée après relecture technique et sécurité** ; T18 est **commitée après relecture technique et sécurité** ; T19–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
+T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11 est **commitée après relecture technique, sécurité finale en attente** ; T12 est **commitée après relecture technique, sécurité finale en attente** ; T13 est **commitée après relecture technique, sécurité finale en attente** ; T14 est **commitée après relecture technique, sécurité finale en attente** ; T15 est **commitée après relecture technique et sécurité** ; T16 est **commitée après relecture technique et sécurité** ; T17 est **commitée après relecture technique et sécurité** ; T18 est **commitée après relecture technique et sécurité** ; T19 est **commitée après relecture technique et sécurité** ; T20–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
 pour les scripts réels et les limites du socle.
 Point de départ historique : branche `feat/saas-frontend`, API de lecture et client personnel
 existants ; aucun package frontend ni pipeline frontend à ce stade.
@@ -135,7 +135,7 @@ demande liens, cohérence et absence de divulgation, pas un faux audit applicati
 
 T01–T05 sont **validées**, T06 est **commitée, sécurité finale en attente**,
 T07 est **commitée, sécurité finale en attente**, T08 est **commitée après relecture technique, sécurité finale en attente**,
-T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11 est **commitée après relecture technique, sécurité finale en attente**, T12 est **commitée après relecture technique, sécurité finale en attente**, T13 est **commitée après relecture technique, sécurité finale en attente**, T14 est **commitée après relecture technique, sécurité finale en attente**, T15 est **commitée après relecture technique et sécurité**, T16 est **commitée après relecture technique et sécurité**, T17 est **commitée après relecture technique et sécurité**, T18 est **commitée après relecture technique et sécurité**, T19–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
+T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11 est **commitée après relecture technique, sécurité finale en attente**, T12 est **commitée après relecture technique, sécurité finale en attente**, T13 est **commitée après relecture technique, sécurité finale en attente**, T14 est **commitée après relecture technique, sécurité finale en attente**, T15 est **commitée après relecture technique et sécurité**, T16 est **commitée après relecture technique et sécurité**, T17 est **commitée après relecture technique et sécurité**, T18 est **commitée après relecture technique et sécurité**, T19 est **commitée après relecture technique et sécurité**, T20–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
 satisfaites ; les tâches bloquées par l’identité réelle ne doivent pas empêcher
 les développements testables sur un environnement synthétique. Ne pas déclarer
 la connexion ou J1 reçus avant leur vérification réelle.
@@ -670,6 +670,19 @@ la connexion ou J1 reçus avant leur vérification réelle.
 - Commit proposé : `Add data quality and restricted audit views`.
 
 ### T19 — Réconciliation exhaustive des champs et parcours
+
+- Statut : **commitée après relecture technique et sécurité**.
+  Contrôle des modèles API publics réellement chargés, du registre, des chemins
+  frontend, du manifeste et de la matrice ; types, nullabilité, clés, filtres et OPS.
+  Rendu et états vides admis par champ, contrôles négatifs d’omission/ajout/doublon.
+  Parcours natifs pour toutes les collections, détails métier spécialisés renforcés.
+  Modèles chargés depuis l’environnement Python verrouillé sans démarrage API/base ;
+  CI adaptée à ce prérequis et aux changements du contrat. R/S restent différés.
+  Validation : format, lint, types, 585 tests unitaires/composants (57 nouveaux),
+  build et 123 scénarios navigateur sur trois largeurs réussis. La phase navigateur
+  a été relancée après un refus local de port ; aucune modification entre les contrôles.
+  Revue Codex Security du diff T19 clôturée sans vulnérabilité relevée dans ce périmètre.
+  CI hébergée et fournisseur réel non vérifiés ; aucun changement runtime/backend.
 
 - Dépendances : T12–T18.
 - Livrer : contrôle automatisé registre ↔ projections ↔ manifeste frontend ↔ matrice,

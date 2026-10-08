@@ -267,6 +267,13 @@ import references individually, with renewed catalogue, exact ID, unique respons
 and stable exposed freshness; no business-row lineage is inferred. Lists paginate
 locally by 50 and collection pages by 25. Existing public decoders discard extra
 private fields; session generation and component cancellation govern this view.
+Frontend contract tests import the actual public API row models in an isolated
+Python process from the prepared project environment, without API/database startup.
+They reconcile schema paths, serialized types, nullability, keys, filters and
+operations flags with frontend projections and the product matrix. The executable
+manifest identifies native fallback destinations; full rendered details and
+admitted empty states are checked with synthetic values. This test-only boundary
+does not expose backend code or dependencies in the browser build.
 A GitHub workflow runs locked installation and the same local quality command;
 hosted execution has not yet been observed. Deployed provider/API compatibility,
 remaining analytical screens and production hosting remain later increments.

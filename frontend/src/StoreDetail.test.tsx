@@ -1,3 +1,4 @@
+import { assertDetail } from "../test/coverage-render";
 import {
   act,
   fireEvent,
@@ -108,6 +109,7 @@ it("reads the full reference only on explicit expansion and renders every publis
   expect(await screen.findByText("00123")).toBeVisible();
   expect(screen.getByText("1 234 567 890,12")).toBeVisible();
   expect(document.querySelectorAll("dt")).toHaveLength(Object.keys(row).length);
+  assertDetail("stores", row);
   const url = new URL(String(request.mock.calls[0]![0]));
   expect([...url.searchParams.keys()].sort()).toEqual(["id", "limit"]);
   expect(url.searchParams.get("id")).toBe(row.id);

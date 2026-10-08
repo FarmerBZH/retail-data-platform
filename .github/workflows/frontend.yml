@@ -4,10 +4,20 @@ on:
   push:
     paths:
       - "frontend/**"
+      - "src/retail_data_platform/api/resources*"
+      - "src/retail_data_platform/database/**"
+      - "docs/saas/data-coverage.md"
+      - "pyproject.toml"
+      - "uv.lock"
       - ".github/workflows/frontend.yml"
   pull_request:
     paths:
       - "frontend/**"
+      - "src/retail_data_platform/api/resources*"
+      - "src/retail_data_platform/database/**"
+      - "docs/saas/data-coverage.md"
+      - "pyproject.toml"
+      - "uv.lock"
       - ".github/workflows/frontend.yml"
 
 permissions:
@@ -28,5 +38,10 @@ jobs:
         with:
           node-version-file: frontend/.nvmrc
       - run: npm ci
+      - name: Install locked public model dependencies
+        run: |
+          python3 -m venv "$RUNNER_TEMP/uv-tools"
+          "$RUNNER_TEMP/uv-tools/bin/pip" install uv==0.12.15
+          "$RUNNER_TEMP/uv-tools/bin/uv" sync --locked --project .. --python 3.13
       - run: npx --no-install playwright install --with-deps chromium
       - run: npm run check

@@ -1,3 +1,4 @@
+import { assertDetail } from "../test/coverage-render";
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
@@ -93,6 +94,7 @@ it("opens existing cell then one live source only on demand, renders inert text 
   expect(
     screen.getByRole("heading", { name: /Détail activité — Appels/ }),
   ).toHaveFocus();
+  assertDetail("analytics_activity_month", syntheticActivity());
   expect(reads.page).not.toHaveBeenCalled();
   const proof = screen.getByRole("button", {
     name: `Consulter l’observation ${activityObservationIds[0]}`,

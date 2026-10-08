@@ -1,3 +1,4 @@
+import { assertDetail } from "../test/coverage-render";
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
@@ -100,6 +101,7 @@ it("opens evidence only on demand, handles a disappeared live product and restor
     name: "Détail GTIN 00000000000003, 2026-01",
   });
   await userEvent.click(button);
+  assertDetail("analytics_register_product_month", syntheticProductRows()[2]!);
   expect(reads.page).not.toHaveBeenCalled();
   await userEvent.click(
     screen.getByRole("button", { name: "Consulter le produit actuel" }),

@@ -412,6 +412,25 @@ Tests cover keyboard access to the explanation, disabled sign-in, configuration
 validation/redaction, loading feedback and render failure recovery. All inputs
 are synthetic. No identity-provider integration is claimed by these tests.
 
+## Published-contract reconciliation
+
+T19 unit tests import the actual public API models from the existing Python
+project environment, without starting the API or reading a database. From the
+repository root, prepare locked dependencies with `uv sync --locked` (Python 3.13+).
+The test uses `../.venv/bin/python` from `frontend/`; `COVERAGE_PYTHON` may select
+another prepared interpreter. Missing Python dependencies fail the test rather
+than silently skipping reconciliation. The frontend CI prepares the same lock.
+
+The check compares resource/field/path sets, keys, filters, operations flags,
+serialized types and nullability against the frontend projection, executable
+manifest and product matrix. It tests omitted, added and duplicate fields and
+checks rendered values inside their labelled field. Every admitted null, empty
+string/list and boolean state is exercised, including nested paths. Native
+fallback journeys cover every collection; OPS remains in Quality under its
+catalogue. Specialized product, presence, activity, typology and store details
+also assert their complete public projection. Network/selection targets remain
+deferred; this is public-field coverage, not acceptance of the full P0 product.
+
 ## Browser checks and CI
 
 Install the Chromium revision selected by the lockfile once after `npm ci`:

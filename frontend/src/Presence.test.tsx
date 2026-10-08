@@ -1,3 +1,4 @@
+import { assertDetail } from "../test/coverage-render";
 import { act, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, it, vi } from "vitest";
@@ -102,6 +103,10 @@ it("loads evidence only on demand with a category filter, keeps source keys iner
   expect(
     screen.getByRole("heading", { name: "Détail de la collection catégorie" }),
   ).toHaveFocus();
+  assertDetail(
+    "analytics_distribution_product_month",
+    syntheticDistributions()[0]!,
+  );
   await userEvent.click(screen.getByText("Liste (1 éléments)"));
   expect(
     screen.getByText("00000000-0000-4000-8000-000000000002"),
@@ -264,4 +269,29 @@ it("keeps the detail category scope explicit even when its source code is empty"
     presenceDecoders.analytics_distribution_product_month,
     expect.any(Object),
   );
+});
+
+it("renders every category summary field in its specialized detail", async () => {
+  view();
+  await screen.findByRole("table");
+  await userEvent.click(
+    screen.getByRole("button", {
+      name: `Détail catégorie ${categoryCode}, 2026-01`,
+    }),
+  );
+  assertDetail("analytics_store_category_month", syntheticCategories()[0]!);
+});
+it("renders every shelf field in the category evidence detail", async () => {
+  view();
+  await screen.findByRole("table");
+  await userEvent.click(
+    screen.getByRole("button", {
+      name: "Consulter les dénominateurs du linéaire",
+    }),
+  );
+  const region = await screen.findByRole("region", {
+    name: "Dénominateurs de linéaire publiés",
+  });
+  await userEvent.click(within(region).getAllByRole("button")[0]!);
+  assertDetail("analytics_shelf_category_month", syntheticShelf());
 });

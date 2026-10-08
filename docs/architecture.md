@@ -187,8 +187,8 @@ still unmount and cancel their reads. A rejected later cursor can restart at pag
 Leaving an explorer cancels its reads and removes its results;
 session termination unmounts the workspace and clears the transport cache.
 The coverage manifest associates 325 public fields and 74 nested paths with this
-renderer and synthetic tests. Operational component rendering tests are not
-proof that an operations screen has been delivered. See
+renderer and synthetic tests. Operational routes are consulted in the
+catalogue-gated Quality screen, independently of ordinary DataExplorer. See
 [coverage manifest notes](saas/frontend-coverage.md).
 The active store product-sales tab reads only the applied store/month window
 from `analytics_register_product_month`, after checking catalogue capabilities.
@@ -255,6 +255,18 @@ assortment can expose its mapping/rank rules through one additional explicit lev
 These mutable references do not replace published rows or claim historical binding.
 Component and session departure cancel reads; labels render as inert text through
 existing published-value components. No backend or identity boundary changes.
+The lazy Quality workspace uses native server pages for network monthly attribution,
+with dataset/month/match-status filters and no store scope or inferred revenue loss.
+It exposes import/refresh audits only from the authenticated server catalogue and
+refreshes that capability contract before mounting each chosen collection. Ordinary
+login retains its original scopes; an explicit operations login requests the optional
+operations scope, without interpreting the request as a grant or decoding token roles.
+The API retains authorization authority. Audits remain readable before analytical
+initialization, while monthly analyses are gated. Publication source IDs open live
+import references individually, with renewed catalogue, exact ID, unique response
+and stable exposed freshness; no business-row lineage is inferred. Lists paginate
+locally by 50 and collection pages by 25. Existing public decoders discard extra
+private fields; session generation and component cancellation govern this view.
 A GitHub workflow runs locked installation and the same local quality command;
 hosted execution has not yet been observed. Deployed provider/API compatibility,
 remaining analytical screens and production hosting remain later increments.

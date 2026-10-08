@@ -3,7 +3,7 @@
 Statut : T01–T05 sont implémentées, validées et commitées.
 T06 est **commitée après relecture technique**, avec revue Security finale en attente ;
 T07 est **commitée après relecture technique, sécurité finale en attente** ;
-T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11 est **commitée après relecture technique, sécurité finale en attente** ; T12 est **commitée après relecture technique, sécurité finale en attente** ; T13 est **commitée après relecture technique, sécurité finale en attente** ; T14 est **commitée après relecture technique, sécurité finale en attente** ; T15 est **commitée après relecture technique et sécurité** ; T16 est **commitée après relecture technique et sécurité** ; T17 est **commitée après relecture technique et sécurité** ; T18–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
+T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11 est **commitée après relecture technique, sécurité finale en attente** ; T12 est **commitée après relecture technique, sécurité finale en attente** ; T13 est **commitée après relecture technique, sécurité finale en attente** ; T14 est **commitée après relecture technique, sécurité finale en attente** ; T15 est **commitée après relecture technique et sécurité** ; T16 est **commitée après relecture technique et sécurité** ; T17 est **commitée après relecture technique et sécurité** ; T18 est **commitée après relecture technique et sécurité** ; T19–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
 pour les scripts réels et les limites du socle.
 Point de départ historique : branche `feat/saas-frontend`, API de lecture et client personnel
 existants ; aucun package frontend ni pipeline frontend à ce stade.
@@ -135,7 +135,7 @@ demande liens, cohérence et absence de divulgation, pas un faux audit applicati
 
 T01–T05 sont **validées**, T06 est **commitée, sécurité finale en attente**,
 T07 est **commitée, sécurité finale en attente**, T08 est **commitée après relecture technique, sécurité finale en attente**,
-T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11 est **commitée après relecture technique, sécurité finale en attente**, T12 est **commitée après relecture technique, sécurité finale en attente**, T13 est **commitée après relecture technique, sécurité finale en attente**, T14 est **commitée après relecture technique, sécurité finale en attente**, T15 est **commitée après relecture technique et sécurité**, T16 est **commitée après relecture technique et sécurité**, T17 est **commitée après relecture technique et sécurité**, T18–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
+T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11 est **commitée après relecture technique, sécurité finale en attente**, T12 est **commitée après relecture technique, sécurité finale en attente**, T13 est **commitée après relecture technique, sécurité finale en attente**, T14 est **commitée après relecture technique, sécurité finale en attente**, T15 est **commitée après relecture technique et sécurité**, T16 est **commitée après relecture technique et sécurité**, T17 est **commitée après relecture technique et sécurité**, T18 est **commitée après relecture technique et sécurité**, T19–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
 satisfaites ; les tâches bloquées par l’identité réelle ne doivent pas empêcher
 les développements testables sur un environnement synthétique. Ne pas déclarer
 la connexion ou J1 reçus avant leur vérification réelle.
@@ -630,6 +630,35 @@ la connexion ou J1 reçus avant leur vérification réelle.
 - Commit proposé : `Add typology and assortment inspection`.
 
 ### T18 — Qualité d’attribution et audits autorisés
+
+- Statut : **commitée après relecture technique et sécurité**.
+  Écran Qualité chargé à la demande ; attribution mensuelle au grain réseau
+  dataset/mois/statut, sans sélection ni filtre magasin et sans total de page.
+  Audits d’import et de publication uniquement selon le catalogue authentifié,
+  relu à chaque ouverture ; aucune lecture OPS automatique. Connexion ordinaire
+  inchangée, connexion opérations explicite demandant `operations:read`, sans
+  confondre demande et octroi. L’API reste l’autorité d’accès.
+  Pagination serveur manuelle par 25 ; détail natif de tous les champs publics.
+  Imports sources d’une publication ouverts individuellement par ID, catalogue
+  relu, identité/unicité/fraîcheur vérifiées ; listes locales par 50.
+  Annulation au départ et à la fin de session, erreurs génériques, aucun champ
+  privé de fichier, empreinte ou diagnostic conservé dans les projections.
+  Une publication non initialisée bloque la qualité mensuelle, pas les audits
+  autorisés. Tests synthétiques ordinaires/OPS, révocation, refus, null/zéro,
+  seconde page, références sources publiées, annulation et références incohérentes.
+  Contrôle frontend complet réussi : formatage, lint, typage strict, compilation,
+  528 tests unitaires/composants et 123 scénarios Chromium/axe aux trois largeurs.
+  T18 ajoute 23 tests unitaires/composants et 9 scénarios navigateur. Deux tests
+  API existants passent ; jetons synthétiques signés vérifient aussi le catalogue
+  et les refus directs OPS, avec démarrage base isolé, sans validation PostgreSQL.
+  Scan Codex Security du diff terminé sans vulnérabilité identifiée. Le code
+  applicatif reste identique au snapshot ; corrections de fixtures, typage des
+  mocks et clavier relues séparément après ce snapshot. Le statut documentaire
+  final est mis à jour après le scan. Aucun audit cumulatif ni accord de production.
+  Relecture technique terminée sans anomalie à corriger ; code et tests inchangés
+  depuis le contrôle complet réussi. Le rapport Security conserve les limites
+  du snapshot et les corrections de tests relues séparément.
+  Fournisseur/configuration OPS réels, déploiement et CI hébergée non vérifiés.
 
 - Dépendances : T07, T10 et T13.
 - Livrer : analytics_monthly_link_quality avec périmètre réseau explicite ;

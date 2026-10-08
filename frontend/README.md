@@ -100,8 +100,8 @@ Responses remain bounded by the 2 MB transport limit. Large lists retain all
 elements and render in local pages of 50, with first/last-page controls and no
 per-element API calls. Published varchar limits and exact-value checks still apply.
 Only published fields are retained, including the projected children of current
-store, activity, category and typology details. Operational routes remain deferred
-to the protected operations screen and are never requested here.
+store, activity, category and typology details. Operational routes belong to
+the catalogue-gated Quality screen and are never requested by DataExplorer.
 
 Pagination reads one page of at most 25 rows per action, without deriving totals.
 Filters are explicitly applied and carried through opaque cursors. A row opens a
@@ -187,6 +187,24 @@ with identity, unique response, catalogue, available owner context and freshness
 checks. Assortment mapping/rank rules can be opened through one additional level.
 Live references are mutable, with no universal historical association guarantee.
 Leaving the applied scope, tab or session cancels reads and removes component data.
+
+Quality is a lazy global workspace view. Monthly attribution stays at network
+scope with dataset/month/match-status filters, never a store filter or page-derived
+revenue loss. Lists use manual 25-row server pages; details reread full native keys
+and render all known public fields. Missing and zero counts remain distinct.
+
+Import and refresh audits are offered only when the authenticated API catalogue
+exposes them, and that catalogue is refreshed before each collection/source opening.
+No audit is read until explicitly selected. The ordinary sign-in requests only
+`openid data:read`; the separate operations sign-in additionally requests
+`operations:read`. Requesting it does not grant it; API authorization remains decisive.
+Actual provider grant/client configuration still requires deployment acceptance.
+Uninitialized analytics block monthly quality but do not block authorized audits.
+Publication `source_run_ids` open import references explicitly, with a fresh
+catalogue, exact ID, unique response and stable exposed freshness. Reference lists
+paginate locally by 50, without eager requests or business-row/import lineage claims.
+Only public projections survive decoding; private file/hash/error fields are discarded.
+Departure and session replacement cancel reads and unmount this view.
 
 ## Run locally
 

@@ -92,3 +92,20 @@ export function TypologiesEntry(
     </Suspense>
   );
 }
+
+const QualityView = lazy(() =>
+  import("./Quality").then((module) => ({ default: module.Quality })),
+);
+export function QualityEntry(
+  props: ComponentProps<typeof import("./Quality").Quality>,
+) {
+  return (
+    <Suspense
+      fallback={
+        <Typography role="status">Chargement de la qualité…</Typography>
+      }
+    >
+      <QualityView {...props} />
+    </Suspense>
+  );
+}

@@ -87,6 +87,17 @@ export function SignIn({
           >
             Se connecter
           </Button>
+          {authentication && !pending && (
+            <Button
+              variant="text"
+              fullWidth
+              onClick={() => {
+                void authentication.signIn(true).catch(() => undefined);
+              }}
+            >
+              Se connecter aux opérations
+            </Button>
+          )}
           {pending && (
             <Button
               variant="outlined"

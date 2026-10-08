@@ -20,6 +20,16 @@ test("public shell is responsive, isolated and keyboard accessible", async ({
 
   const explanation = page.getByRole("button", { name: "Comprendre l’accès" });
   await page.keyboard.press("Tab");
+  await expect(
+    page.getByRole("button", { name: "Se connecter", exact: true }),
+  ).toBeFocused();
+  await page.keyboard.press("Tab");
+  await expect(
+    page.getByRole("button", {
+      name: "Se connecter aux opérations",
+      exact: true,
+    }),
+  ).toBeFocused();
   await page.keyboard.press("Tab");
   await expect(explanation).toBeFocused();
   await page.keyboard.press("Enter");

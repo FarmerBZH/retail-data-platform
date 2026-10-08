@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
@@ -29,7 +30,8 @@ import {
   rowKey,
 } from "./published-data";
 import type { PublishedRow } from "./published-data";
-import { PublishedDetail } from "./PublishedDetail";
+import { publishedContract } from "./published-contract";
+import { PublishedDetail, PublishedValue } from "./PublishedDetail";
 
 export type ExplorerReads = Pick<ReadQueries, "resources" | "page" | "status">;
 function message(error: unknown) {
@@ -81,8 +83,8 @@ export function DataExplorer({
       <Typography variant={storeId ? "h2" : "h1"}>Données publiées</Typography>
       <Typography>
         Consultation au grain natif, sans total global. Le catalogue détermine
-        les collections et filtres disponibles. Les audits opérationnels seront
-        proposés dans Qualité.
+        les collections et filtres disponibles. Les audits opérationnels sont
+        accessibles selon les droits dans Qualité des données.
       </Typography>
       {storeId && (
         <Typography>
@@ -170,10 +172,14 @@ export function CollectionExplorer({
   reads,
   resource,
   fixedQuery = {},
+  summaryColumns,
+  renderRelated,
 }: {
   reads: Pick<ReadQueries, "page" | "status">;
   resource: Resource;
   fixedQuery?: Query;
+  summaryColumns?: readonly string[];
+  renderRelated?: (row: PublishedRow) => ReactNode;
 }) {
   const [draft, setDraft] = useState<Record<string, string>>({});
   const [query, setQuery] = useState<Query>(fixedQuery);
@@ -209,6 +215,7 @@ export function CollectionExplorer({
       const before = await reads.status(options);
       if (
         resource.name.startsWith("analytics_") &&
+        !publishedContract[resource.name].operations &&
         before.state === "uninitialized"
       )
         throw new Error("uninitialized");
@@ -420,7 +427,10 @@ export function CollectionExplorer({
         </Typography>
       )}
       {page && opened && page.items[0] && (
-        <PublishedDetail resource={resource} row={page.items[0]} />
+        <>
+          <PublishedDetail resource={resource} row={page.items[0]} />
+          {renderRelated?.(page.items[0])}
+        </>
       )}
       {!opened && position.index > 0 && current.phase === "error" && (
         <Button
@@ -449,7 +459,7 @@ export function CollectionExplorer({
               </caption>
               <TableHead>
                 <TableRow>
-                  {resource.keys.map((key) => (
+                  {(summaryColumns ?? resource.keys).map((key) => (
                     <TableCell key={key}>
                       {fieldLabel(key)} ({key})
                     </TableCell>
@@ -460,9 +470,16 @@ export function CollectionExplorer({
               <TableBody>
                 {page.items.map((row, index) => (
                   <TableRow key={rowKey(resource, row)}>
-                    {resource.keys.map((key) => (
+                    {(summaryColumns ?? resource.keys).map((key) => (
                       <TableCell key={key} sx={{ overflowWrap: "anywhere" }}>
-                        {String(row[key])}
+                        {summaryColumns ? (
+                          <PublishedValue
+                            value={row[key]!}
+                            node={publishedContract[resource.name].fields[key]!}
+                          />
+                        ) : (
+                          String(row[key])
+                        )}
                       </TableCell>
                     ))}
                     <TableCell>

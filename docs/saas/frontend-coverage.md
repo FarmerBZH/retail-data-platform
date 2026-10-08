@@ -27,9 +27,9 @@ supplémentaires ne reçoivent un filtre magasin fixe que si le catalogue l’au
 Le retour depuis Données préserve la sélection et les mois du magasin en mémoire
 de session, sans garder son écran de données monté.
 
-`import_runs` et `analytics_refresh_runs` ont des tests de rendu synthétiques,
-mais leur accès par un écran habilité reste **à faire en T20**. Le manifeste
-les marque explicitement comme tels ; l’explorateur ne les propose ni ne les appelle.
+T18 rend `import_runs` et `analytics_refresh_runs` consultables dans Qualité
+uniquement selon le catalogue authentifié. Le manifeste associe désormais ces
+champs à cet accès OPS ; l’explorateur Données ne les propose ni ne les appelle.
 La présence d’une valeur dans le détail natif ne signifie pas que toutes les
 analyses métier ou tous les écrans P0 sont livrés. Les graphiques, indicateurs,
 filiations et limites de couverture restent soumis à leurs tâches respectives.
@@ -76,3 +76,15 @@ Chaque ligne conserve ses champs et listes dans `PublishedDetail`. Les référen
 vivantes, y compris les règles d'un assortiment, s'ouvrent explicitement par ID.
 Les scénarios synthétiques couvrent contradictions, mapping ambigu, règles multiples,
 mois absents, contexte enseigne sans candidat, lots incomplets et annulation.
+
+T18 utilise le lecteur partagé pour `analytics_monthly_link_quality`, au grain
+réseau dataset/mois/statut sans filtre magasin. Les pages ne deviennent pas des
+agrégats, et les nombres de lignes ne mesurent pas du CA perdu. Les audits conservent
+leurs champs publics dans `PublishedDetail`, notamment les `source_run_ids`.
+Les imports sources s’ouvrent explicitement avec contrôle renouvelé du catalogue,
+de l’identité, de l’unicité et de la fraîcheur. Les tests
+[Quality.test.tsx](../../frontend/src/Quality.test.tsx),
+[SourceImports.test.tsx](../../frontend/src/SourceImports.test.tsx) et
+[quality.spec.ts](../../frontend/e2e/quality.spec.ts) vérifient l’accès ordinaire/OPS,
+la révocation, les refus locaux, les secondes pages, null/zéro, le changement de
+lecteur, les champs privés exclus et l’absence de requêtes anticipées par ID.

@@ -16,7 +16,10 @@ import { FreshnessBanner } from "./FreshnessBanner";
 import { StoreList } from "./Stores";
 import { initialStoreNavigation } from "./store-navigation";
 import type { ReadQueries } from "./read-queries";
-import { DataExplorerEntry as DataExplorer } from "./ExplorerEntry";
+import {
+  DataExplorerEntry as DataExplorer,
+  QualityEntry as Quality,
+} from "./ExplorerEntry";
 import { useSession } from "./use-session";
 
 export default function App({
@@ -178,7 +181,7 @@ function Workspace({ reads }: { reads: ReadQueries }) {
   return (
     <Stack spacing={3}>
       <Box component="nav" aria-label="Navigation principale">
-        <Stack direction="row" spacing={2}>
+        <Stack direction="row" spacing={2} useFlexGap sx={{ flexWrap: "wrap" }}>
           <Button
             aria-current={view === "stores" ? "page" : undefined}
             onClick={() => setView("stores")}
@@ -191,6 +194,12 @@ function Workspace({ reads }: { reads: ReadQueries }) {
           >
             Données
           </Button>
+          <Button
+            aria-current={view === "quality" ? "page" : undefined}
+            onClick={() => setView("quality")}
+          >
+            Qualité des données
+          </Button>
         </Stack>
       </Box>
       {view === "stores" ? (
@@ -199,6 +208,8 @@ function Workspace({ reads }: { reads: ReadQueries }) {
           navigation={navigation}
           onNavigation={setNavigation}
         />
+      ) : view === "quality" ? (
+        <Quality reads={reads} />
       ) : (
         <DataExplorer reads={reads} />
       )}

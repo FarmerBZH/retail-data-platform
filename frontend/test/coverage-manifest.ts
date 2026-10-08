@@ -2,8 +2,8 @@ import { publishedContract } from "../src/published-contract";
 import type { Node } from "../src/published-data";
 import { resourceNames } from "../src/read-api";
 
-// One entry per published field/path. Operations routes remain deferred to T20;
-// rendering a synthetic component is not evidence that an operational screen exists.
+// One entry per published field/path. Quality exposes OPS collections only
+// through the server catalogue; ordinary DataExplorer still excludes them.
 export const coverageManifest = resourceNames.flatMap((resource) => {
   const entries: {
     resource: string;
@@ -23,7 +23,7 @@ export const coverageManifest = resourceNames.flatMap((resource) => {
         component: "PublishedDetail / PublishedValue",
         test: `published-data.test.tsx: renders every field and nested path of ${resource} using synthetic values`,
         access: publishedContract[resource].operations
-          ? "T20 pending; synthetic rendering only"
+          ? "Quality / operations:read catalogue"
           : "DataExplorer",
       });
       if (node.kind === "object") visit(node.fields!, `${path}.`);

@@ -30,6 +30,7 @@ export async function providerFixture(settings: OidcSettings) {
     pkceValid: false,
     signatureRead: false,
     accessToken: "synthetic-access-token",
+    grantedScope: "openid data:read",
     async fetch(url: string, options: RequestInit): Promise<Response> {
       const path = new URL(url).pathname;
       if (path.endsWith("/.well-known/openid-configuration")) {
@@ -125,7 +126,7 @@ export async function providerFixture(settings: OidcSettings) {
       const body: Record<string, unknown> = {
         access_token: fixture.accessToken,
         token_type: "Bearer",
-        scope: fixture.failure === "scope" ? "openid" : "openid data:read",
+        scope: fixture.failure === "scope" ? "openid" : fixture.grantedScope,
         expires_in: fixture.failure === "overlong" ? 86401 : 300,
         id_token: `${input}.${base64url(signature)}`,
       };

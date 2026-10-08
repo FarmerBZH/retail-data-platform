@@ -181,7 +181,7 @@ export class Authentication {
     return server;
   }
 
-  async signIn(): Promise<void> {
+  async signIn(operations = false): Promise<void> {
     if (this.#busy) return;
     const operation = this.sessions.begin();
     this.#busy = operation;
@@ -198,7 +198,9 @@ export class Authentication {
         client_id: this.settings.clientId,
         redirect_uri: this.settings.redirectUri,
         response_type: "code",
-        scope: "openid data:read",
+        scope: operations
+          ? "openid data:read operations:read"
+          : "openid data:read",
         prompt: "login",
         max_age: "0",
         code_challenge_method: "S256",

@@ -90,6 +90,30 @@ describe("browser PKCE with a synthetic signed provider", () => {
     ).toBeUndefined();
   });
 
+  it("requests operations only on explicit sign-in without granting browser authority", async () => {
+    await auth.signIn(true);
+    expect(authorization.searchParams.get("scope")).toBe(
+      "openid data:read operations:read",
+    );
+    expect(authorization.searchParams.get("prompt")).toBe("login");
+    expect(authorization.searchParams.get("max_age")).toBe("0");
+    const url = new URL(settings.redirectUri);
+    url.search = new URLSearchParams({
+      code: "synthetic-code",
+      state: authorization.searchParams.get("state")!,
+      iss: settings.issuer,
+    }).toString();
+    // A provider may decline the optional scope while still admitting a reader.
+    await auth.complete(url);
+    expect(auth.session).toBeDefined();
+    expect(storage.length).toBe(0);
+    expect(Object.keys(auth.sessions.getSnapshot()).sort()).toEqual([
+      "expiresAt",
+      "generation",
+      "phase",
+    ]);
+  });
+
   it("drops an expired memory token and purges an abandoned expired redirect on re-entry", async () => {
     const url = await callback();
     await auth.complete(url);

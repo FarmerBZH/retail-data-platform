@@ -535,3 +535,92 @@ CSP destinations with that environment's public configuration, then exercise log
 reads and logout under those headers. Check script/style allowances, framing/base/
 object restrictions, cache behavior and callback access-log redaction explicitly.
 No host, deployment or production-readiness claim follows from local Vite preview.
+
+## Integrated delivery qualification
+
+T22 adds `e2e/delivery.spec.ts` to the existing browser suite at 360, 768 and
+1440 px. The whole journey uses one ordinary synthetic identity: login, a 25-row
+store page and a second one-row page, store detail, four product-month cells over
+January–March 2026 in two pages, an explicit live observation, network-scoped
+quality with one HTTP 500 and manual recovery, then logout. Negative revenue,
+zero and ambiguous/null values come from the existing synthetic fixture. Extra
+audit scopes are not granted. No production code or backend endpoint is added.
+
+Two profiles add either 0 or 300 ms to each synthetic API response. The latter
+is a response-delay model, with no bandwidth/packet-loss or CPU throttling and
+no provider delay. Neither profile establishes performance on a real network.
+The existing session-wide one-second request spacing remains active.
+
+The owner delegated local budget selection. Thresholds apply to every sample
+(and therefore to its p95), only for this fixture and runner:
+
+| Measurement      | Local ceiling | Definition                                                                                                          |
+| ---------------- | ------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Login/list       | 8 s           | Before initial navigation to visible last row of the first page, including synthetic login                          |
+| Sales            | 10 s          | Apply click to the exact two-page sales table displaying the negative cell                                          |
+| Complete journey | 60 s          | Initial navigation through verified logout and final heap sampling; includes test interactions                      |
+| API reads        | 24            | All browser requests to the synthetic API, including catalogue/freshness and failed reads; excludes OIDC and assets |
+| API JSON         | 128 KiB       | Sum of UTF-8 fixture response bodies, including the error; excludes HTTP overhead, OIDC and assets                  |
+| Sampled JS heap  | 128 MiB       | Maximum of four Chromium `Runtime.getHeapUsage.usedSize` observations: list, sales, quality, logout                 |
+
+An exploratory run exceeded the initial 20-request proposal with 21 reads. The
+ceiling was explicitly revised to 24 before repeated qualification to accommodate
+the existing freshness/capability checks and three reads of headroom. No security
+check was removed. Heap observations are not a continuous peak, process RSS, total
+browser memory, leak proof or secure memory erasure; no forced collection is used.
+The API JSON counter is fixture accounting, not a wire-byte measurement.
+
+Run the full `npm run check` first. Repeat just the qualification in isolation:
+
+```bash
+npm run test:e2e -- delivery.spec.ts --project chromium-1440 --workers 1 --repeat-each 10
+```
+
+Each test receives a fresh context, with no persistent storage state. The server
+is shared; OS/browser caches and machine activity are uncontrolled. Twenty runs
+give ten samples per profile. `DELIVERY_METRICS` lines contain only numeric
+synthetic aggregates, browser version and generic platform/architecture/core/RAM
+characteristics, without host names, paths, payloads or credentials. Compute p95
+per profile and measurement with sorted values at `ceil(0.95 * n) - 1`; at n=10
+this is the maximum, with limited statistical confidence. Do not mix widths or
+profiles, omit failed samples, or call the standard two-worker suite an isolated
+benchmark. Builds and provider fixture preparation are outside the timing window.
+
+Real end-to-end API/OIDC recipe acceptance remains blocked without a defined
+synthetic environment. Earlier local identity smoke covers its recorded subset,
+not all business tabs. Human accessibility receipt, deployed CSP/TLS/cache/logs,
+hosted CI, target production volumes and concurrent-user load remain unverified.
+The full P0 product is not received: network totals/rankings and multi-store
+server analytics are still deferred. Local results below are separate from those open boundaries.
+
+### Observed local measurements
+
+On 2026-10-09, the isolated command above completed all 20 runs without failures
+(ten per profile), at 1440 × 900 px, one worker, Chromium 153.0.8010.12 and Node
+24.15.0. The runner was macOS/arm64 with eight logical CPUs and 16 GiB RAM.
+These are generic machine characteristics, not a benchmark hardware guarantee.
+The table uses nearest-rank p95, with durations rounded upward to milliseconds;
+all six local ceilings passed for every measured sample.
+
+| Measurement           | 0 ms profile p95 | 300 ms profile p95 | Ceiling     |
+| --------------------- | ---------------- | ------------------ | ----------- |
+| Login/list            | 2.841 s          | 3.005 s            | 8 s         |
+| Sales                 | 7.001 s          | 6.979 s            | 10 s        |
+| Complete journey      | 21.606 s         | 22.188 s           | 60 s        |
+| API reads             | 21               | 21                 | 24          |
+| API JSON bytes        | 39,753           | 39,753             | 131,072     |
+| Sampled JS heap bytes | 20,925,808       | 20,973,560         | 134,217,728 |
+
+The delayed profile's similar sales duration reflects the existing one-second
+request-start spacing; this synthetic result is not evidence that network latency
+has no effect. Ten samples give a descriptive maximum, not a reliable production
+p95. No concurrent-user, maximum-row-volume or deployed API test was performed.
+
+The full local `npm run check` also passed formatting, lint, strict types,
+585 unit/component tests, production build and all 147 browser scenarios across
+360/768/1440 px. The repeated command's 20 runs are additional qualification, not
+added to that suite count. Codex Security's T22 diff review found no vulnerability
+in its inspected scope; the earlier cumulative frontend scan remains available.
+The sealed diff snapshot preceded only narrow results/status documentation and
+budget-comment clarification, reviewed manually with no executable behavior change.
+No successful hosted workflow or real recipe receipt is inferred.

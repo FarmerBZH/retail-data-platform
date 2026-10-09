@@ -4,9 +4,13 @@ A portfolio project for building a reliable data platform from heterogeneous
 tabular sources.
 
 The project provides validated data ingestion, PostgreSQL analytics and an
-authenticated read API. An initial React frontend shell provides a French entry
-screen and shared Material UI theme; authentication and business screens are not
-implemented yet. See the [frontend setup](frontend/README.md) and
+authenticated read API. The React frontend provides personal OIDC login, store
+selection and detail, monthly store analyses, published data inspection and
+permission-gated quality audits with a shared Material UI theme. These flows are
+verified with synthetic browser scenarios; deployed identity/API acceptance,
+human accessibility receipt and production qualification remain open. Network
+aggregations, global rankings and multi-store analytics are deferred. See the
+[frontend setup](frontend/README.md) and
 [SaaS frontend specification](docs/saas/README.md).
 
 ## Development

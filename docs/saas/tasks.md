@@ -3,7 +3,7 @@
 Statut : T01–T05 sont implémentées, validées et commitées.
 T06 est **commitée après relecture technique**, avec revue Security finale en attente ;
 T07 est **commitée après relecture technique, sécurité finale en attente** ;
-T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11 est **commitée après relecture technique, sécurité finale en attente** ; T12 est **commitée après relecture technique, sécurité finale en attente** ; T13 est **commitée après relecture technique, sécurité finale en attente** ; T14 est **commitée après relecture technique, sécurité finale en attente** ; T15 est **commitée après relecture technique et sécurité** ; T16 est **commitée après relecture technique et sécurité** ; T17 est **commitée après relecture technique et sécurité** ; T18 est **commitée après relecture technique et sécurité** ; T19 est **commitée après relecture technique et sécurité** ; T20 est **partie automatisée commitée après relecture technique et sécurité, recette humaine requise** ; T21 est **partie automatisée commitée après relecture technique et sécurité, headers de recette bloqués faute d’environnement défini** ; T22 reste à faire. Voir le [guide frontend](../../frontend/README.md)
+T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11 est **commitée après relecture technique, sécurité finale en attente** ; T12 est **commitée après relecture technique, sécurité finale en attente** ; T13 est **commitée après relecture technique, sécurité finale en attente** ; T14 est **commitée après relecture technique, sécurité finale en attente** ; T15 est **commitée après relecture technique et sécurité** ; T16 est **commitée après relecture technique et sécurité** ; T17 est **commitée après relecture technique et sécurité** ; T18 est **commitée après relecture technique et sécurité** ; T19 est **commitée après relecture technique et sécurité** ; T20 est **partie automatisée commitée après relecture technique et sécurité, recette humaine requise** ; T21 est **partie automatisée commitée après relecture technique et sécurité, headers de recette bloqués faute d’environnement défini** ; T22 est **partie automatisée commitée après relecture technique et sécurité, recette réelle bloquée faute d’environnement**. Voir le [guide frontend](../../frontend/README.md)
 pour les scripts réels et les limites du socle.
 Point de départ historique : branche `feat/saas-frontend`, API de lecture et client personnel
 existants ; aucun package frontend ni pipeline frontend à ce stade.
@@ -135,7 +135,7 @@ demande liens, cohérence et absence de divulgation, pas un faux audit applicati
 
 T01–T05 sont **validées**, T06 est **commitée, sécurité finale en attente**,
 T07 est **commitée, sécurité finale en attente**, T08 est **commitée après relecture technique, sécurité finale en attente**,
-T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11 est **commitée après relecture technique, sécurité finale en attente**, T12 est **commitée après relecture technique, sécurité finale en attente**, T13 est **commitée après relecture technique, sécurité finale en attente**, T14 est **commitée après relecture technique, sécurité finale en attente**, T15 est **commitée après relecture technique et sécurité**, T16 est **commitée après relecture technique et sécurité**, T17 est **commitée après relecture technique et sécurité**, T18 est **commitée après relecture technique et sécurité**, T19 est **commitée après relecture technique et sécurité**, T20 est **partie automatisée commitée après relecture technique et sécurité, recette humaine requise**, T21 est **partie automatisée commitée après relecture technique et sécurité, headers de recette bloqués faute d’environnement défini** ; T22 est **à faire**. Réaliser la suivante dont les dépendances sont
+T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11 est **commitée après relecture technique, sécurité finale en attente**, T12 est **commitée après relecture technique, sécurité finale en attente**, T13 est **commitée après relecture technique, sécurité finale en attente**, T14 est **commitée après relecture technique, sécurité finale en attente**, T15 est **commitée après relecture technique et sécurité**, T16 est **commitée après relecture technique et sécurité**, T17 est **commitée après relecture technique et sécurité**, T18 est **commitée après relecture technique et sécurité**, T19 est **commitée après relecture technique et sécurité**, T20 est **partie automatisée commitée après relecture technique et sécurité, recette humaine requise**, T21 est **partie automatisée commitée après relecture technique et sécurité, headers de recette bloqués faute d’environnement défini** ; T22 est **partie automatisée commitée après relecture technique et sécurité, recette réelle bloquée faute d’environnement**. Réaliser la suivante dont les dépendances sont
 satisfaites ; les tâches bloquées par l’identité réelle ne doivent pas empêcher
 les développements testables sur un environnement synthétique. Ne pas déclarer
 la connexion ou J1 reçus avant leur vérification réelle.
@@ -749,6 +749,26 @@ la connexion ou J1 reçus avant leur vérification réelle.
 - Commit proposé : `Verify browser security boundaries`.
 
 ### T22 — Recette intégrée et limites de livraison
+
+- Statut : **partie automatisée commitée après relecture technique et sécurité**. Parcours intégré
+  connexion → pagination magasins → fiche → ventes paginées → preuve explicite →
+  qualité avec erreur récupérable → logout vérifié à 360/768/1440 px.
+  `npm run check` passe : formatage, lint, types, 585 tests unitaires/composants,
+  build et 147 scénarios navigateur. Qualification isolée : 20/20 passages,
+  dix par profil (0/300 ms de délai API), un worker à 1440 px ; plafonds locaux
+  respectés, p95 descriptifs et limites des mesures publiés dans le
+  [guide de qualification](../../frontend/README.md#integrated-delivery-qualification).
+  Le responsable a délégué les budgets locaux ; plafond de requêtes ajusté de
+  20 à 24 après exploration, avant les répétitions, pour conserver les contrôles
+  de fraîcheur/droits. Scan Security du diff terminé sans vulnérabilité relevée ;
+  scan cumulatif T21 disponible. Seuls des résultats/statuts documentaires et un
+  commentaire ont évolué après le snapshot Security, vérifiés manuellement ;
+  aucun comportement exécutable modifié. README et architecture décrivent les
+  capacités implémentées et ces limites.
+  Recette API/OIDC réelle **bloquée**, absence d’environnement confirmée.
+  Recette humaine T20, headers/logs réels T21, CI hébergée et charge de production
+  non reçus. Aucun accord de charge/production, déploiement, livraison P0 complète
+  ou nouveau backend implicite.
 
 - Dépendances : T07 et T19–T21.
 - Livrer : parcours E2E réels sur données synthétiques couvrant connexion → liste →

@@ -3,9 +3,10 @@
 ## Scope and status
 
 This document describes the implemented ingestion, analytical and authenticated
-read API boundaries of Retail Data Platform, plus a web entry screen with OIDC
-authentication. Business screens, verified production identity deployment and
-multi-tenant authorization are outside the current implementation.
+read API boundaries of Retail Data Platform, plus an authenticated React frontend
+with store analyses and published data/quality inspection. Production identity
+deployment, network/global multi-store analytics and multi-tenant authorization
+are outside the verified implementation.
 Authorized API readers have global access; store selection is a query filter.
 
 The platform turns heterogeneous tabular source bundles into a validated,
@@ -35,9 +36,9 @@ rejects results and errors from old generations, including work that ignores can
 Page-hide clears protected content synchronously before caching; persisted restoration
 requires a new login. Intentional provider navigation preserves only transient PKCE
 state. Redirect-state removal is best-effort if browser storage throws; memory
-authority still ends and login/exchange refuse storage failures. The shell initiates
-no business-data reads, telemetry or service worker.
-It is not connected to the read API in the context diagram below.
+authority still ends and login/exchange refuse storage failures. The unauthenticated
+entry screen initiates no business reads; authenticated workspaces use the read
+transport below. No telemetry or service worker is added.
 
 The separate read transport provides fixed GET routes for the catalog, analytical
 freshness and single pages of published resources. It validates the configured
@@ -275,8 +276,15 @@ manifest identifies native fallback destinations; full rendered details and
 admitted empty states are checked with synthetic values. This test-only boundary
 does not expose backend code or dependencies in the browser build.
 A GitHub workflow runs locked installation and the same local quality command;
-hosted execution has not yet been observed. Deployed provider/API compatibility,
-remaining analytical screens and production hosting remain later increments.
+hosted execution has not yet been observed. An integrated synthetic browser
+journey additionally exercises login, store pagination/detail, product sales,
+explicit live evidence, recoverable quality
+failure and logout under the synthetic HTTP CSP. Test-only measurements record
+local action durations, API request counts and JSON bytes, and sampled Chromium
+JavaScript heap use. These do not establish server load capacity, a real network
+p95, complete browser memory use or production readiness. Deployed provider/API
+acceptance for all business flows, human accessibility receipt and production
+hosting remain open; network/global multi-store analytics are deferred.
 Setup and actual scripts are in the
 [frontend guide](../frontend/README.md).
 

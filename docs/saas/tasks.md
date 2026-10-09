@@ -1,10 +1,17 @@
 # Frontend SaaS — tâches d’implémentation et de validation
 
-Statut : T01–T05 sont implémentées, validées et commitées.
-T06 est **commitée après relecture technique**, avec revue Security finale en attente ;
-T07 est **commitée après relecture technique, sécurité finale en attente** ;
-T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11 est **commitée après relecture technique, sécurité finale en attente** ; T12 est **commitée après relecture technique, sécurité finale en attente** ; T13 est **commitée après relecture technique, sécurité finale en attente** ; T14 est **commitée après relecture technique, sécurité finale en attente** ; T15 est **commitée après relecture technique et sécurité** ; T16 est **commitée après relecture technique et sécurité** ; T17 est **commitée après relecture technique et sécurité** ; T18 est **commitée après relecture technique et sécurité** ; T19 est **commitée après relecture technique et sécurité** ; T20 est **partie automatisée commitée après relecture technique et sécurité, recette humaine requise** ; T21 est **partie automatisée commitée après relecture technique et sécurité, headers de recette bloqués faute d’environnement défini** ; T22 est **partie automatisée commitée après relecture technique et sécurité, recette réelle bloquée faute d’environnement**. Voir le [guide frontend](../../frontend/README.md)
-pour les scripts réels et les limites du socle.
+Statut actuel : les développements T01–T22 sont commités. Les parties automatisées
+T20–T22 sont vérifiées localement ; la recette humaine T20, les headers/logs réels
+T21 et la recette intégrée API/OIDC T22 restent ouverts, cette dernière faute
+d’environnement défini. CI hébergée et charge de production non reçues.
+Voir le [guide frontend](../../frontend/README.md#integrated-delivery-qualification)
+pour les résultats, budgets locaux et limites.
+
+Les statuts détaillés T01–T19 retracent les validations au moment de chaque tâche,
+y compris les revues Security alors en attente. Le scan cumulatif T21 a depuis
+examiné le frontend actuel ; il ne remplace pas une revue de tous les artefacts
+backend ou du smoke T07. Aucun statut historique ne vaut réception de production.
+
 Point de départ historique : branche `feat/saas-frontend`, API de lecture et client personnel
 existants ; aucun package frontend ni pipeline frontend à ce stade.
 
@@ -133,12 +140,10 @@ demande liens, cohérence et absence de divulgation, pas un faux audit applicati
 
 ## Tâches ordonnées
 
-T01–T05 sont **validées**, T06 est **commitée, sécurité finale en attente**,
-T07 est **commitée, sécurité finale en attente**, T08 est **commitée après relecture technique, sécurité finale en attente**,
-T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11 est **commitée après relecture technique, sécurité finale en attente**, T12 est **commitée après relecture technique, sécurité finale en attente**, T13 est **commitée après relecture technique, sécurité finale en attente**, T14 est **commitée après relecture technique, sécurité finale en attente**, T15 est **commitée après relecture technique et sécurité**, T16 est **commitée après relecture technique et sécurité**, T17 est **commitée après relecture technique et sécurité**, T18 est **commitée après relecture technique et sécurité**, T19 est **commitée après relecture technique et sécurité**, T20 est **partie automatisée commitée après relecture technique et sécurité, recette humaine requise**, T21 est **partie automatisée commitée après relecture technique et sécurité, headers de recette bloqués faute d’environnement défini** ; T22 est **partie automatisée commitée après relecture technique et sécurité, recette réelle bloquée faute d’environnement**. Réaliser la suivante dont les dépendances sont
-satisfaites ; les tâches bloquées par l’identité réelle ne doivent pas empêcher
-les développements testables sur un environnement synthétique. Ne pas déclarer
-la connexion ou J1 reçus avant leur vérification réelle.
+Les développements du plan sont commités. Les validations restantes sont celles
+signalées dans les statuts actuels T20–T22 : les lever exige les preuves humaines
+ou l’environnement réel correspondant. Les résultats synthétiques ne constituent
+ni la réception du P0 réseau/multi-magasins différé, ni la qualification de production.
 
 ### T01 — Socle React, thème et contrôles statiques
 

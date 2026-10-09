@@ -3,6 +3,9 @@
 Statut : contrat cible. Les capacités existantes ci-dessous ont été vérifiées dans
 `api/app.py`, `api/query.py`, `api/resources.py`, `api/resources.json` et
 `analytics.py`. Aucun endpoint supplémentaire n'est créé par ce document.
+Le client web implémenté et ses preuves locales sont décrits dans
+[l’architecture](../architecture.md) et le [guide frontend](../../frontend/README.md).
+La compatibilité de recette API/OIDC et les contrôles d’hébergement restent ouverts.
 
 ## Frontières
 

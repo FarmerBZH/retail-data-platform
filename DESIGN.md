@@ -1,7 +1,10 @@
 # Design de la plateforme analytique
 
-Statut : référence visuelle cible. Le socle frontend applique le thème à l’écran
-d’entrée et à la liste des magasins ; les analyses et graphiques restent à implémenter.
+Statut : référence visuelle cible. Le frontend applique le thème à l’entrée, aux
+magasins, aux analyses unitaires et à l’explorateur/qualité. Les graphiques des
+magasins sont implémentés et testés sur données synthétiques ; les vues réseau
+et les comparaisons multi-magasins restent différées. La recette humaine et
+la qualification de production restent ouvertes.
 MUI, le responsive et une interface agréable et simple sont confirmés. Les valeurs
 ci-dessous fixent une base commune pour l’implémentation ; elles pourront évoluer
 ensemble après une revue des premiers écrans.
@@ -186,9 +189,11 @@ Recette minimale : 360, 768 et 1440 px, zoom navigateur à 200 %, clavier seul,
 libellés longs, valeurs négatives, listes vides, données partielles et erreurs.
 Vérifier l’absence de débordement de page, la lisibilité des axes et l’accès au texte
 complet des tableaux. Utiliser uniquement des exemples et captures synthétiques.
-Le shell initial a été vérifié à 360, 768 et 1440 px avec navigation clavier et
-réduction du mouvement. La recette complète des écrans métier, du zoom et des
-graphiques reste à effectuer.
+Les parcours du shell et des écrans métier ont des contrôles automatisés à
+360, 768 et 1440 px, avec navigation clavier, focus, contrastes axe et réduction
+du mouvement. Ils ne remplacent pas la recette humaine du zoom natif et des
+annonces avec lecteur d’écran, toujours ouverte en T20. Voir les
+[résultats et limites du frontend](frontend/README.md#responsive-and-accessibility-qualification).
 
 ## Références MUI
 

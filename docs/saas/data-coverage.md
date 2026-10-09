@@ -1,6 +1,9 @@
 # Matrice exhaustive des données publiées vers les écrans
 
-Statut : contrat de couverture du frontend cible, pas inventaire de composants déjà livrés.
+Statut : contrat de couverture du frontend cible. La réconciliation et les
+destinations de consultation vérifiées de la tranche implémentée sont documentées
+dans le [manifeste frontend](frontend-coverage.md). Cette matrice conserve les
+écrans réseau/multi-magasins cibles, encore différés ; elle ne vaut pas leur réception.
 Référence : [registre API](../../src/retail_data_platform/api/resources.json) et
 [projection des objets](../../src/retail_data_platform/api/resources.py).
 Périmètre vérifié : **24 ressources** (13 tables et 11 vues analytiques),

@@ -1,4 +1,4 @@
-# Frontend shell
+# Frontend
 
 React, strict TypeScript, Vite and Material UI provide the French entry screen
 and shared theme from [DESIGN.md](../DESIGN.md). Public OIDC configuration enables
@@ -23,8 +23,8 @@ in session memory through list/detail navigation. Valid months range from 0001-0
 to 9999-12, with a maximum interval of 120 inclusive months. Calendar arithmetic
 uses month indexes without timezone conversion. This client limit bounds reads
 and makes no claim about available months. The active synthesis tab reads the
-existing single-store monthly publication only after Apply; other monthly views
-remain subsequent work. Network and comparison actions are unavailable because
+existing single-store monthly publication only after Apply; the other implemented
+store tabs likewise use explicit bounded reads. Network and comparison actions are unavailable because
 their server aggregations are not implemented.
 
 The authenticated screen reads `/v1/analytics/status` once on entry and on an
@@ -403,7 +403,7 @@ the unauthenticated entry screen performs no business reads.
 | `npm test`             | Run Vitest and Testing Library tests once                        |
 | `npm run test:watch`   | Interactive test loop                                            |
 | `npm run build`        | Typecheck and production build in ignored `dist/`                |
-| `npm run preview`      | Inspect the built shell on loopback, default port 4173           |
+| `npm run preview`      | Inspect the built frontend on loopback, default port 4173        |
 | `npm run test:e2e`     | Build synthetic configuration and test with Chromium and axe     |
 | `npm run check`        | Run formatting, lint, types, unit tests, build and browser tests |
 

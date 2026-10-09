@@ -1,7 +1,8 @@
 # Critères de réception du frontend
 
-Statut : scénarios à implémenter avec le produit. Ce fichier n'est pas un rapport
-de tests exécutés. Toutes les données et identités de test doivent être synthétiques,
+Statut : critères de la cible produit, pas un rapport de tests exécutés. Les
+preuves locales de la tranche implémentée et les validations encore ouvertes
+sont dans le [guide frontend](../../frontend/README.md#integrated-delivery-qualification). Toutes les données et identités de test doivent être synthétiques,
 y compris les maquettes, captures, réponses API et jeux de charge.
 
 ## Calculs métier
@@ -91,7 +92,9 @@ La recette exige les parcours navigateur, l'accessibilité des graphiques, les t
 des calculs et les contrats de transport/session. Mesurer temps de chargement,
 nombre de requêtes, taille des réponses et mémoire sur un volume synthétique annoncé.
 Fixer avec le responsable produit les budgets acceptables avant de qualifier la
-vue réseau pour la production ; aucun objectif de latence n'a encore été mesuré.
+vue réseau pour la production. T22 fournit des budgets et mesures locaux sur un
+petit parcours synthétique de magasin ; ils ne qualifient ni la vue réseau,
+ni le volume cible ou la charge de production.
 
 Toute évolution Python conserve les contrôles de formatage, lint, typage et tests
 du projet. Une évolution de persistence exige des tests PostgreSQL ; une évolution

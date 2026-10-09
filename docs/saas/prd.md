@@ -1,13 +1,15 @@
 # PRD — Plateforme d’analyse commerciale
 
-Statut : proposition de référence pour la première version, à valider avant
-implémentation. Les décisions confirmées sont distinguées des priorités proposées.
+Statut : référence cible pour la première version, distincte de la tranche
+frontend implémentée et des preuves de réception. Les décisions confirmées sont distinguées des priorités proposées.
 Ce document définit le résultat produit attendu ; il ne décrit pas une application
 déjà livrée et ne remplace pas les contrats détaillés.
 
 Décision de démarrage : différer les nouveaux endpoints analytiques et réaliser
 le frontend sur les capacités existantes. Le P0 ci-dessous reste la cible complète ;
-la première tranche (connexion, magasins, détails) ne constitue pas sa réception.
+la tranche implémentée (connexion, magasins, analyses unitaires, données et qualité)
+ne constitue pas sa réception. Les [résultats locaux et limites](../../frontend/README.md#integrated-delivery-qualification)
+sont documentés séparément.
 Les vues nécessitant de nouvelles agrégations restent dépendantes d’une reprise
 ultérieure de ce périmètre backend.
 

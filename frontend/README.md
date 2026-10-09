@@ -388,8 +388,8 @@ Batches deduplicate while running but are not cached. The result includes `compl
 `reason`, `nextCursor` and actual `attempts`; callers must not treat partial items as
 a definitive total/KPI. A changed freshness response discards the batch and invalidates
 cached values, preventing older work from repopulating that cache. An unchanged
-freshness response does not establish a database snapshot. Neither this service nor
-business data screens are wired into the entry screen yet.
+freshness response does not establish a database snapshot. The authenticated store, data and quality screens use this shared service;
+the unauthenticated entry screen performs no business reads.
 
 ## Package scripts
 
@@ -466,7 +466,7 @@ Chromium installation and the same `npm run check` on GitHub pushes and pull
 requests affecting the frontend or workflow. It has read-only repository
 permissions, no persisted checkout credentials, secrets or deployment. Local
 execution does not establish that the hosted job has run or that branch protection
-is configured. Production CSP and hosting checks are later tasks.
+is configured. Real hosting CSP and TLS headers still require a defined recipe environment.
 Vite dev/preview are local tools, not production servers.
 No token storage, service worker, external font or telemetry is added here.
 MUI uses its MIT-licensed components and Emotion engine. MUI X Charts Community
@@ -502,3 +502,36 @@ operating system, assistive technology and versions, and confirm:
 
 This human receipt is pending. Existing CSS zoom checks and axe results must not
 be reported as native zoom, assistive-technology acceptance or certification.
+
+## Browser security qualification
+
+T21 applies the explicit synthetic policy in `test/security-policy.ts` as an HTTP
+header on the e2e preview server, including the OIDC callback. All synthetic browser
+journeys therefore run under this policy. It permits same-origin scripts, the two
+explicit synthetic API/issuer connect origins and Emotion/MUI inline styles.
+`unsafe-inline` is restricted to styles; scripts receive no inline/eval allowance.
+Tests verify rendered MUI styling, personal login, callback cleanup, inert HTML/URL
+labels, blocked inline script and a blocked third-party fetch through actual CSP
+violation events. The policy is not a production hosting configuration.
+
+Additional scenarios inspect both production and synthetic build assets for
+private-key/token shapes, fixture tokens and source maps. These heuristic checks
+cannot prove the absence of every possible secret. Run `npm run check` so the normal
+production build is fresh before these asset assertions. Public Vite configuration
+still belongs in the bundle and must contain no secrets.
+
+A held retry response after logout must not restore data or trigger another read.
+The synthetic scenario checks browser storage, cookies, cache, IndexedDB, service
+worker registrations and console canaries; the harness also blocks service workers.
+These observed checks do not prove memory erasure, server cache policy, access-log
+redaction or provider-side token revocation. Review locked dependency advisories
+with `npm audit`; a registry check is time-dependent, not a permanent guarantee.
+The development-only `source-map-js` dependency is updated to 1.2.2 for
+[GHSA-68fv-2mgg-jv7q](https://github.com/advisories/GHSA-68fv-2mgg-jv7q).
+
+Real recipe acceptance remains blocked until its synthetic environment is defined.
+Inspect the actual document, callback and asset HTTP headers, TLS and the effective
+CSP destinations with that environment's public configuration, then exercise login,
+reads and logout under those headers. Check script/style allowances, framing/base/
+object restrictions, cache behavior and callback access-log redaction explicitly.
+No host, deployment or production-readiness claim follows from local Vite preview.

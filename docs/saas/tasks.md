@@ -3,7 +3,7 @@
 Statut : T01–T05 sont implémentées, validées et commitées.
 T06 est **commitée après relecture technique**, avec revue Security finale en attente ;
 T07 est **commitée après relecture technique, sécurité finale en attente** ;
-T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11 est **commitée après relecture technique, sécurité finale en attente** ; T12 est **commitée après relecture technique, sécurité finale en attente** ; T13 est **commitée après relecture technique, sécurité finale en attente** ; T14 est **commitée après relecture technique, sécurité finale en attente** ; T15 est **commitée après relecture technique et sécurité** ; T16 est **commitée après relecture technique et sécurité** ; T17 est **commitée après relecture technique et sécurité** ; T18 est **commitée après relecture technique et sécurité** ; T19 est **commitée après relecture technique et sécurité** ; T20 est **partie automatisée commitée après relecture technique et sécurité, recette humaine requise** ; T21–T22 restent à faire. Voir le [guide frontend](../../frontend/README.md)
+T08 est **commitée après relecture technique, sécurité finale en attente** ; T09 est **commitée après relecture technique, sécurité finale en attente** ; T10 est **commitée après relecture technique, sécurité finale en attente** ; T11 est **commitée après relecture technique, sécurité finale en attente** ; T12 est **commitée après relecture technique, sécurité finale en attente** ; T13 est **commitée après relecture technique, sécurité finale en attente** ; T14 est **commitée après relecture technique, sécurité finale en attente** ; T15 est **commitée après relecture technique et sécurité** ; T16 est **commitée après relecture technique et sécurité** ; T17 est **commitée après relecture technique et sécurité** ; T18 est **commitée après relecture technique et sécurité** ; T19 est **commitée après relecture technique et sécurité** ; T20 est **partie automatisée commitée après relecture technique et sécurité, recette humaine requise** ; T21 est **partie automatisée commitée après relecture technique et sécurité, headers de recette bloqués faute d’environnement défini** ; T22 reste à faire. Voir le [guide frontend](../../frontend/README.md)
 pour les scripts réels et les limites du socle.
 Point de départ historique : branche `feat/saas-frontend`, API de lecture et client personnel
 existants ; aucun package frontend ni pipeline frontend à ce stade.
@@ -135,7 +135,7 @@ demande liens, cohérence et absence de divulgation, pas un faux audit applicati
 
 T01–T05 sont **validées**, T06 est **commitée, sécurité finale en attente**,
 T07 est **commitée, sécurité finale en attente**, T08 est **commitée après relecture technique, sécurité finale en attente**,
-T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11 est **commitée après relecture technique, sécurité finale en attente**, T12 est **commitée après relecture technique, sécurité finale en attente**, T13 est **commitée après relecture technique, sécurité finale en attente**, T14 est **commitée après relecture technique, sécurité finale en attente**, T15 est **commitée après relecture technique et sécurité**, T16 est **commitée après relecture technique et sécurité**, T17 est **commitée après relecture technique et sécurité**, T18 est **commitée après relecture technique et sécurité**, T19 est **commitée après relecture technique et sécurité**, T20 est **partie automatisée commitée après relecture technique et sécurité, recette humaine requise**, T21–T22 sont **à faire**. Réaliser la suivante dont les dépendances sont
+T09 est **commitée après relecture technique, sécurité finale en attente**, T10 est **commitée après relecture technique, sécurité finale en attente**, T11 est **commitée après relecture technique, sécurité finale en attente**, T12 est **commitée après relecture technique, sécurité finale en attente**, T13 est **commitée après relecture technique, sécurité finale en attente**, T14 est **commitée après relecture technique, sécurité finale en attente**, T15 est **commitée après relecture technique et sécurité**, T16 est **commitée après relecture technique et sécurité**, T17 est **commitée après relecture technique et sécurité**, T18 est **commitée après relecture technique et sécurité**, T19 est **commitée après relecture technique et sécurité**, T20 est **partie automatisée commitée après relecture technique et sécurité, recette humaine requise**, T21 est **partie automatisée commitée après relecture technique et sécurité, headers de recette bloqués faute d’environnement défini** ; T22 est **à faire**. Réaliser la suivante dont les dépendances sont
 satisfaites ; les tâches bloquées par l’identité réelle ne doivent pas empêcher
 les développements testables sur un environnement synthétique. Ne pas déclarer
 la connexion ou J1 reçus avant leur vérification réelle.
@@ -718,6 +718,23 @@ la connexion ou J1 reçus avant leur vérification réelle.
 - Commit proposé : `Verify accessible responsive user journeys`.
 
 ### T21 — Sécurité du build et contrôles navigateur transversaux
+
+- Statut : **partie automatisée commitée après relecture technique et sécurité** ;
+  tests synthétiques du build, CSP HTTP sur le serveur
+  e2e (callback inclus), libellés inertes, script/connect-src refusés et logout
+  pendant une reprise vérifiés à 360/768/1440 px. `npm run check` passe :
+  formatage, lint, types, 585 tests unitaires/composants, build et 141 tests navigateur.
+  `npm audit` ne signale aucune vulnérabilité après le correctif de dépendance de
+  développement `source-map-js` 1.2.2. Scan cumulatif du frontend et scan du diff
+  final terminés sans vulnérabilité applicative relevée dans leurs périmètres.
+  Headers du document, callback et asset vérifiés sur le seul serveur synthétique.
+  Cette qualification ne constitue pas une garantie permanente ni une recette de
+  production ; CI hébergée non observée.
+  La politique autorise les styles inline nécessaires à MUI/Emotion, pas les scripts
+  inline ni eval. Aucune configuration d’hébergement de production ajoutée.
+  Headers réels CSP/TLS/cache et logs du callback : **bloqués**, aucun environnement
+  de recette défini. Recette humaine T20 toujours requise. Voir le
+  [guide des contrôles navigateur](../../frontend/README.md#browser-security-qualification).
 
 - Dépendances : T19–T20.
 - Livrer : tests du build de production, configuration CSP compatible avec les

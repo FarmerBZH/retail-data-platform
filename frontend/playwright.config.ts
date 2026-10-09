@@ -22,7 +22,7 @@ export default defineConfig({
   })),
   webServer: {
     command:
-      "npm run build -- --mode e2e --outDir dist-e2e && npm run preview -- --outDir dist-e2e --port 4180",
+      "npm run build -- --mode e2e --outDir dist-e2e && npm run preview -- --mode e2e --outDir dist-e2e --port 4180",
     env: {
       VITE_API_BASE_URL: "https://api.example.test",
       VITE_OIDC_ISSUER: "https://identity.example.test",

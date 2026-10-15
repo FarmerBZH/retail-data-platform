@@ -30,7 +30,7 @@ et l’[identité locale](../local-identity.md).
 Le [registre](../../src/retail_data_platform/api/resources.json) et les
 [projections imbriquées](../../src/retail_data_platform/api/resources.py) font
 autorité sur les champs ; le catalogue authentifié détermine les capacités du lecteur.
-La matrice recense actuellement 24 ressources, 325 champs de premier niveau et
+La matrice recense actuellement 28 ressources, 426 champs de premier niveau et
 74 chemins enfants : vérifier les ensembles, pas seulement ces nombres.
 
 ## Périmètre et règles de réalisation
@@ -829,3 +829,24 @@ Ne pas confondre code implémenté, fonctionnalité vérifiée et commit approuv
 Les dépendances backend différées doivent faire l’objet d’un futur arbitrage dédié.
 Le présent fichier n’autorise ni leur implémentation, ni un changement de modèle
 d’accès, ni un push ou déploiement automatique.
+
+
+### T23A — Accepter et explorer les ressources réseau publiées
+
+- Statut : **à relire**, commit non approuvé.
+- Vérification isolée : format, lint, TypeScript strict, 597 tests unitaires et
+  composants, build et neuf parcours navigateur de l’explorateur réussis aux
+  trois largeurs. La suite navigateur complète n’a pas été rejouée sur ce sous-ensemble.
+- Dépendance : merge des quatre vues réseau du backend.
+- Livrer : liste fixe des quatre routes, paramètre `scope`, projection des
+  101 champs supplémentaires, libellés français et détails natifs dans Données.
+  La matrice et le manifeste couvrent 28 ressources, 426 champs et 74 chemins enfants.
+- Tests : réconciliation des modèles API, du registre, des projections et de la
+  matrice ; rendu exhaustif et parcours des détails sous catalogue autorisé.
+  Les tests et fixtures existants sont étendus automatiquement aux quatre vues.
+- Sécurité : transport authentifié existant, projection stricte, rendu texte et
+  cache en mémoire conservés ; aucun accès OPS supplémentaire. Le diff applicatif
+  appartient au périmètre de la revue de sécurité T23, sans vulnérabilité retenue.
+- Suite : la vue réseau dédiée, ses lectures métier, tests et documentation
+  d’usage appartiennent à T23B et ne sont pas livrés par ce premier commit.
+- Commit proposé : `Support published network resources in the data explorer`.

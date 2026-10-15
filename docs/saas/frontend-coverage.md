@@ -4,7 +4,7 @@ Le [manifeste exécutable](../../frontend/test/coverage-manifest.ts) associe cha
 ressource, champ et chemin imbriqué à `PublishedDetail / PublishedValue` et au
 scénario synthétique correspondant dans
 [published-data.test.tsx](../../frontend/src/published-data.test.tsx).
-Il contient 325 champs de premier niveau et 74 chemins enfants, sans doublons.
+Il contient 426 champs de premier niveau et 74 chemins enfants, sans doublons.
 
 La [projection frontend](../../frontend/src/published-contract.ts) reprend uniquement
 les projections publiques du [registre](../../src/retail_data_platform/api/resources.json)
@@ -103,7 +103,10 @@ uniquement le nombre de libellés. La synthèse et les comparaisons conservent l
 tests de calculs propres ; leurs champs supplémentaires restent dans le détail natif.
 
 Le manifeste indique les destinations métier et le secours natif de chaque champ.
-Les codes R/S sont explicitement différés, conformément au périmètre backend :
+T23 ajoute le secours natif dans Données pour les quatre vues réseau publiées :
+101 champs supplémentaires. R désigne leur destination métier cible, dont
+l’écran dédié sera livré dans la seconde partie de T23.
+Les autres destinations R et S (sélections, classements et cohortes) restent différées ;
 leur présence dans la matrice cible n’est pas une preuve de livraison. Les audits
 ont leur secours dans Qualité ; les autres collections dans Données. Cette
 réconciliation ne garantit ni identité réelle, ni charge, ni réception du P0 complet.

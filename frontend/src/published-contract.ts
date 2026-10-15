@@ -1830,4 +1830,396 @@ export const publishedContract: PublishedContract = {
       },
     },
   },
+  analytics_network_month: {
+    keys: ["period"],
+    filters: ["period"],
+    operations: false,
+    fields: {
+      period: {
+        kind: "date",
+      },
+      first_period: {
+        kind: "date",
+        nullable: true,
+      },
+      last_period: {
+        kind: "date",
+        nullable: true,
+      },
+      expected_cell_count: {
+        kind: "integer",
+      },
+      store_count: {
+        kind: "integer",
+      },
+      stores_with_register: {
+        kind: "integer",
+      },
+      month_count: {
+        kind: "integer",
+      },
+      revenue_covered_cell_count: {
+        kind: "integer",
+      },
+      units_covered_cell_count: {
+        kind: "integer",
+      },
+      calls_covered_cell_count: {
+        kind: "integer",
+      },
+      field_visits_covered_cell_count: {
+        kind: "integer",
+      },
+      crowdsourced_visits_covered_cell_count: {
+        kind: "integer",
+      },
+      stores_with_activity: {
+        kind: "integer",
+      },
+      stores_with_category_data: {
+        kind: "integer",
+      },
+      stores_with_typology: {
+        kind: "integer",
+      },
+      revenue: {
+        kind: "decimal",
+        nullable: true,
+      },
+      revenue_partial: {
+        kind: "decimal",
+        nullable: true,
+      },
+      units: {
+        kind: "decimal",
+        nullable: true,
+      },
+      units_partial: {
+        kind: "decimal",
+        nullable: true,
+      },
+      calls: {
+        kind: "decimal",
+        nullable: true,
+      },
+      calls_partial: {
+        kind: "decimal",
+        nullable: true,
+      },
+      field_visits: {
+        kind: "decimal",
+        nullable: true,
+      },
+      field_visits_partial: {
+        kind: "decimal",
+        nullable: true,
+      },
+      crowdsourced_visits: {
+        kind: "decimal",
+        nullable: true,
+      },
+      crowdsourced_visits_partial: {
+        kind: "decimal",
+        nullable: true,
+      },
+      revenue_per_unit: {
+        kind: "decimal",
+        nullable: true,
+      },
+      unambiguous_reported_revenue: {
+        kind: "decimal",
+        nullable: true,
+      },
+      unambiguous_reported_units: {
+        kind: "decimal",
+        nullable: true,
+      },
+      register_product_count: {
+        kind: "decimal",
+        nullable: true,
+      },
+      register_ambiguous_products: {
+        kind: "decimal",
+        nullable: true,
+      },
+      register_unmatched_product_rows: {
+        kind: "decimal",
+        nullable: true,
+      },
+    },
+  },
+  analytics_network_year: {
+    keys: ["period"],
+    filters: ["period"],
+    operations: false,
+    fields: {
+      period: {
+        kind: "date",
+      },
+      first_period: {
+        kind: "date",
+        nullable: true,
+      },
+      last_period: {
+        kind: "date",
+        nullable: true,
+      },
+      expected_cell_count: {
+        kind: "integer",
+      },
+      store_count: {
+        kind: "integer",
+      },
+      stores_with_register: {
+        kind: "integer",
+      },
+      month_count: {
+        kind: "integer",
+      },
+      revenue_covered_cell_count: {
+        kind: "integer",
+      },
+      units_covered_cell_count: {
+        kind: "integer",
+      },
+      calls_covered_cell_count: {
+        kind: "integer",
+      },
+      field_visits_covered_cell_count: {
+        kind: "integer",
+      },
+      crowdsourced_visits_covered_cell_count: {
+        kind: "integer",
+      },
+      stores_with_activity: {
+        kind: "integer",
+      },
+      stores_with_category_data: {
+        kind: "integer",
+      },
+      stores_with_typology: {
+        kind: "integer",
+      },
+      revenue: {
+        kind: "decimal",
+        nullable: true,
+      },
+      revenue_partial: {
+        kind: "decimal",
+        nullable: true,
+      },
+      units: {
+        kind: "decimal",
+        nullable: true,
+      },
+      units_partial: {
+        kind: "decimal",
+        nullable: true,
+      },
+      calls: {
+        kind: "decimal",
+        nullable: true,
+      },
+      calls_partial: {
+        kind: "decimal",
+        nullable: true,
+      },
+      field_visits: {
+        kind: "decimal",
+        nullable: true,
+      },
+      field_visits_partial: {
+        kind: "decimal",
+        nullable: true,
+      },
+      crowdsourced_visits: {
+        kind: "decimal",
+        nullable: true,
+      },
+      crowdsourced_visits_partial: {
+        kind: "decimal",
+        nullable: true,
+      },
+      revenue_per_unit: {
+        kind: "decimal",
+        nullable: true,
+      },
+      unambiguous_reported_revenue: {
+        kind: "decimal",
+        nullable: true,
+      },
+      unambiguous_reported_units: {
+        kind: "decimal",
+        nullable: true,
+      },
+      register_product_count: {
+        kind: "decimal",
+        nullable: true,
+      },
+      register_ambiguous_products: {
+        kind: "decimal",
+        nullable: true,
+      },
+      register_unmatched_product_rows: {
+        kind: "decimal",
+        nullable: true,
+      },
+    },
+  },
+  analytics_network_overview: {
+    keys: ["scope"],
+    filters: ["scope"],
+    operations: false,
+    fields: {
+      scope: {
+        kind: "string",
+      },
+      first_period: {
+        kind: "date",
+        nullable: true,
+      },
+      last_period: {
+        kind: "date",
+        nullable: true,
+      },
+      expected_cell_count: {
+        kind: "integer",
+      },
+      store_count: {
+        kind: "integer",
+      },
+      stores_with_register: {
+        kind: "integer",
+      },
+      month_count: {
+        kind: "integer",
+      },
+      revenue_covered_cell_count: {
+        kind: "integer",
+      },
+      units_covered_cell_count: {
+        kind: "integer",
+      },
+      calls_covered_cell_count: {
+        kind: "integer",
+      },
+      field_visits_covered_cell_count: {
+        kind: "integer",
+      },
+      crowdsourced_visits_covered_cell_count: {
+        kind: "integer",
+      },
+      stores_with_activity: {
+        kind: "integer",
+      },
+      stores_with_category_data: {
+        kind: "integer",
+      },
+      stores_with_typology: {
+        kind: "integer",
+      },
+      revenue: {
+        kind: "decimal",
+        nullable: true,
+      },
+      revenue_partial: {
+        kind: "decimal",
+        nullable: true,
+      },
+      units: {
+        kind: "decimal",
+        nullable: true,
+      },
+      units_partial: {
+        kind: "decimal",
+        nullable: true,
+      },
+      calls: {
+        kind: "decimal",
+        nullable: true,
+      },
+      calls_partial: {
+        kind: "decimal",
+        nullable: true,
+      },
+      field_visits: {
+        kind: "decimal",
+        nullable: true,
+      },
+      field_visits_partial: {
+        kind: "decimal",
+        nullable: true,
+      },
+      crowdsourced_visits: {
+        kind: "decimal",
+        nullable: true,
+      },
+      crowdsourced_visits_partial: {
+        kind: "decimal",
+        nullable: true,
+      },
+      revenue_per_unit: {
+        kind: "decimal",
+        nullable: true,
+      },
+      unambiguous_reported_revenue: {
+        kind: "decimal",
+        nullable: true,
+      },
+      unambiguous_reported_units: {
+        kind: "decimal",
+        nullable: true,
+      },
+      register_product_count: {
+        kind: "decimal",
+        nullable: true,
+      },
+      register_ambiguous_products: {
+        kind: "decimal",
+        nullable: true,
+      },
+      register_unmatched_product_rows: {
+        kind: "decimal",
+        nullable: true,
+      },
+    },
+  },
+  analytics_network_month_changes: {
+    keys: ["period"],
+    filters: ["period"],
+    operations: false,
+    fields: {
+      period: {
+        kind: "date",
+      },
+      revenue: {
+        kind: "decimal",
+        nullable: true,
+      },
+      revenue_previous_month: {
+        kind: "decimal",
+        nullable: true,
+      },
+      revenue_previous_year: {
+        kind: "decimal",
+        nullable: true,
+      },
+      revenue_month_change: {
+        kind: "decimal",
+        nullable: true,
+      },
+      revenue_month_change_ratio: {
+        kind: "decimal",
+        nullable: true,
+      },
+      revenue_year_change: {
+        kind: "decimal",
+        nullable: true,
+      },
+      revenue_year_change_ratio: {
+        kind: "decimal",
+        nullable: true,
+      },
+    },
+  },
 };

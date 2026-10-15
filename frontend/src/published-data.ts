@@ -39,6 +39,29 @@ export type Value =
 export type PublishedRow = { readonly [key: string]: Value };
 
 const labels: Record<string, string> = {
+  revenue_partial: "CA observé — partiel",
+  revenue_covered_cell_count: "CA observé — cellules couvertes",
+  units_partial: "Unités vendues — partiel",
+  units_covered_cell_count: "Unités vendues — cellules couvertes",
+  calls_partial: "Appels — partiel",
+  calls_covered_cell_count: "Appels — cellules couvertes",
+  field_visits_partial: "Visites terrain — partiel",
+  field_visits_covered_cell_count: "Visites terrain — cellules couvertes",
+  crowdsourced_visits_partial: "Visites participatives — partiel",
+  crowdsourced_visits_covered_cell_count:
+    "Visites participatives — cellules couvertes",
+  scope: "Périmètre",
+  first_period: "Premier mois publié",
+  last_period: "Dernier mois publié",
+  month_count: "Nombre de mois publiés",
+  store_count: "Magasins distincts",
+  expected_cell_count: "Cellules magasin-mois attendues",
+  stores_with_register: "Magasins avec observations de ventes",
+  stores_with_activity: "Magasins avec observations d’activité",
+  stores_with_category_data: "Magasins avec observations de catégorie",
+  stores_with_typology: "Magasins avec observations de typologie",
+  revenue_year_change: "Variation absolue annuelle du CA",
+
   period_from: "Mois de début",
   period_to: "Mois de fin",
   activity_ambiguous_types: "Types d’activité ambigus",
@@ -320,6 +343,11 @@ export function resourceGroup(name: ResourceName): string {
       : "Référentiels";
 }
 export const resourceLabels: Record<ResourceName, string> = {
+  analytics_network_month: "Réseau — synthèse mensuelle",
+  analytics_network_year: "Réseau — synthèse annuelle",
+  analytics_network_overview: "Réseau — ensemble du calendrier",
+  analytics_network_month_changes: "Réseau — évolutions mensuelles",
+
   analytics_activity_month: "Activité mensuelle par type",
   analytics_assortment_candidates: "Candidats exacts d’assortiment",
   analytics_distribution_product_month: "Présence mensuelle par produit",

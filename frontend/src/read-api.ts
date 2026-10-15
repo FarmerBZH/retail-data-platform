@@ -13,6 +13,11 @@ import { readScheduler, ReadSchedulingError } from "./read-scheduler";
 
 // Fixed public routes, never paths or destinations supplied by a response.
 export const resourceNames = [
+  "analytics_network_month",
+  "analytics_network_year",
+  "analytics_network_overview",
+  "analytics_network_month_changes",
+
   "analytics_activity_month",
   "analytics_assortment_candidates",
   "analytics_distribution_product_month",
@@ -51,6 +56,7 @@ export type Page<T> = Readonly<{
   nextCursor: string | null;
 }>;
 export type Query = Readonly<{
+  scope?: string;
   limit?: number;
   after?: string;
   id?: string;
@@ -176,6 +182,7 @@ function queryParameters(query: Query): URLSearchParams {
       if (!date(value).endsWith("-01")) throw new Error("Invalid query");
     } else {
       const maxima: Record<string, number> = {
+        scope: 32,
         after: 8192,
         activity_type: 32,
         category_code: 32,

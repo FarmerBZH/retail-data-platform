@@ -2,6 +2,11 @@ import type { ResourceName } from "../src/read-api";
 
 // Native consultation is always available; these are additional business destinations.
 export const businessDestinations: Record<ResourceName, readonly string[]> = {
+  analytics_network_month: ["R"],
+  analytics_network_year: ["R"],
+  analytics_network_overview: ["R"],
+  analytics_network_month_changes: ["R"],
+
   analytics_activity_month: ["M-ACT"],
   analytics_assortment_candidates: ["M-TYP"],
   analytics_distribution_product_month: ["M-PRE"],

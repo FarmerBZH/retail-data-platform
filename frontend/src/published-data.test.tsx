@@ -71,7 +71,7 @@ describe("public projection and full recursive detail", () => {
       );
       count += registry[name]!.columns.length;
     }
-    expect(count).toBe(325);
+    expect(count).toBe(426);
     const sources = {
       current_store: "stores",
       activity_details: "analytics_activity_month",
@@ -90,12 +90,12 @@ describe("public projection and full recursive detail", () => {
       children += expected.length;
     }
     expect(children).toBe(74);
-    expect(coverageManifest).toHaveLength(399);
+    expect(coverageManifest).toHaveLength(500);
     expect(
       new Set(
         coverageManifest.map((entry) => `${entry.resource}:${entry.path}`),
       ).size,
-    ).toBe(399);
+    ).toBe(500);
   });
   for (const name of resourceNames) {
     it(`renders every field and nested path of ${name} using synthetic values`, () => {

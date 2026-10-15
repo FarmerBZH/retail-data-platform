@@ -198,12 +198,12 @@ export function StoreList({
       </Button>
       <Paper variant="outlined" sx={{ p: 2 }}>
         <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-          <Button disabled>Vue réseau</Button>
           <Button disabled>Comparer la sélection</Button>
         </Stack>
         <Typography variant="body2">
-          Les analyses réseau et la comparaison nécessitent des agrégations
-          serveur encore indisponibles.
+          La comparaison de la sélection nécessite des agrégations serveur
+          encore indisponibles. La Vue réseau consulte tous les magasins
+          indépendamment de cette sélection.
         </Typography>
       </Paper>
       {opened && (

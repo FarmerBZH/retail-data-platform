@@ -3,7 +3,7 @@
 Statut : référence visuelle cible. Le frontend applique le thème à l’entrée, aux
 magasins, aux analyses unitaires et à l’explorateur/qualité. Les graphiques des
 magasins sont implémentés et testés sur données synthétiques ; les vues réseau
-et les comparaisons multi-magasins restent différées. La recette humaine et
+publiées sont intégrées en T23 ; les comparaisons multi-magasins restent différées. La recette humaine et
 la qualification de production restent ouvertes.
 MUI, le responsive et une interface agréable et simple sont confirmés. Les valeurs
 ci-dessous fixent une base commune pour l’implémentation ; elles pourront évoluer

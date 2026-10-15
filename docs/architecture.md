@@ -4,8 +4,8 @@
 
 This document describes the implemented ingestion, analytical and authenticated
 read API boundaries of Retail Data Platform, plus an authenticated React frontend
-with store analyses and published data/quality inspection. Production identity
-deployment, network/global multi-store analytics and multi-tenant authorization
+with store/network analyses and published data/quality inspection. Production identity
+deployment, network rankings/comparable cohorts, multi-store analytics and multi-tenant authorization
 are outside the verified implementation.
 Authorized API readers have global access; store selection is a query filter.
 
@@ -187,7 +187,7 @@ months survive navigation through Données in session memory; business component
 still unmount and cancel their reads. A rejected later cursor can restart at page one.
 Leaving an explorer cancels its reads and removes its results;
 session termination unmounts the workspace and clears the transport cache.
-The coverage manifest associates 325 public fields and 74 nested paths with this
+The coverage manifest associates 426 public fields and 74 nested paths with this
 renderer and synthetic tests. Operational routes are consulted in the
 catalogue-gated Quality screen, independently of ordinary DataExplorer. See
 [coverage manifest notes](saas/frontend-coverage.md).
@@ -284,9 +284,22 @@ local action durations, API request counts and JSON bytes, and sampled Chromium
 JavaScript heap use. These do not establish server load capacity, a real network
 p95, complete browser memory use or production readiness. Deployed provider/API
 acceptance for all business flows, human accessibility receipt and production
-hosting remain open; network/global multi-store analytics are deferred.
+hosting remain open; rankings, comparable cohorts and multi-store analytics are deferred.
 Setup and actual scripts are in the
 [frontend guide](../frontend/README.md).
+
+The network workspace uses only the four published `analytics_network_*` views.
+Overview has no temporal filter; annual reads use January keys without trimming
+annual totals. Monthly reads are bounded to 120 months and 120 rows/five pages.
+The frontend never totals network pages or downloads individual stores to build a
+network aggregate. Complete and explicitly partial values retain metric-specific
+coverage and exact decimal labels; only chart geometry uses binary numbers.
+Catalogue validation precedes reads, freshness surrounds the complete batch, and
+incomplete results are hidden. Comparisons fail independently. Draft/applied
+network selection survives navigation in session memory; results unmount and
+requests abort on departure. No new credentials, storage, backend routes or
+operational permissions are introduced. Synthetic network scenarios exercise
+pagination, invalid responses, independent coverage, calendar bounds and logout.
 
 ## Context
 

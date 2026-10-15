@@ -91,7 +91,26 @@ ce dernier nécessite une extension de `expose_headers`, sinon utiliser le déla
 les KPI et explique l'absence de publication ; `current` ne signifie pas couverture
 commerciale exhaustive. Afficher séparément l'échec éventuel du dernier refresh.
 
-## Besoins API avant une vue réseau exploitable à grande échelle
+## Lectures réseau ajoutées par le backend
+
+Les quatre routes `analytics_network_month`, `analytics_network_year`,
+`analytics_network_overview` et `analytics_network_month_changes` sous
+`/v1/data/` sont disponibles avec `data:read`, sous réserve du catalogue autorisé.
+T23 les ajoute à la liste fixe de routes et à la projection frontend ; aucun
+endpoint, droit ni contrat d’identité supplémentaire n’est introduit.
+Le paramètre `scope` permet la lecture et le détail de l’overview ; les vues réseau
+n’acceptent aucun filtre magasin. Les bornes annuelles sont ramenées au 1er janvier
+des années choisies. Overview ne reçoit aucune borne temporelle.
+La lecture est bornée à 120 lignes, cinq pages et 120 mois sélectionnés. Une lecture
+incomplète ou une fraîcheur changée masque les résultats concernés. Les comparaisons
+échouent séparément ; la fin de session efface tout le workspace. Les objets métier
+et jetons restent en mémoire, les champs sources restent du texte inerte.
+Le détail natif expose tous les champs des quatre vues.
+Déploiement : appliquer migration, refresh analytique et grants des nouvelles vues
+selon [network-analytics.md](../network-analytics.md) avant l’API et le frontend.
+La présence du code ne prouve pas que ces opérations ont été réalisées sur la cible.
+
+## Besoins API restant pour la cible complète
 
 Statut : différé par décision produit. Cette section conserve les dépendances de
 la cible complète ; elle n’autorise pas leur implémentation pendant la première
@@ -104,7 +123,7 @@ Il est interdit de coder le frontend comme si ces routes existaient déjà.
 | --- | --- | --- |
 | Disponibilité | Périmètre de magasins validé | Bornes et mois observés par dataset, absence distinguée de zéro ; pas de présomption de mois complet |
 | Recherche magasins | Texte borné, dimensions actuelles, pagination | Sélection et recherche serveur, ordre stable ; IDs inconnus signalés pour une sélection explicite |
-| Synthèse et série | Mois inclusifs, sélection explicite ou tous, dimensions, comparaison | Totaux, numérateurs/dénominateurs de couverture, cohorte et exclus selon `metrics.md` |
+| Synthèse et série filtrées / cohortes | Mois inclusifs, sélection explicite ou tous, dimensions, comparaison | Totaux, numérateurs/dénominateurs de couverture, cohorte et exclus selon `metrics.md` |
 | Classement et contributions | Même périmètre, indicateur/tri autorisés | Tri global stable, pagination, contributions cohérentes avec les totaux |
 
 Une réponse agrégée doit porter son périmètre résolu, ses périodes, son grain,

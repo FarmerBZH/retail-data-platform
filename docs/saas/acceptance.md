@@ -100,3 +100,15 @@ Toute évolution Python conserve les contrôles de formatage, lint, typage et te
 du projet. Une évolution de persistence exige des tests PostgreSQL ; une évolution
 de schéma exige migration réversible et modèle aligné. Ne déclarer une frontière
 dans `docs/architecture.md` qu'après son implémentation et sa vérification.
+
+
+## Réception T23 — vues réseau publiées
+
+Vérifier overview sans bornes temporelles, mois avec pagination complète et années
+filtrées sur leurs clés de janvier sans découpage des totaux. Distinguer 0, null,
+montant partiel et couverture propre à chaque mesure ; aucun cumul de pages.
+Les tests synthétiques vérifient la seconde page, un mois absent, une année à un
+seul mois, les références zéro/négative, les capacités absentes, une publication
+changée et l’annulation. Tester clavier et axe à 360/768/1440 px, effacement après
+déconnexion et absence de stockage métier. Un échec du bloc de comparaison reste
+local. Les classements/cohortes/sélections de la cible restent non reçus.

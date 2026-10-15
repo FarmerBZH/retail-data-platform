@@ -44,6 +44,19 @@ une URL partageable, un stockage persistant ou une télémétrie.
 
 ## Vue réseau
 
+Tranche T23 sur API existante : trois lectures explicites (tout le calendrier,
+mois, années), sans filtre magasin. Les cartes décrivent la dernière ligne publiée
+du résultat, avec sa période ; elles ne totalisent pas une fenêtre arbitraire.
+Le tableau conserve toutes les lignes lues, les valeurs exactes et leur couverture.
+La courbe représente uniquement le CA complet, avec trous ; les montants partiels
+sont nommés dans les cartes et le tableau. M−1/N−1 sont consultables en tableau,
+avec base négative qualifiée et pourcentage masqué. Les champs supplémentaires
+restent accessibles dans les détails dépliables et dans Données.
+Une erreur de comparaison laisse la synthèse consultable avec avertissement.
+Les années affichent le nombre réel de mois, sans présumer douze mois complets.
+Les interactions suivantes décrivent toujours la cible complète : contributions,
+classements, cohortes, courbe de référence et sélection restent hors de cette tranche.
+
 Ordre de lecture :
 
 1. KPI : CA observé, unités vendues, ratio CA/unité, couverture magasins-mois.

@@ -103,9 +103,7 @@ uniquement le nombre de libellés. La synthèse et les comparaisons conservent l
 tests de calculs propres ; leurs champs supplémentaires restent dans le détail natif.
 
 Le manifeste indique les destinations métier et le secours natif de chaque champ.
-T23 ajoute le secours natif dans Données pour les quatre vues réseau publiées :
-101 champs supplémentaires. R désigne leur destination métier cible, dont
-l’écran dédié sera livré dans la seconde partie de T23.
+T23 ajoute R pour les quatre vues réseau publiées : 101 champs supplémentaires.
 Les autres destinations R et S (sélections, classements et cohortes) restent différées ;
 leur présence dans la matrice cible n’est pas une preuve de livraison. Les audits
 ont leur secours dans Qualité ; les autres collections dans Données. Cette

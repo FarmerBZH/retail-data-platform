@@ -590,8 +590,8 @@ Real end-to-end API/OIDC recipe acceptance remains blocked without a defined
 synthetic environment. Earlier local identity smoke covers its recorded subset,
 not all business tabs. Human accessibility receipt, deployed CSP/TLS/cache/logs,
 hosted CI, target production volumes and concurrent-user load remain unverified.
-The full P0 product is not received: network totals/rankings and multi-store
-server analytics are still deferred. Local results below are separate from those open boundaries.
+The full P0 product is not received: network rankings, comparable cohorts and multi-store
+server analytics are still deferred; T23 integrates the published network totals. Local results below are separate from those open boundaries.
 
 ### Observed local measurements
 
@@ -624,3 +624,43 @@ in its inspected scope; the earlier cumulative frontend scan remains available.
 The sealed diff snapshot preceded only narrow results/status documentation and
 budget-comment clarification, reviewed manually with no executable behavior change.
 No successful hosted workflow or real recipe receipt is inferred.
+
+## Published network analytics (T23)
+
+The Vue réseau entry uses the existing authenticated read transport and the four
+published network views. Overview covers the entire calendar; monthly selection
+reads calendar bounds; annual selection converts both bounds to January keys and
+never trims annual totals. Cards describe the last returned row, explicitly dated,
+not an arbitrary-window total. Five measures retain independent coverage; partial
+amounts are labelled and never replaced by product-level diagnostics. The monthly
+chart uses complete revenue only, with exact tables and calendar gaps. M−1/N−1
+comparisons remain server-derived, with zero/missing and negative bases qualified.
+All 101 additional fields are available in native explorer details, bringing the
+public contract to 28 resources, 426 top-level fields and 74 nested paths.
+
+Draft and applied network context survive workspace navigation in session memory;
+leaving cancels reads and unmounts results. No business data or token is persisted.
+Catalogue capabilities gate reads. Collections are bounded to 120 rows/five pages,
+with freshness checks around the batch. Incomplete reads suppress the affected
+result; comparison failures leave primary measures available with an alert.
+Unexpected errors never expose upstream messages. Existing session termination
+removes the workspace and clears the transport. No operational audit is requested.
+
+Tests: `network-data.test.ts`, `Network.test.tsx`, `e2e/network.spec.ts`, and the
+existing exhaustive contract/render/explorer tests. All fixtures are synthetic.
+Run `npm run check` with Node 24.15+ on the Node 24 line. Real API/OIDC integration,
+human assistive-technology acceptance and production load remain separate gates.
+Apply migration, refresh and reviewed grants following
+[the backend network contract](../docs/network-analytics.md) before deployment.
+No deployment is performed by these frontend changes.
+
+T23 local verification on 2026-10-15: format/lint/type/build and 612 unit/component
+tests passed. The full check ran 147 existing browser scenarios successfully; the
+15 new scenarios initially exceeded their five-second assertion waits. After
+aligning only those waits to 15 seconds (60 seconds per journey), the targeted
+network rerun passed all 15 scenarios, including axe, keyboard, pagination and
+logout across the three widths. Format/lint/type were rechecked. The full pipeline
+was not repeated after this test-only adjustment. Python baseline: 138 passed,
+36 conditional skips; no isolated PostgreSQL or real API/OIDC run in this task.
+Codex Security completed its static diff review without retained findings; subsequent
+changes were limited to test timing and documentation, outside that sealed snapshot.

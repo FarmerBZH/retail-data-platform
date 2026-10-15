@@ -1,6 +1,8 @@
 # Frontend SaaS — tâches d’implémentation et de validation
 
-Statut actuel : les développements T01–T22 sont commités. Les parties automatisées
+Statut actuel : T23 intègre les quatre vues réseau publiées, avec vérifications
+locales terminées. T23A est commitée ; T23B est validée avec autorisation explicite
+de commit. Les développements T01–T22 sont commités. Les parties automatisées
 T20–T22 sont vérifiées localement ; la recette humaine T20, les headers/logs réels
 T21 et la recette intégrée API/OIDC T22 restent ouverts, cette dernière faute
 d’environnement défini. CI hébergée et charge de production non reçues.
@@ -40,7 +42,8 @@ unitaires, l’exploration des données publiées et leur qualité sur l’API e
 L’application est en français, en lecture seule, pour une seule organisation avec
 accès global. Un filtre magasin n’est jamais une règle d’autorisation.
 
-Les vues réseau, totaux multi-magasins, cohortes réseau, classements globaux,
+T23 intègre les quatre vues réseau maintenant publiées. Les totaux multi-magasins,
+cohortes réseau, classements globaux,
 recherche serveur et disponibilité des périodes restent dépendants d’un futur
 périmètre backend. Les signaler indisponibles dans cette tranche ; ne pas simuler
 ces fonctions en téléchargeant le réseau ou en agrégeant une première page.
@@ -812,7 +815,8 @@ les validations réelles en dépendant restent ouverts.
 | Droits OPS et qualité réseau | T18 ; absence d’appel et refus serveur |
 | Responsive, clavier, graphiques accessibles | T02 puis chaque écran, T20 ; auto + humain |
 | Performance et livraison | T22 ; mesures sur profils déclarés et budgets convenus |
-| Réseau, classement, cohortes et comparaison multi-magasins | Différés ; cas correspondants d’acceptance.md non reçus dans cette tranche |
+| Synthèses réseau et variations calendaires | T23A–T23B ; couverture, pagination, comparaisons et session sur données synthétiques |
+| Classement, cohortes et comparaison multi-magasins | Différés ; cas correspondants d’acceptance.md non reçus dans cette tranche |
 
 ## Reprise par un agent
 
@@ -833,7 +837,7 @@ d’accès, ni un push ou déploiement automatique.
 
 ### T23A — Accepter et explorer les ressources réseau publiées
 
-- Statut : **à relire**, commit non approuvé.
+- Statut : **commitée**, `02015e4`, après approbation explicite.
 - Vérification isolée : format, lint, TypeScript strict, 597 tests unitaires et
   composants, build et neuf parcours navigateur de l’explorateur réussis aux
   trois largeurs. La suite navigateur complète n’a pas été rejouée sur ce sous-ensemble.
@@ -850,3 +854,41 @@ d’accès, ni un push ou déploiement automatique.
 - Suite : la vue réseau dédiée, ses lectures métier, tests et documentation
   d’usage appartiennent à T23B et ne sont pas livrés par ce premier commit.
 - Commit proposé : `Support published network resources in the data explorer`.
+
+### T23B — Intégrer les synthèses réseau publiées
+
+- Statut : **validée pour commit**, après approbation explicite. T23B complète
+  T23A avec l’écran réseau, ses lectures métier, ses tests et sa documentation.
+- Résultats du 15 octobre 2026 : format, lint, TypeScript strict, build et 612 tests
+  frontend réussis. La commande `npm run check` a validé 147 parcours navigateur
+  existants, mais ses 15 nouveaux scénarios ont échoué sur leur attente de 5 s,
+  trop courte pour les lectures espacées du transport. Après passage à 15 s
+  (sans modifier l’application), les 15 scénarios réseau ont été rejoués et réussis
+  à 360/768/1440 px avec axe et clavier. Le pipeline complet n’a pas été rejoué
+  après ce seul réglage de test ; format/lint/typage ont été revérifiés.
+- Baseline Python : format, lint, mypy et 138 tests réussis ; 36 tests conditionnels
+  ignorés. PostgreSQL isolé et recette API/OIDC n’ont pas été exécutés dans cette
+  vérification. Aucun changement Python ou de persistance dans T23.
+- Revue Codex Security du diff terminée sans vulnérabilité retenue ; rapport
+  conservé hors du dépôt. Après le scan, seuls les délais du harnais navigateur
+  et la documentation ont été ajustés : le code applicatif revu est inchangé.
+  La revue statique ne certifie ni le déploiement ni l’absence de vulnérabilités.
+- Dépendances : T23A (`02015e4`), T05/T06, T19–T22.
+- Analyse du merge : agrégations serveur complètes/partielles mensuelles, annuelles
+  et overview, variations calendaires ; aucune sélection multi-magasins, cohorte,
+  contribution ni classement. Aucun nouveau backend n’est requis pour cette tranche.
+- Livrer : entrée Vue réseau, lectures explicites, couverture indépendante des cinq
+  mesures, CA/unité, courbe mensuelle et tables exactes, M−1/N−1, détail de tous les
+  champs ; catalogue et explorateur étendus de 24 à 28 ressources.
+- Sécurité : transport authentifié existant, routes fixes, projection validée,
+  lectures bornées/annulables, aucune persistance navigateur, erreurs sans payload,
+  effacement à la fin de session et aucun appel OPS.
+- Valider : null/zéro/partiel/négatif, exactitude des chaînes, pagination complète,
+  limites de lecture, fraîcheur changée, capacités absentes, année partielle,
+  filtres brouillons/appliqués, annulation, session, clavier, axe et trois largeurs.
+- Documentation : PRD, produit, indicateurs, intégration, matrice, couverture,
+  réception et guide frontend alignés sur les capacités réellement livrées.
+- Limites : recette API/OIDC réelle, grants et refresh sur l’environnement cible,
+  revue humaine et performance au volume cible restent ouverts. Le P0 complet
+  ne peut pas être déclaré reçu.
+- Commit proposé : `Integrate published network analytics`.

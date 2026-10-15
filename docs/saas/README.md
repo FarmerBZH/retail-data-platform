@@ -43,8 +43,9 @@ Le démarrage porte sur le frontend consommant l’API existante. Les nouveaux
 endpoints analytiques sont explicitement différés : leurs besoins restent décrits
 comme dépendances de la cible complète, sans développement backend dans cette étape.
 La tranche implémentée couvre la connexion personnelle, les magasins et leurs
-analyses unitaires, les données publiées et la qualité selon les droits. Les
-agrégations réseau indisponibles ne sont pas livrées.
+analyses unitaires, les données publiées et la qualité selon les droits. T23 ajoute
+les quatre vues réseau maintenant publiées : voir le [contrat réseau](../network-analytics.md).
+Classements, cohortes et agrégations multi-magasins restent indisponibles.
 
 - Application web en français, lecture seule, usage principal sur ordinateur.
 - Trois niveaux : réseau, sélection de magasins, fiche magasin.
@@ -67,5 +68,5 @@ agrégations réseau indisponibles ne sont pas livrées.
 | Volume et temps de réponse attendus | Mesures et budgets locaux T22 disponibles ; aucun engagement de production | Définir le volume et la charge cibles, puis qualifier l’environnement réel |
 
 Les extensions de l'API décrites ici sont des besoins concrets des vues demandées,
-pas des endpoints disponibles. La fiche magasin utilise les collections actuelles ; les totaux réseau à grande
-échelle dépendent toujours des extensions.
+pas des endpoints disponibles. Les synthèses réseau existantes sont intégrées
+en T23 ; les filtres réseau, cohortes et classements demandent encore ces extensions.

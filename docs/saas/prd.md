@@ -10,8 +10,10 @@ le frontend sur les capacités existantes. Le P0 ci-dessous reste la cible compl
 la tranche implémentée (connexion, magasins, analyses unitaires, données et qualité)
 ne constitue pas sa réception. Les [résultats locaux et limites](../../frontend/README.md#integrated-delivery-qualification)
 sont documentés séparément.
-Les vues nécessitant de nouvelles agrégations restent dépendantes d’une reprise
-ultérieure de ce périmètre backend.
+Les quatre vues réseau publiées permettent maintenant les synthèses mensuelles,
+annuelles, sur tout le calendrier et les variations M−1/N−1. Leur intégration
+frontend est suivie en T23. Classements, contributions, cohortes comparables et
+sélections multi-magasins restent dépendants d’un périmètre backend ultérieur.
 
 ## 1. Problème et résultat attendu
 
@@ -128,7 +130,7 @@ les cas techniques, y compris pagination, erreurs et changement de publication.
 
 | Sujet | État et incidence sur la première version |
 | --- | --- |
-| API réseau | Agrégations, recherche magasins, disponibilité des périodes et classement global à développer ; bloquent la réception des vues réseau P0 |
+| API réseau | Synthèses réseau publiées disponibles ; recherche magasins, disponibilité par dataset, cohortes et classement global restent à développer et bloquent le P0 complet |
 | Cohérence des publications | Contrat de version/fraîcheur à définir pour les futures réponses agrégées ; ne pas promettre un snapshot entre pages actuelles |
 | Connexion web | Adapter et vérifier le client OIDC autorisé, les redirections et origines ; le client CLI ne constitue pas une session navigateur |
 | Devise et HT/TTC | Inconnus ; consultation possible avec libellé explicite, présentation financière qualifiée suspendue à confirmation métier |

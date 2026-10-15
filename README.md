@@ -5,11 +5,12 @@ tabular sources.
 
 The project provides validated data ingestion, PostgreSQL analytics and an
 authenticated read API. The React frontend provides personal OIDC login, store
-selection and detail, monthly store analyses, published data inspection and
+selection and detail, monthly store analyses, published network summaries, data inspection and
 permission-gated quality audits with a shared Material UI theme. These flows are
 verified with synthetic browser scenarios; deployed identity/API acceptance,
-human accessibility receipt and production qualification remain open. Network
-aggregations, global rankings and multi-store analytics are deferred. See the
+human accessibility receipt and production qualification remain open. Global
+rankings, comparable cohorts and multi-store analytics are deferred. Network
+month/year/calendar summaries and calendar comparisons use the published views. See the
 [frontend setup](frontend/README.md) and
 [SaaS frontend specification](docs/saas/README.md).
 

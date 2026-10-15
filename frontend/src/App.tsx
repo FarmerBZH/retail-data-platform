@@ -1,3 +1,5 @@
+import { Network } from "./Network";
+import { initialNetworkContext } from "./network-data";
 import { useState } from "react";
 import {
   Box,
@@ -176,12 +178,19 @@ export default function App({
 }
 
 function Workspace({ reads }: { reads: ReadQueries }) {
+  const [networkContext, setNetworkContext] = useState(initialNetworkContext);
   const [view, setView] = useState("stores");
   const [navigation, setNavigation] = useState(initialStoreNavigation);
   return (
     <Stack spacing={3}>
       <Box component="nav" aria-label="Navigation principale">
         <Stack direction="row" spacing={2} useFlexGap sx={{ flexWrap: "wrap" }}>
+          <Button
+            aria-current={view === "network" ? "page" : undefined}
+            onClick={() => setView("network")}
+          >
+            Vue réseau
+          </Button>
           <Button
             aria-current={view === "stores" ? "page" : undefined}
             onClick={() => setView("stores")}
@@ -202,7 +211,13 @@ function Workspace({ reads }: { reads: ReadQueries }) {
           </Button>
         </Stack>
       </Box>
-      {view === "stores" ? (
+      {view === "network" ? (
+        <Network
+          reads={reads}
+          context={networkContext}
+          onContext={setNetworkContext}
+        />
+      ) : view === "stores" ? (
         <StoreList
           reads={reads}
           navigation={navigation}

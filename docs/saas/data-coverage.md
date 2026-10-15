@@ -4,8 +4,7 @@ Statut : contrat de couverture du frontend cible. La réconciliation et les
 destinations de consultation vérifiées de la tranche implémentée sont documentées
 dans le [manifeste frontend](frontend-coverage.md). Cette matrice conserve les
 capacités réseau/multi-magasins cibles : les quatre vues réseau publiées sont
-consultables dans Données ; leur écran dédié est prévu dans la seconde partie
-de T23. Les sélections et classements restent différés.
+intégrées en T23, les sélections et classements restent différés.
 Référence : [registre API](../../src/retail_data_platform/api/resources.json) et
 [projection des objets](../../src/retail_data_platform/api/resources.py).
 Périmètre vérifié : **28 ressources** (13 tables et 15 vues analytiques),

@@ -112,12 +112,15 @@ La présence du code ne prouve pas que ces opérations ont été réalisées sur
 
 ## Besoins API restant pour la cible complète
 
-Statut : différé par décision produit. Cette section conserve les dépendances de
-la cible complète ; elle n’autorise pas leur implémentation pendant la première
-tranche frontend, qui utilise uniquement les endpoints existants.
+Statut : capacités non livrées, désormais préparées en T24 à la demande du
+responsable produit. Le [contrat en trois commits](network-analysis.md) précise
+PostgreSQL, API et SaaS, avec limites, sécurité et tests. La présente préparation
+a conduit au socle PostgreSQL interne T24A ; les nouveaux endpoints et parcours
+T24B/C restent à faire. L’API et le frontend exposés restent ceux de T23.
 
-Les noms et chemins de ces futures routes sont à définir lors du contrat OpenAPI.
-Il est interdit de coder le frontend comme si ces routes existaient déjà.
+Les noms et chemins proposés dans T24 doivent être figés dans l’OpenAPI de T24B
+avant leur consommation en T24C. Ils ne sont pas encore disponibles. Les routes
+`/v1/data/*` et le catalogue natif conservent leur contrat existant.
 
 | Capacité à ajouter | Entrée cible | Sortie et invariants attendus |
 | --- | --- | --- |

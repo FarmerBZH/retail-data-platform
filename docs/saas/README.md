@@ -30,6 +30,8 @@ Les documents suivants précisent ses contrats sans répéter les arbitrages pro
    graphiques et états visuels communs.
 7. [Tâches d’implémentation](tasks.md) : fonctionnalités ordonnées, propositions
    de petits commits, tests progressifs et revues Codex Security pour les agents.
+8. [T24 — Analyses réseau filtrées](network-analysis.md) : prochain périmètre
+   préparé en trois commits PostgreSQL, API et SaaS ; contrats et réception.
 
 Ces documents définissent la cible ; [l'architecture](../architecture.md) décrit
 uniquement l'existant. En cas de divergence avec une capacité supposée, vérifier
@@ -45,7 +47,9 @@ comme dépendances de la cible complète, sans développement backend dans cette
 La tranche implémentée couvre la connexion personnelle, les magasins et leurs
 analyses unitaires, les données publiées et la qualité selon les droits. T23 ajoute
 les quatre vues réseau maintenant publiées : voir le [contrat réseau](../network-analytics.md).
-Classements, cohortes et agrégations multi-magasins restent indisponibles.
+Classements, cohortes et agrégations multi-magasins restent indisponibles ;
+leur réalisation est cadrée en T24. Le socle PostgreSQL T24A est implémenté
+localement ; l’exposition API T24B et les parcours SaaS T24C restent à faire.
 
 - Application web en français, lecture seule, usage principal sur ordinateur.
 - Trois niveaux : réseau, sélection de magasins, fiche magasin.

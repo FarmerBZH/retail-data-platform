@@ -1,8 +1,10 @@
 # Frontend SaaS — tâches d’implémentation et de validation
 
 Statut actuel : T23 intègre les quatre vues réseau publiées, avec vérifications
-locales terminées. T23A est commitée ; T23B est validée avec autorisation explicite
-de commit. Les développements T01–T22 sont commités. Les parties automatisées
+locales terminées. T23A (`02015e4`) et T23B (`24cc19b`) sont commitées.
+T24A est commitée après relecture et approbation explicite ; T24B/C restent à faire
+dans le découpage PostgreSQL → API → SaaS ; voir le [contrat de réalisation](network-analysis.md).
+Les développements T01–T22 sont commités. Les parties automatisées
 T20–T22 sont vérifiées localement ; la recette humaine T20, les headers/logs réels
 T21 et la recette intégrée API/OIDC T22 restent ouverts, cette dernière faute
 d’environnement défini. CI hébergée et charge de production non reçues.
@@ -816,7 +818,7 @@ les validations réelles en dépendant restent ouverts.
 | Responsive, clavier, graphiques accessibles | T02 puis chaque écran, T20 ; auto + humain |
 | Performance et livraison | T22 ; mesures sur profils déclarés et budgets convenus |
 | Synthèses réseau et variations calendaires | T23A–T23B ; couverture, pagination, comparaisons et session sur données synthétiques |
-| Classement, cohortes et comparaison multi-magasins | Différés ; cas correspondants d’acceptance.md non reçus dans cette tranche |
+| Classement, cohortes et comparaison multi-magasins | T24A commitée ; API T24B et SaaS T24C restent à faire |
 
 ## Reprise par un agent
 
@@ -830,9 +832,9 @@ partir de ces preuves ; conserver les résultats sensibles hors des fichiers pub
 (tests faits, commit non approuvé), **validé**, **commité** (après accord explicite).
 Ne pas confondre code implémenté, fonctionnalité vérifiée et commit approuvé.
 
-Les dépendances backend différées doivent faire l’objet d’un futur arbitrage dédié.
-Le présent fichier n’autorise ni leur implémentation, ni un changement de modèle
-d’accès, ni un push ou déploiement automatique.
+La préparation du prochain périmètre backend est détaillée en T24A–T24C.
+Cette préparation documentaire ne démarre pas les développements, ne change pas
+le modèle d’accès et n’autorise aucun commit, push ou déploiement automatique.
 
 
 ### T23A — Accepter et explorer les ressources réseau publiées
@@ -857,7 +859,7 @@ d’accès, ni un push ou déploiement automatique.
 
 ### T23B — Intégrer les synthèses réseau publiées
 
-- Statut : **validée pour commit**, après approbation explicite. T23B complète
+- Statut : **commitée**, `24cc19b`, après approbation explicite. T23B complète
   T23A avec l’écran réseau, ses lectures métier, ses tests et sa documentation.
 - Résultats du 15 octobre 2026 : format, lint, TypeScript strict, build et 612 tests
   frontend réussis. La commande `npm run check` a validé 147 parcours navigateur
@@ -892,3 +894,89 @@ d’accès, ni un push ou déploiement automatique.
   revue humaine et performance au volume cible restent ouverts. Le P0 complet
   ne peut pas être déclaré reçu.
 - Commit proposé : `Integrate published network analytics`.
+
+
+### T24 — Réseau filtré, classement et comparaison multi-magasins
+
+- Statut : **T24A commitée après relecture et approbation explicite** ; T24B/C à faire.
+  Demande : trois commits successifs, base → API → frontend SaaS. Le [contrat détaillé](network-analysis.md) définit les vues,
+  calculs, entrées/sorties, sécurité, tests et réception de chaque étape.
+- Dépendance : T23A–T23B. Réutiliser les données et vues existantes ; pas de nouvelle
+  source, dépendance commerciale, identité ou modèle multi-tenant.
+- Périmètre : filtres actuels à la publication, recherche et sélection explicite,
+  disponibilité par source, totaux de fenêtre, séries, cohortes, contributions,
+  classement global paginé et comparaison de magasins.
+- Ordre : réaliser et vérifier un commit entier avant de passer au suivant.
+  Chaque proposition inclut ses tests, sa documentation et sa revue de sécurité.
+  La préparation de T24 n’est ni une autorisation de commit ni une recette P0.
+
+### T24A — Préparer les vues et calculs PostgreSQL
+
+- Statut : **commitée après relecture et approbation explicite** ; dépendance T23.
+  Revue de sécurité finale terminée sans vulnérabilité retenue.
+- Preuves locales : format Ruff, lint, mypy strict et **218 tests réussis** avec
+  `TEST_DATABASE_URL` vers PostgreSQL 18 isolé. Aucun test PostgreSQL ignoré ; seul
+  le callback OIDC opt-in est désactivé. Les deux tests de contrat frontend passent,
+  sans modification de l’application web ni du catalogue à 28 ressources.
+- Migration vérifiée : upgrade à neuf, cycle downgrade/upgrade vers
+  `20260930_14`, `alembic check`, colonnes/types/grains des modèles alignés,
+  initialisation depuis une publication existante et maintien des vues publiques.
+- Publication : rollback des deux nouvelles vues et des anciennes ensemble,
+  lecteurs concurrents, référentiel figé et disponibilité rapportée/inférée testés.
+- Calculs : oracles A/B, absence/zéro/négatif, cohortes figées par mesure,
+  intersection CA/unités, fenêtres chevauchantes/hors calendrier, contribution
+  globale exacte, tris avec égalités/nulls et pages bornées. Recherche/dimensions/
+  bornes utilisables avant choix de période ; calcul sans fenêtre refusé.
+- Profil synthétique : 300 magasins × 24 mois (7 200 observations), fenêtres de
+  deux mois et plans EXPLAIN ANALYZE sur synthèses réseau/filtrée et classement.
+  Aucun index supplémentaire non unique justifié sur ce profil ; aucune mesure
+  p95 de production ou qualification de charge n’est revendiquée.
+- Migration : `20261015_15`, après `20260930_14`. Vues internes seulement :
+  `analytics_store_scope` et `analytics_store_dataset_month`.
+- Commit proposé : `Add filtered network analytics foundations`.
+- Livrer : migration réversible après `20260930_14`, mappings SQLAlchemy,
+  vues magasin publié et observations par source/mois, indexes justifiés,
+  refresh/audit atomiques et module SQL paramétré de calculs par périmètre.
+- Réutiliser `analytics_store_month` ; aucune vue par combinaison d’IDs, de dates
+  ou de filtres. Aucun nouvel endpoint ou ajout au catalogue natif dans ce commit.
+- Valider : PostgreSQL réel, migration à neuf, downgrade/upgrade, `alembic check`,
+  oracles exacts, absence/zéro, cohortes figées, classement et refresh concurrent.
+  Exécuter format/lint/mypy/pytest du projet et revue Security du diff.
+- Terminé quand : calculs testés sans API, ancienne API et frontend toujours
+  compatibles ; contrat backend et architecture alignés sur les preuves.
+
+### T24B — Exposer les analyses dans l’API
+
+- Statut : **à faire** ; dépendance T24A.
+- Commit proposé : `Expose filtered network analytics endpoints`.
+- Livrer : schémas dédiés/OpenAPI, recherche et dimensions paginées, disponibilité,
+  synthèse, séries, classement et séries individuelles ; réutiliser les requêtes
+  T24A sans recoder les formules. Routes proposées dans le contrat détaillé.
+- Garantir : `data:read`, accès global inchangé, SQL lié, droits SELECT explicites,
+  répétitions/tri/IDs/périodes/réponses bornés, erreurs sans valeurs ; aucun audit
+  OPS exposé. Catalogue `/v1/resources` et routes natives existantes préservés.
+- Cohérence : même transaction read-only repeatable-read pour publication et
+  résultats ; version exigée sur lectures suivantes, rejet 409 si elle change,
+  curseur lié au contexte complet. Aucun snapshot historique ni refresh HTTP.
+- Valider : baseline Python, vrais tests API/PostgreSQL, grants/démarrage,
+  cas hostiles, exactitude des cohortes et pagination ; revue Security du diff.
+- Terminé quand : contrat machine et opérations documentés, API testée avec rôle
+  de lecture minimal, ancien client toujours utilisable ; aucune UI anticipée.
+
+### T24C — Réaliser les parcours SaaS
+
+- Statut : **à faire** ; dépendance T24B.
+- Commit proposé : `Add filtered network and store comparisons`.
+- Livrer : transport typé, contexte partagé de période/filtres/référence/sélection,
+  recherche serveur, totaux et séries qualifiés, choix cohorte, contributions et
+  classement paginés, comparaison de six séries à la fois avec total complet.
+- Préserver : routes et lectures globale/annuelle T23, MUI/tokens, valeurs exactes,
+  couverture, contexte au retour magasin et effacement à la fin de session.
+  Publication changée ⇒ retirer les blocs dépendants et relire explicitement.
+- Valider : `npm run check` complet, clavier/axe à 360/768/1440, sept magasins,
+  seconde page, changements en vol, erreurs/409 et expiration ; recette intégrée
+  OIDC/API/PostgreSQL synthétique et limites humaines/charge distinguées.
+- Mettre à jour produit, matrice, intégration, réception, architecture et guide
+  frontend d’après les champs/garanties effectivement reçus, sans gonfler le bilan P0.
+- Terminé quand : résultats PostgreSQL/API/UI concordants, tests requis exécutés,
+  revue Security du diff et cumulative T24A–C terminées ; limites publiées.

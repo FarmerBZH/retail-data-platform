@@ -13,7 +13,8 @@ sont documentés séparément.
 Les quatre vues réseau publiées permettent maintenant les synthèses mensuelles,
 annuelles, sur tout le calendrier et les variations M−1/N−1. Leur intégration
 frontend est suivie en T23. Classements, contributions, cohortes comparables et
-sélections multi-magasins restent dépendants d’un périmètre backend ultérieur.
+sélections multi-magasins font désormais l’objet de la [tâche T24](network-analysis.md),
+préparée en trois commits PostgreSQL, API et SaaS ; elles ne sont pas encore livrées.
 
 ## 1. Problème et résultat attendu
 

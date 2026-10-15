@@ -112,3 +112,26 @@ seul mois, les références zéro/négative, les capacités absentes, une public
 changée et l’annulation. Tester clavier et axe à 360/768/1440 px, effacement après
 déconnexion et absence de stockage métier. Un échec du bloc de comparaison reste
 local. Les classements/cohortes/sélections de la cible restent non reçus.
+
+
+## Réception T24 — réseau filtré et comparaison multi-magasins
+
+Statut : à exécuter avec les développements ; aucun résultat de T23 ne vaut
+validation de ces nouvelles capacités. Le [contrat T24](network-analysis.md)
+associe chaque exigence à son commit et à ses preuves PostgreSQL/API/SaaS.
+
+- T24A : migration réversible, référentiel figé, disponibilité observée par source,
+  calculs exacts sur grille attendue, cohortes figées et contributions concordantes.
+- T24B : filtres et sélection bornés, recherche/options serveur, tri global et deux
+  pages, rôle SQL minimal, publication cohérente par réponse, 409 entre versions,
+  erreurs sans valeurs et compatibilité des anciennes collections.
+- T24C : même résultat que les oracles PostgreSQL/API, total indépendant de la page,
+  comparaison de sept magasins avec six visibles, conservation du contexte, retrait
+  des anciennes données en vol ou après 409, clavier/axe et effacement de session.
+- Ensemble : baseline Python, PostgreSQL réel, `npm run check`, revues de sécurité
+  par diff puis cumulative et recette OIDC/API/PostgreSQL synthétique. Les contrôles
+  conditionnels ignorés ou une recette réelle indisponible restent signalés ouverts.
+
+Les vues et réponses nouvelles n’entrent dans la matrice des données publiées
+qu’une fois leurs projections décidées et implémentées. Les budgets de performance
+et la recette humaine restent distincts des plafonds techniques et des tests simulés.

@@ -5,8 +5,9 @@
 This document describes the implemented ingestion, analytical and authenticated
 read API boundaries of Retail Data Platform, plus an authenticated React frontend
 with store/network analyses and published data/quality inspection. Production identity
-deployment, network rankings/comparable cohorts, multi-store analytics and multi-tenant authorization
-are outside the verified implementation.
+deployment, HTTP/SaaS exposure of network rankings, comparable cohorts and
+multi-store analytics, and multi-tenant authorization are outside the verified
+implementation.
 Authorized API readers have global access; store selection is a query filter.
 
 The platform turns heterogeneous tabular source bundles into a validated,
@@ -284,7 +285,8 @@ local action durations, API request counts and JSON bytes, and sampled Chromium
 JavaScript heap use. These do not establish server load capacity, a real network
 p95, complete browser memory use or production readiness. Deployed provider/API
 acceptance for all business flows, human accessibility receipt and production
-hosting remain open; rankings, comparable cohorts and multi-store analytics are deferred.
+hosting remain open; HTTP/SaaS exposure of rankings, comparable cohorts and
+multi-store analytics remains deferred.
 Setup and actual scripts are in the
 [frontend guide](../frontend/README.md).
 
@@ -449,8 +451,22 @@ Network month, year and whole-calendar summaries aggregate only the canonical
 store-month grain, with separate complete and partial measures and explicit
 coverage counts. Monthly comparisons propagate missing coverage and zero-base
 ratios. Their typed read resources preserve global access and existing grants;
-no frontend fan-out or arbitrary multi-store aggregation was introduced. See
+no frontend fan-out or multi-store HTTP analysis endpoint was introduced. See
 [Network analytics](network-analytics.md) for the published contract and limits.
+
+Two internal materialized views additionally freeze published store dimensions
+and store/month/dataset observation counts. They have unique grain indexes and
+share the same atomic refresh as the fifteen public views. The filtered-analysis
+reader reuses store-month measures for parameterized window/cohort totals,
+aligned series, bounded search and globally ranked revenue contributions. Missing
+cells stay in the expected denominator and each measure has its own fixed cohort;
+revenue/unit ratios use their common complete cohort. SQL numeric arithmetic and
+null-aware keyset ordering retain exact results. This reader operates only on
+published snapshots and relies on its caller's transaction for a common snapshot;
+no new HTTP endpoints, publication-pinning protocol or reader grants are added.
+Internal ORM metadata is separate from public analytical metadata, preserving the
+28-resource API catalog. Tests verify that its existing role has no SELECT grant
+on either internal view. See [Network analytics](network-analytics.md).
 
 SQLAlchemy view mappings use separate metadata from the base tables. The refresh
 audit is a normal mapped table. Migration lifecycle, analytical contracts,

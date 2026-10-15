@@ -16,7 +16,7 @@ from sqlalchemy import Connection, create_engine, event, inspect, select, text
 from sqlalchemy.orm import ORMExecuteState, Session
 
 from retail_data_platform.analytics import _refresh_views
-from retail_data_platform.database.analytics import AnalyticsBase, StoreMonth
+from retail_data_platform.database.analytics import AnalyticsBase, InternalAnalyticsBase, StoreMonth
 from retail_data_platform.database.models import (
     Assortment,
     NumericDistributionObservation,
@@ -48,6 +48,10 @@ def migrated_connection() -> Iterator[Connection]:
         connection.execute(text(f'SET LOCAL search_path TO "{schema}"'))
         config = Config("alembic.ini")
         config.attributes["connection"] = connection
+        command.upgrade(config, "head")
+        command.check(config)
+        command.downgrade(config, "20260930_14")
+        assert "analytics_store_scope" not in inspect(connection).get_materialized_view_names()
         command.upgrade(config, "head")
         command.check(config)
         command.downgrade(config, "20260927_13")
@@ -219,8 +223,9 @@ def monthly(session: Session, s: Store, period: date = JAN) -> Any:
 def test_empty_and_view_model_contract(session: Session) -> None:
     assert session.scalars(select(StoreMonth)).all() == []
     inspector = inspect(session.connection())
-    assert set(inspector.get_materialized_view_names()) == set(AnalyticsBase.metadata.tables)
-    for table in AnalyticsBase.metadata.tables.values():
+    mapped_views = {**AnalyticsBase.metadata.tables, **InternalAnalyticsBase.metadata.tables}
+    assert set(inspector.get_materialized_view_names()) == set(mapped_views)
+    for table in mapped_views.values():
         actual = inspector.get_columns(table.name)
         assert {c["name"] for c in actual} == set(table.columns.keys())
         for column in actual:

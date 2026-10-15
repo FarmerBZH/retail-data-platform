@@ -83,8 +83,9 @@ favorable trend from the ratio sign. Ratios are fractions, not percentages.
 Comparisons use the same current store population in the published calendar, but
 do not guarantee a constant product universe or economically constant perimeter.
 They are calculated before API period filtering, so selecting one month preserves
-its reference history. There is no comparable-cohort calculation, store ranking,
-arbitrary multi-store selection, or arbitrary-window summary in this release.
+its reference history. These four global resources do not expose comparable-cohort
+calculations, store ranking, arbitrary multi-store selection or arbitrary-window
+summaries.
 Do not add store filters to these global resources or sum a page as a window total.
 
 ## API and refresh
@@ -103,8 +104,8 @@ For example, a monthly request is:
 GET /v1/data/analytics_network_month?period_from=2025-01-01&period_to=2025-12-01
 ```
 
-Use `/v1/analytics/status` for initialization and source freshness. All fifteen
-views are refreshed from one repeatable-read snapshot and published atomically
+Use `/v1/analytics/status` for initialization and source freshness. All seventeen
+analytical views (fifteen public and two internal) are refreshed from one repeatable-read snapshot and published atomically
 with the refresh audit. Separate HTTP requests/pages can see different successful
 refreshes; this is not a frozen export contract.
 
@@ -130,3 +131,45 @@ Synthetic PostgreSQL tests cover null/zero/negative measures, ambiguous products
 unattributed observations, independent coverage, calendar gaps, annual boundaries,
 exact API serialization, authorization/grants, atomic refresh and migration cycles.
 Private source rows and derived statistics are not test fixtures or documentation.
+
+
+## Internal filtered-analysis foundations (T24A)
+
+Migration `20261015_15`, after `20260930_14`, adds two internal materialized views:
+`analytics_store_scope` (one published store with name/city/filter dimensions) and
+`analytics_store_dataset_month` (store/month/dataset observation counts). Both
+have unique grain indexes and refresh atomically with the fifteen existing views.
+The observation view preserves separate reported and inferred-absence counts and
+counts typology snapshots before their child values. Neither view establishes
+source-delivery completeness. Unmatched observations remain in link quality.
+
+`database/network_analysis.py` reuses canonical store-month measures for bounded
+window totals, independent measure coverage, fixed per-measure cohorts, aligned
+series and server-side revenue rankings/contributions. It also reads published
+search/dimension pages and observation availability. It uses bound SQLAlchemy
+expressions, exact PostgreSQL numeric arithmetic and stable null-aware keyset
+ordering. UUID selection is explicit and bounded to 100 stores; unknown IDs are
+rejected before dimension filtering. Windows are bounded to 120 months with an
+equal calendar reference; missing cells remain in the expected denominator.
+
+The reader's caller must provide one snapshot transaction for scope resolution
+and all related reads. No HTTP route, publication precondition between requests,
+new reader grant or public resource is introduced in T24A. Internal mappings have
+separate metadata: the existing catalog remains 28 resources. PostgreSQL tests
+verify that the current API role cannot read the two internal views.
+
+Deploy the migration with the owner and use the matching refresh code before
+considering the new snapshots initialized. Existing published global views are
+retained during migration, but analytical status stays uninitialized until a
+successful refresh includes the new views. Do not keep an older refresh writer
+running against the new schema. T24A requires no new HTTP reader grants.
+Downgrade first requires matching older refresh/status consumers; it removes only
+the two internal views and leaves existing public results intact.
+
+Synthetic PostgreSQL tests cover migration/model alignment, new upgrade cycles,
+publication rollback and concurrent readers, the absent/zero A/B oracle,
+independent cohorts and their common revenue/unit intersection, calendar gaps,
+negative/zero references, exact contributions and two-page global rankings.
+A 300-store/24-month synthetic profile checks query plans and bounded output;
+no production capacity or new performance SLA is implied. API exposure and SaaS
+flows remain T24B/C in the [implementation contract](saas/network-analysis.md).

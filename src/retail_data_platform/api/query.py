@@ -24,6 +24,7 @@ class Query(BaseModel):
     product_id: UUID | None = None
     assortment_id: UUID | None = None
     typology_value_id: UUID | None = None
+    scope: str | None = Field(default=None, max_length=32)
     activity_type: str | None = Field(default=None, max_length=32)
     category_code: str | None = Field(default=None, max_length=32)
     product_key: str | None = Field(default=None, max_length=1024)

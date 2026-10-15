@@ -24,6 +24,10 @@ ANALYTICAL_VIEWS = (
     "analytics_monthly_link_quality",
     "analytics_store_month",
     "analytics_store_month_changes",
+    "analytics_network_month",
+    "analytics_network_year",
+    "analytics_network_overview",
+    "analytics_network_month_changes",
 )
 LOCK_NAME = "retail_analytics_refresh"
 

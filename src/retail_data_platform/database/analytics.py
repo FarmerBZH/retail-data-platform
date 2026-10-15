@@ -196,3 +196,65 @@ class StoreMonthChanges(AnalyticsBase):
     revenue_month_change: Mapped[Decimal | None] = mapped_column(Numeric)
     revenue_month_change_ratio: Mapped[Decimal | None] = mapped_column(Numeric)
     revenue_year_change_ratio: Mapped[Decimal | None] = mapped_column(Numeric)
+
+
+class NetworkMeasures:
+    """Shared columns; coverage counts store-month cells, not source delivery."""
+
+    first_period: Mapped[date | None] = mapped_column(Date)
+    last_period: Mapped[date | None] = mapped_column(Date)
+    expected_cell_count: Mapped[int] = mapped_column(BigInteger)
+    store_count: Mapped[int] = mapped_column(BigInteger)
+    stores_with_register: Mapped[int] = mapped_column(BigInteger)
+    month_count: Mapped[int] = mapped_column(BigInteger)
+    revenue_covered_cell_count: Mapped[int] = mapped_column(BigInteger)
+    units_covered_cell_count: Mapped[int] = mapped_column(BigInteger)
+    calls_covered_cell_count: Mapped[int] = mapped_column(BigInteger)
+    field_visits_covered_cell_count: Mapped[int] = mapped_column(BigInteger)
+    crowdsourced_visits_covered_cell_count: Mapped[int] = mapped_column(BigInteger)
+    stores_with_activity: Mapped[int] = mapped_column(BigInteger)
+    stores_with_category_data: Mapped[int] = mapped_column(BigInteger)
+    stores_with_typology: Mapped[int] = mapped_column(BigInteger)
+    revenue: Mapped[Decimal | None] = mapped_column(Numeric)
+    revenue_partial: Mapped[Decimal | None] = mapped_column(Numeric)
+    units: Mapped[Decimal | None] = mapped_column(Numeric)
+    units_partial: Mapped[Decimal | None] = mapped_column(Numeric)
+    calls: Mapped[Decimal | None] = mapped_column(Numeric)
+    calls_partial: Mapped[Decimal | None] = mapped_column(Numeric)
+    field_visits: Mapped[Decimal | None] = mapped_column(Numeric)
+    field_visits_partial: Mapped[Decimal | None] = mapped_column(Numeric)
+    crowdsourced_visits: Mapped[Decimal | None] = mapped_column(Numeric)
+    crowdsourced_visits_partial: Mapped[Decimal | None] = mapped_column(Numeric)
+    revenue_per_unit: Mapped[Decimal | None] = mapped_column(Numeric)
+    unambiguous_reported_revenue: Mapped[Decimal | None] = mapped_column(Numeric)
+    unambiguous_reported_units: Mapped[Decimal | None] = mapped_column(Numeric)
+    register_product_count: Mapped[Decimal | None] = mapped_column(Numeric)
+    register_ambiguous_products: Mapped[Decimal | None] = mapped_column(Numeric)
+    register_unmatched_product_rows: Mapped[Decimal | None] = mapped_column(Numeric)
+
+
+class NetworkMonth(NetworkMeasures, AnalyticsBase):
+    __tablename__ = "analytics_network_month"
+    period: Mapped[date] = mapped_column(Date, primary_key=True)
+
+
+class NetworkYear(NetworkMeasures, AnalyticsBase):
+    __tablename__ = "analytics_network_year"
+    period: Mapped[date] = mapped_column(Date, primary_key=True)
+
+
+class NetworkOverview(NetworkMeasures, AnalyticsBase):
+    __tablename__ = "analytics_network_overview"
+    scope: Mapped[str] = mapped_column(Text, primary_key=True)
+
+
+class NetworkMonthChanges(AnalyticsBase):
+    __tablename__ = "analytics_network_month_changes"
+    period: Mapped[date] = mapped_column(Date, primary_key=True)
+    revenue: Mapped[Decimal | None] = mapped_column(Numeric)
+    revenue_previous_month: Mapped[Decimal | None] = mapped_column(Numeric)
+    revenue_previous_year: Mapped[Decimal | None] = mapped_column(Numeric)
+    revenue_month_change: Mapped[Decimal | None] = mapped_column(Numeric)
+    revenue_month_change_ratio: Mapped[Decimal | None] = mapped_column(Numeric)
+    revenue_year_change: Mapped[Decimal | None] = mapped_column(Numeric)
+    revenue_year_change_ratio: Mapped[Decimal | None] = mapped_column(Numeric)

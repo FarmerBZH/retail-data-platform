@@ -50,6 +50,10 @@ def migrated_connection() -> Iterator[Connection]:
         config.attributes["connection"] = connection
         command.upgrade(config, "head")
         command.check(config)
+        command.downgrade(config, "20260927_13")
+        assert "analytics_network_month" not in inspect(connection).get_materialized_view_names()
+        command.upgrade(config, "head")
+        command.check(config)
         command.downgrade(config, "20260927_12")
         assert not connection.execute(
             text(

@@ -4,7 +4,8 @@ Statut : contrat de couverture du frontend cible. La réconciliation et les
 destinations de consultation vérifiées de la tranche implémentée sont documentées
 dans le [manifeste frontend](frontend-coverage.md). Cette matrice conserve les
 capacités réseau/multi-magasins cibles : les quatre vues réseau publiées sont
-intégrées en T23, les sélections et classements restent différés.
+intégrées en T23 ; sélections et classements ont une API T24B vérifiée localement,
+mais leurs parcours SaaS restent T24C.
 Référence : [registre API](../../src/retail_data_platform/api/resources.json) et
 [projection des objets](../../src/retail_data_platform/api/resources.py).
 Périmètre vérifié : **28 ressources** (13 tables et 15 vues analytiques),
@@ -808,3 +809,28 @@ Inclure les secondes pages, les champs rarement renseignés, les lignes sans lie
 magasin/produit et les rôles avec/sans operations:read. Aucun écran ne doit se
 contenter des premières colonnes de sa table. Ne pas annoncer cette couverture
 comme implémentée tant que ces scénarios ne sont pas vérifiés.
+
+
+## Objets analytiques dédiés T24B
+
+Les 28 collections et leur matrice exhaustive ci-dessus restent inchangées. Les
+sept routes dédiées ont leurs propres [projections typées](../filtered-analysis-api.md)
+et n’ajoutent aucune colonne au registre natif. Leurs parcours frontend restent
+T24C ; les destinations ci-dessous sont cibles, sans couverture UI revendiquée.
+
+| Objet/champs API | Destination cible T24C | État de couverture |
+| --- | --- | --- |
+| Contexte : publication, fraîcheur, scope/IDs/filtres, quatre comptes, fenêtres/référence/comparaison | Workspace partagé et fraîcheur | API implémentée ; UI à faire |
+| Magasin publié : ID, nom, ville, enseigne, région, format, actif | Recherche, sélection, classement, comparaison | API implémentée ; UI à faire |
+| Page : items et curseur ; dimensions : valeur, dimension, compte manquant | Navigation manuelle, options de filtre | API implémentée ; UI à faire |
+| Cinq mesures : valeur complète/partielle, cellules couvertes/attendues | KPI, couverture et tableau alternatif | API implémentée ; UI à faire |
+| Changements : différence, ratio, état de référence ; cohortes : inclus/exclus, cellules attendues, valeurs courante/référence et changement | Choix périmètre/cohorte et comparaison | API implémentée ; UI à faire |
+| CA/unité : courant/référence, courant/référence cohorte, effectif commun ; somme globale des contributions | KPI qualifiés et contrôle global | API implémentée ; UI à faire |
+| Points : mois courant/référence, cinq mesures et valeurs/effectifs de cohorte figée | Séries et tableau mensuel | API implémentée ; UI à faire |
+| Classement : magasin, rang, CA courant/référence complet/partiel, couverture, mois attendus, contribution, motif d’exclusion | Classement paginé | API implémentée ; UI à faire |
+| Séries magasin : objet magasin et points ; compte total dans le contexte | Comparaison, six magasins par page | API implémentée ; UI à faire |
+| Disponibilité : domaine, bornes, mois, observation présente, lignes sources/rapportées/inférées, magasins observés | Panneau de disponibilité, distinct de la couverture des mesures | API implémentée ; UI à faire |
+
+Les erreurs de publication et de disponibilité ne deviennent pas des valeurs
+métier. Le transport et les tests frontend seront ajoutés en T24C ; la validation
+API/PostgreSQL et les limites sont suivies dans [T24](network-analysis.md).

@@ -19,6 +19,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.responses import JSONResponse
 
 from retail_data_platform.analytics import analytics_status
+from retail_data_platform.api.analysis import install_analysis_routes
 from retail_data_platform.api.auth import Principal, TokenVerifier
 from retail_data_platform.api.config import Settings
 from retail_data_platform.api.database import create_read_engine, read_connection, validate_database
@@ -202,6 +203,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 )
             ),
         )
+    install_analysis_routes(app, authenticate)
     return app
 
 

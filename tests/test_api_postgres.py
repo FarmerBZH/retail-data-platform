@@ -328,10 +328,12 @@ def test_network_resources_coverage_filters_and_nulls(api: TestClient) -> None:
     assert api.get("/v1/data/analytics_network_year").json()["items"][0]["month_count"] == 1
 
 
-def test_internal_analytics_are_not_granted_to_existing_http_reader(
+def test_internal_analytics_are_granted_only_for_analysis_queries(
     database: tuple[Settings, Engine, Engine],
 ) -> None:
     _, _, reader = database
     for view in ("analytics_store_scope", "analytics_store_dataset_month"):
-        with reader.connect() as connection, pytest.raises(DBAPIError):
-            connection.execute(text(f"SELECT * FROM {view} LIMIT 1"))
+        with reader.connect() as connection:
+            assert connection.execute(text(f"SELECT * FROM {view} LIMIT 1")).first() is not None
+    assert "analytics_store_scope" not in RESOURCES
+    assert "analytics_store_dataset_month" not in RESOURCES

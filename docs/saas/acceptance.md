@@ -116,8 +116,8 @@ local. Les classements/cohortes/sélections de la cible restent non reçus.
 
 ## Réception T24 — réseau filtré et comparaison multi-magasins
 
-Statut : à exécuter avec les développements ; aucun résultat de T23 ne vaut
-validation de ces nouvelles capacités. Le [contrat T24](network-analysis.md)
+Statut : T24A vérifiée et commitée ; T24B vérifiée localement et commitée après
+relecture et approbation explicite, revue de sécurité terminée ; T24C à faire. Aucun résultat de T23 ne vaut validation de ces nouvelles capacités. Le [contrat T24](network-analysis.md)
 associe chaque exigence à son commit et à ses preuves PostgreSQL/API/SaaS.
 
 - T24A : migration réversible, référentiel figé, disponibilité observée par source,

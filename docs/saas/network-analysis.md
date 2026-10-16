@@ -1,9 +1,10 @@
 # T24 — Analyses réseau filtrées et comparaison de magasins
 
 Statut : **T24A commitée après relecture et approbation explicite** ;
-T24B et T24C restent à faire. Ce contrat couvre les trois étapes dépendantes ;
-seul le socle PostgreSQL de T24A est développé à ce stade. Les routes et écrans
-T24B/C restent des exigences, sans implémentation. Aucun commit, push ou déploiement
+T24B est commitée après relecture et approbation explicite ; T24C reste à faire.
+Ce contrat couvre les trois étapes dépendantes. Les sept routes T24B sont
+définies dans le [contrat API livré](../filtered-analysis-api.md) ; les écrans
+T24C restent des exigences sans implémentation. Aucun commit, push ou déploiement
 n’est autorisé par ce document. Les limites des livraisons
 existantes restent celles de [l’architecture](../architecture.md).
 
@@ -166,10 +167,10 @@ classement, recherche, dimensions et disponibilité. Les erreurs de validation
 sont des codes génériques sans valeurs. Les résultats restent des objets Python
 avec `Decimal` ; les schémas HTTP et leur sérialisation appartiennent à T24B.
 
-Le lecteur ne crée ni transaction ni connexion. Le futur service T24B doit
-l’instancier et effectuer ses lectures dans une même transaction read-only
-repeatable-read ; la précondition de publication entre requêtes n’est pas fournie
-par T24A. Les lectures de tests de calculs utilisent une transaction synthétique.
+Le lecteur ne crée ni transaction ni connexion. Le service T24B
+l’instancie et effectue ses lectures dans une même transaction read-only
+repeatable-read ; la précondition de publication entre requêtes appartient
+à cet adaptateur HTTP, pas au module T24A. Les lectures de tests de calculs utilisent une transaction synthétique.
 Les tests de cycle de publication utilisent de vraies connexions concurrentes.
 
 Les pages de recherche, dimensions et classement prennent une ligne d’anticipation
@@ -209,15 +210,16 @@ réconciliation du contrat frontend passent : 28 ressources publiques inchangée
 La revue de sécurité finale s’est terminée sans vulnérabilité retenue, y compris
 sur le découplage des lectures de découverte et de la fenêtre. La relecture
 technique est terminée et le propriétaire a explicitement approuvé le commit.
-Ces résultats ne valident ni les futurs endpoints ni la recette SaaS T24B/C.
+Ces preuves T24A seules ne valident ni l’API T24B ni la recette SaaS T24C.
 
 ## T24B — API analytique de lecture
 
-### Routes proposées à figer dans OpenAPI
+### Routes implémentées dans OpenAPI
 
-Préfixe proposé `/v1/analytics/analysis` pour séparer ces réponses métier des
-collections natives `/v1/data/*` et préserver `/v1/analytics/status`.
-Ces noms sont une proposition de contrat, pas des routes déjà disponibles.
+Préfixe `/v1/analytics/analysis`, distinct des collections natives `/v1/data/*`
+et de `/v1/analytics/status`. Les requêtes/réponses sont figées par les modèles
+`api/analysis_models.py` et exposées dans l’OpenAPI authentifié.
+Les comportements effectifs sont décrits dans le [contrat API](../filtered-analysis-api.md).
 
 | Route GET sous ce préfixe | Réponse attendue |
 | --- | --- |
@@ -249,15 +251,14 @@ aux longueurs des colonnes ; page 1–200 (défaut 50) ; curseur au plus 8192 ca
 La limite de 100 IDs reste subordonnée au plafond d’URL existant : ne jamais la
 contourner par un corps GET ou une nouvelle méthode d’écriture.
 
-Définir avant de coder les handlers les modèles requête/réponse et erreurs
-stables : montants/ratios en chaînes, dates mensuelles, compteurs entiers, clés
+Les modèles requête/réponse et les erreurs stables sont explicites : montants/ratios en chaînes, dates mensuelles, compteurs entiers, clés
 explicites pour valeurs et couverture. Répondre avec `publication_id`, fraîcheur,
 périmètre normalisé, fenêtres et mode de comparaison effectifs. Les pages utilisent
 `items` et `next_cursor` ; les totaux agrégés sont identifiés séparément et ne
 proviennent jamais d’un `count` ou d’une somme sur les lignes de la page.
 Ne pas publier automatiquement toutes les colonnes des nouvelles vues.
 
-Projection minimale à figer avec les modèles T24B :
+Projection commune aux modèles T24B (champs détaillés dans le contrat API) :
 
 | Objet | Champs requis |
 | --- | --- |
@@ -278,8 +279,8 @@ y compris les nouvelles métadonnées et les états nuls.
 - Utiliser l’UUID du dernier refresh réussi comme `publication_id`, jamais les
   hashes, noms de fichiers ou IDs des imports sources. Lire l’ID, les dimensions,
   les mesures et la fraîcheur dans une **même transaction read-only repeatable-read**.
-  Le helper actuel ouvre seulement une transaction read-only : cette garantie est
-  donc à implémenter et tester, pas à présumer.
+  Le helper `analysis_connection` ajoute cette garantie ; le helper des collections
+  natives conserve son comportement read-only précédent.
 - La première réponse initialise l’ID côté client. Les lectures suivantes d’un
   contexte et les pages demandent cet ID. Une publication différente produit
   `409 publication_changed`, aucune donnée d’un autre contexte. Publication non
@@ -318,6 +319,20 @@ Un ancien client frontend doit accepter le catalogue natif inchangé et continue
 découverte dans l’OpenAPI authentifié ; les listes fixes frontend sont étendues
 seulement en T24C. Documenter erreurs, grants, compatibilité et mise en service.
 Baseline Python complète et revue de sécurité du diff avant réception.
+
+### Vérifications locales de T24B
+
+Format Ruff, lint et mypy strict réussis ; 264 tests Python réussis avec PostgreSQL
+18 isolé. Un callback OIDC opt-in est désactivé ; aucun test PostgreSQL ignoré.
+Les scénarios couvrent authentification, contrats, oracles, classement global et
+curseurs, sept magasins, disponibilité, publication concurrente et changement de
+version, droits/démarrage, annulation/délai SQL et plafonds de réponse/budget.
+Le profil API ajoute 300 magasins × 24 mois à l’oracle de sept magasins ; sorties
+bornées et durées locales mesurées, sans qualification de charge de production.
+Le schéma OpenAPI des erreurs correspond au corps réel, avec un test sur les sept
+routes. Deux tests de contrat frontend passent. Revue de sécurité finale terminée
+sans vulnérabilité retenue. Relecture technique terminée et commit explicitement
+approuvé par le propriétaire. Aucun push ou déploiement T24B effectué.
 
 ## T24C — Frontend SaaS
 

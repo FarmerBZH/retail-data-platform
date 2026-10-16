@@ -14,7 +14,8 @@ Les quatre vues réseau publiées permettent maintenant les synthèses mensuelle
 annuelles, sur tout le calendrier et les variations M−1/N−1. Leur intégration
 frontend est suivie en T23. Classements, contributions, cohortes comparables et
 sélections multi-magasins font désormais l’objet de la [tâche T24](network-analysis.md),
-préparée en trois commits PostgreSQL, API et SaaS ; elles ne sont pas encore livrées.
+découpée en PostgreSQL, API et SaaS. Le socle est commité et les routes T24B
+sont implémentées et vérifiées localement ; leurs parcours SaaS T24C restent à faire.
 
 ## 1. Problème et résultat attendu
 

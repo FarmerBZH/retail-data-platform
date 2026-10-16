@@ -2,8 +2,8 @@
 
 Statut actuel : T23 intègre les quatre vues réseau publiées, avec vérifications
 locales terminées. T23A (`02015e4`) et T23B (`24cc19b`) sont commitées.
-T24A est commitée après relecture et approbation explicite ; T24B/C restent à faire
-dans le découpage PostgreSQL → API → SaaS ; voir le [contrat de réalisation](network-analysis.md).
+T24A et T24B sont commitées après relecture et approbation explicite ;
+T24C reste à faire dans le découpage PostgreSQL → API → SaaS ; voir le [contrat de réalisation](network-analysis.md).
 Les développements T01–T22 sont commités. Les parties automatisées
 T20–T22 sont vérifiées localement ; la recette humaine T20, les headers/logs réels
 T21 et la recette intégrée API/OIDC T22 restent ouverts, cette dernière faute
@@ -818,7 +818,7 @@ les validations réelles en dépendant restent ouverts.
 | Responsive, clavier, graphiques accessibles | T02 puis chaque écran, T20 ; auto + humain |
 | Performance et livraison | T22 ; mesures sur profils déclarés et budgets convenus |
 | Synthèses réseau et variations calendaires | T23A–T23B ; couverture, pagination, comparaisons et session sur données synthétiques |
-| Classement, cohortes et comparaison multi-magasins | T24A commitée ; API T24B et SaaS T24C restent à faire |
+| Classement, cohortes et comparaison multi-magasins | T24A et API T24B commitées ; SaaS T24C à faire |
 
 ## Reprise par un agent
 
@@ -898,7 +898,7 @@ le modèle d’accès et n’autorise aucun commit, push ou déploiement automat
 
 ### T24 — Réseau filtré, classement et comparaison multi-magasins
 
-- Statut : **T24A commitée après relecture et approbation explicite** ; T24B/C à faire.
+- Statut : **T24A et T24B commitées après approbation explicite** ; T24C à faire.
   Demande : trois commits successifs, base → API → frontend SaaS. Le [contrat détaillé](network-analysis.md) définit les vues,
   calculs, entrées/sorties, sécurité, tests et réception de chaque étape.
 - Dépendance : T23A–T23B. Réutiliser les données et vues existantes ; pas de nouvelle
@@ -947,11 +947,21 @@ le modèle d’accès et n’autorise aucun commit, push ou déploiement automat
 
 ### T24B — Exposer les analyses dans l’API
 
-- Statut : **à faire** ; dépendance T24A.
+- Statut : **commitée après relecture et approbation explicite** ; dépendance
+  T24A. [Contrat API](../filtered-analysis-api.md). Revue de sécurité finale
+  terminée sans vulnérabilité retenue.
+- Vérifications : format Ruff, lint et mypy strict ; **264 tests Python réussis**
+  sur PostgreSQL 18 isolé, un callback OIDC opt-in désactivé et aucun test
+  PostgreSQL ignoré. Oracles exacts, sept routes, classements sur deux pages,
+  séries de sept magasins, refresh pendant réponse, 409, stale/échec/initialisation,
+  droits minimaux et démarrage refusé, timeout et annulation SQL, 413/429/503.
+  Le profil synthétique ajoute 300 magasins × 24 mois à l’oracle ; pas de p95
+  ni de charge de production revendiqués. Les deux tests de contrat frontend
+  passent ; aucun code frontend modifié.
 - Commit proposé : `Expose filtered network analytics endpoints`.
 - Livrer : schémas dédiés/OpenAPI, recherche et dimensions paginées, disponibilité,
   synthèse, séries, classement et séries individuelles ; réutiliser les requêtes
-  T24A sans recoder les formules. Routes proposées dans le contrat détaillé.
+  T24A sans recoder les formules. Routes figées dans l’OpenAPI et le contrat détaillé.
 - Garantir : `data:read`, accès global inchangé, SQL lié, droits SELECT explicites,
   répétitions/tri/IDs/périodes/réponses bornés, erreurs sans valeurs ; aucun audit
   OPS exposé. Catalogue `/v1/resources` et routes natives existantes préservés.

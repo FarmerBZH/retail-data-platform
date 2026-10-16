@@ -41,15 +41,15 @@ en simplifier les ambiguïtés pour satisfaire une maquette.
 
 ## Périmètre retenu pour la proposition
 
-Le démarrage porte sur le frontend consommant l’API existante. Les nouveaux
-endpoints analytiques sont explicitement différés : leurs besoins restent décrits
-comme dépendances de la cible complète, sans développement backend dans cette étape.
+La première tranche frontend consomme l’API existante. Les endpoints analytiques
+initialement différés font ensuite l’objet de T24 : socle PostgreSQL, API et SaaS.
 La tranche implémentée couvre la connexion personnelle, les magasins et leurs
 analyses unitaires, les données publiées et la qualité selon les droits. T23 ajoute
 les quatre vues réseau maintenant publiées : voir le [contrat réseau](../network-analytics.md).
-Classements, cohortes et agrégations multi-magasins restent indisponibles ;
-leur réalisation est cadrée en T24. Le socle PostgreSQL T24A est implémenté
-localement ; l’exposition API T24B et les parcours SaaS T24C restent à faire.
+Classements, cohortes et agrégations multi-magasins restent indisponibles dans le SaaS ;
+leur réalisation est cadrée en T24. Le socle PostgreSQL T24A est commité ;
+l’API T24B est commitée après relecture et approbation explicite ; les parcours SaaS T24C
+restent à faire. Voir le [contrat API](../filtered-analysis-api.md).
 
 - Application web en français, lecture seule, usage principal sur ordinateur.
 - Trois niveaux : réseau, sélection de magasins, fiche magasin.

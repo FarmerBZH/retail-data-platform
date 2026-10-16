@@ -5,9 +5,8 @@
 This document describes the implemented ingestion, analytical and authenticated
 read API boundaries of Retail Data Platform, plus an authenticated React frontend
 with store/network analyses and published data/quality inspection. Production identity
-deployment, HTTP/SaaS exposure of network rankings, comparable cohorts and
-multi-store analytics, and multi-tenant authorization are outside the verified
-implementation.
+deployment, SaaS exposure of filtered rankings, comparable cohorts and multi-store
+analytics, and multi-tenant authorization are outside the verified implementation.
 Authorized API readers have global access; store selection is a query filter.
 
 The platform turns heterogeneous tabular source bundles into a validated,
@@ -285,8 +284,8 @@ local action durations, API request counts and JSON bytes, and sampled Chromium
 JavaScript heap use. These do not establish server load capacity, a real network
 p95, complete browser memory use or production readiness. Deployed provider/API
 acceptance for all business flows, human accessibility receipt and production
-hosting remain open; HTTP/SaaS exposure of rankings, comparable cohorts and
-multi-store analytics remains deferred.
+hosting remain open; SaaS exposure of filtered rankings, comparable cohorts and
+multi-store analytics remains T24C.
 Setup and actual scripts are in the
 [frontend guide](../frontend/README.md).
 
@@ -451,7 +450,7 @@ Network month, year and whole-calendar summaries aggregate only the canonical
 store-month grain, with separate complete and partial measures and explicit
 coverage counts. Monthly comparisons propagate missing coverage and zero-base
 ratios. Their typed read resources preserve global access and existing grants;
-no frontend fan-out or multi-store HTTP analysis endpoint was introduced. See
+no frontend fan-out is used. These four resources retain their global scope. See
 [Network analytics](network-analytics.md) for the published contract and limits.
 
 Two internal materialized views additionally freeze published store dimensions
@@ -462,11 +461,15 @@ aligned series, bounded search and globally ranked revenue contributions. Missin
 cells stay in the expected denominator and each measure has its own fixed cohort;
 revenue/unit ratios use their common complete cohort. SQL numeric arithmetic and
 null-aware keyset ordering retain exact results. This reader operates only on
-published snapshots and relies on its caller's transaction for a common snapshot;
-no new HTTP endpoints, publication-pinning protocol or reader grants are added.
-Internal ORM metadata is separate from public analytical metadata, preserving the
-28-resource API catalog. Tests verify that its existing role has no SELECT grant
-on either internal view. See [Network analytics](network-analytics.md).
+published snapshots. Seven dedicated T24B routes supply a read-only repeatable-read
+transaction for scope, publication and business reads. Related requests can require
+the returned publication UUID; pagination requires it, and a refresh invalidates
+the old context with 409. No historical snapshot is retained. Fixed typed response
+models serialize exact decimals and exclude operational audit payloads.
+Internal ORM metadata remains separate, preserving the 28-resource catalog. An
+explicit SQL permission manifest additionally grants the two internal projections;
+startup checks their column grants and rejects ownership or write privileges. See
+[Filtered analysis API](filtered-analysis-api.md) for contracts and operations.
 
 SQLAlchemy view mappings use separate metadata from the base tables. The refresh
 audit is a normal mapped table. Migration lifecycle, analytical contracts,
@@ -497,7 +500,8 @@ A bounded per-process subject rate limiter
 supplements mandatory ingress limits. No HTTP writes, arbitrary SQL, joins supplied
 by clients, or refresh operations exist. Typology-value store filtering follows the
 snapshot relationship. Analytical semantics and freshness remain those documented
-in monthly-analytics.md. Separate pages are separate snapshots, not frozen exports.
+in monthly-analytics.md. Native collection pages remain separate snapshots, not frozen exports; dedicated
+analysis routes add a publication precondition as described above.
 
 A dedicated PostgreSQL login has explicit column SELECT grants. Startup checks
 role flags, memberships, ownership, schema creation, write permissions and column

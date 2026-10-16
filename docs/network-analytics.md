@@ -155,8 +155,9 @@ equal calendar reference; missing cells remain in the expected denominator.
 The reader's caller must provide one snapshot transaction for scope resolution
 and all related reads. No HTTP route, publication precondition between requests,
 new reader grant or public resource is introduced in T24A. Internal mappings have
-separate metadata: the existing catalog remains 28 resources. PostgreSQL tests
-verify that the current API role cannot read the two internal views.
+separate metadata: the existing catalog remains 28 resources. T24B subsequently
+grants their explicit projections for dedicated analytical queries, without
+registering native collections.
 
 Deploy the migration with the owner and use the matching refresh code before
 considering the new snapshots initialized. Existing published global views are
@@ -172,4 +173,6 @@ independent cohorts and their common revenue/unit intersection, calendar gaps,
 negative/zero references, exact contributions and two-page global rankings.
 A 300-store/24-month synthetic profile checks query plans and bounded output;
 no production capacity or new performance SLA is implied. API exposure and SaaS
-flows remain T24B/C in the [implementation contract](saas/network-analysis.md).
+flows remain T24C in the [implementation contract](saas/network-analysis.md).
+The seven dedicated T24B routes, transaction/publication contract, explicit grants
+and HTTP verification are in [Filtered analysis API](filtered-analysis-api.md).

@@ -59,11 +59,16 @@ python -m retail_data_platform.api.database --role api_reader --schema public
 ```
 
 Apply the reviewed output using your administrative connection. It grants USAGE
-on the schema and SELECT on explicit columns of the 28 resources. Audit filenames,
+on the schema and SELECT on explicit columns of the 28 resources plus the two
+internal analysis projections (30 relations checked at startup). Audit filenames,
 hashes and error messages are excluded at the database grant boundary. Set
 `API_DATABASE_URL` to the reader login. Startup rejects importer/superuser/owner
 credentials, memberships, write access, missing grants and overbroad audit grants.
-No schema changes or new migration are required for this API.
+T24B requires the existing T24A migration and a successful publication, then the
+extended grants before startup; no additional schema migration is introduced.
+A role with T23 grants alone fails startup. See the
+[filtered analysis contract](filtered-analysis-api.md) for grants, seven dedicated
+routes, publication preconditions, errors and cancellation limits.
 
 Migrate and refresh analytics using the existing administrator/importer workflow.
 The API cannot migrate, import or refresh. Unpopulated analytical views return a

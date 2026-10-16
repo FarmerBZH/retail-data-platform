@@ -110,19 +110,20 @@ Déploiement : appliquer migration, refresh analytique et grants des nouvelles v
 selon [network-analytics.md](../network-analytics.md) avant l’API et le frontend.
 La présence du code ne prouve pas que ces opérations ont été réalisées sur la cible.
 
-## Besoins API restant pour la cible complète
+## API analytique pour la cible complète
 
-Statut : capacités non livrées, désormais préparées en T24 à la demande du
-responsable produit. Le [contrat en trois commits](network-analysis.md) précise
+Statut : socle T24A commité ; API T24B commitée après relecture et approbation explicite ;
+intégration SaaS T24C à faire. Le [contrat en trois commits](network-analysis.md) précise
 PostgreSQL, API et SaaS, avec limites, sécurité et tests. La présente préparation
-a conduit au socle PostgreSQL interne T24A ; les nouveaux endpoints et parcours
-T24B/C restent à faire. L’API et le frontend exposés restent ceux de T23.
+a conduit au socle PostgreSQL T24A puis aux sept routes T24B vérifiées localement.
+Le [contrat API](../filtered-analysis-api.md) précise publication, réponses et grants.
+Le frontend exposé reste celui de T23 ; les parcours T24C restent à faire.
 
-Les noms et chemins proposés dans T24 doivent être figés dans l’OpenAPI de T24B
-avant leur consommation en T24C. Ils ne sont pas encore disponibles. Les routes
+Les noms et chemins T24B sont figés dans l’OpenAPI authentifié avant leur
+consommation en T24C. Les routes
 `/v1/data/*` et le catalogue natif conservent leur contrat existant.
 
-| Capacité à ajouter | Entrée cible | Sortie et invariants attendus |
+| Capacité T24B | Entrée | Sortie et invariants |
 | --- | --- | --- |
 | Disponibilité | Périmètre de magasins validé | Bornes et mois observés par dataset, absence distinguée de zéro ; pas de présomption de mois complet |
 | Recherche magasins | Texte borné, dimensions actuelles, pagination | Sélection et recherche serveur, ordre stable ; IDs inconnus signalés pour une sélection explicite |

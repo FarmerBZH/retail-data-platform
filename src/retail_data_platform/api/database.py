@@ -4,11 +4,41 @@ import json
 from collections.abc import Iterator
 from contextlib import contextmanager
 from decimal import Decimal
+from typing import cast
 
-from sqlalchemy import Connection, Engine, create_engine, text
+from sqlalchemy import Connection, Engine, Table, create_engine, text
 
 from retail_data_platform.api.config import Settings
 from retail_data_platform.api.resources import RESOURCES
+from retail_data_platform.database.analytics import StoreDatasetMonth, StoreScope
+
+# Internal query projections: deliberately absent from the public resource registry.
+ANALYSIS_COLUMNS = {
+    cast(Table, StoreScope.__table__): (
+        "store_id",
+        "name",
+        "city",
+        "retailer_name",
+        "region_code",
+        "store_format",
+        "is_active",
+    ),
+    cast(Table, StoreDatasetMonth.__table__): (
+        "store_id",
+        "period",
+        "dataset",
+        "source_row_count",
+        "observed_row_count",
+        "inferred_absence_row_count",
+    ),
+}
+
+
+def readable_relations() -> dict[Table, tuple[str, ...]]:
+    return {
+        **{resource.table: resource.columns for resource in RESOURCES.values()},
+        **ANALYSIS_COLUMNS,
+    }
 
 
 def create_read_engine(settings: Settings) -> Engine:
@@ -38,6 +68,16 @@ def read_connection(engine: Engine) -> Iterator[Connection]:
         yield connection
 
 
+@contextmanager
+def analysis_connection(engine: Engine) -> Iterator[Connection]:
+    with (
+        engine.connect().execution_options(isolation_level="REPEATABLE READ") as connection,
+        connection.begin(),
+    ):
+        connection.execute(text("SET TRANSACTION READ ONLY"))
+        yield connection
+
+
 def validate_database(engine: Engine, schema: str) -> None:
     """Fail startup if an importer/owner or overprivileged role was supplied."""
     with read_connection(engine) as c:
@@ -53,8 +93,8 @@ def validate_database(engine: Engine, schema: str) -> None:
         )
         if unsafe is not False or c.scalar(text("SELECT current_schema()")) != schema:
             raise RuntimeError("API database role is unsafe")
-        for resource in RESOURCES.values():
-            relation = f"{schema}.{resource.name}"
+        for table, columns in readable_relations().items():
+            relation = f"{schema}.{table.name}"
             if c.scalar(text("SELECT to_regclass(:relation)"), {"relation": relation}) is None:
                 raise RuntimeError("API schema is incomplete")
             writable = c.scalar(
@@ -70,12 +110,12 @@ def validate_database(engine: Engine, schema: str) -> None:
             )
             if writable:
                 raise RuntimeError("API database role is writable")
-            for column in resource.table.columns:
+            for column in table.columns:
                 readable = c.scalar(
                     text("SELECT has_column_privilege(current_user, :relation, :column, 'SELECT')"),
                     {"relation": relation, "column": column.name},
                 )
-                if bool(readable) != (column.name in resource.columns):
+                if bool(readable) != (column.name in columns):
                     raise RuntimeError("API column grants do not match the resource contract")
 
 
@@ -86,9 +126,9 @@ def grant_sql(role: str, schema: str) -> str:
     if not all(re.fullmatch(r"[a-z_][a-z0-9_]{0,62}", item) for item in (role, schema)):
         raise ValueError("Invalid role or schema identifier")
     statements = [f'GRANT USAGE ON SCHEMA "{schema}" TO "{role}";']
-    for resource in RESOURCES.values():
-        columns = ", ".join(f'"{column}"' for column in resource.columns)
-        statements.append(f'GRANT SELECT ({columns}) ON "{schema}"."{resource.name}" TO "{role}";')
+    for table, allowed in readable_relations().items():
+        columns = ", ".join(f'"{column}"' for column in allowed)
+        statements.append(f'GRANT SELECT ({columns}) ON "{schema}"."{table.name}" TO "{role}";')
     return "\n".join(statements)
 
 

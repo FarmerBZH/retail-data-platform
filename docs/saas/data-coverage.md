@@ -5,7 +5,7 @@ destinations de consultation vérifiées de la tranche implémentée sont docume
 dans le [manifeste frontend](frontend-coverage.md). Cette matrice conserve les
 capacités réseau/multi-magasins cibles : les quatre vues réseau publiées sont
 intégrées en T23 ; sélections et classements ont une API T24B vérifiée localement,
-mais leurs parcours SaaS restent T24C.
+et leurs parcours SaaS T24C sont implémentés et vérifiés et relus localement.
 Référence : [registre API](../../src/retail_data_platform/api/resources.json) et
 [projection des objets](../../src/retail_data_platform/api/resources.py).
 Périmètre vérifié : **28 ressources** (13 tables et 15 vues analytiques),
@@ -816,21 +816,26 @@ comme implémentée tant que ces scénarios ne sont pas vérifiés.
 Les 28 collections et leur matrice exhaustive ci-dessus restent inchangées. Les
 sept routes dédiées ont leurs propres [projections typées](../filtered-analysis-api.md)
 et n’ajoutent aucune colonne au registre natif. Leurs parcours frontend restent
-T24C ; les destinations ci-dessous sont cibles, sans couverture UI revendiquée.
+T24C ; les composants ci-dessous sont implémentés. Les vérifications finales et
+limites restent celles du [contrat SaaS](filtered-analysis.md).
 
-| Objet/champs API | Destination cible T24C | État de couverture |
+| Objet/champs API | Destination T24C | État de couverture |
 | --- | --- | --- |
-| Contexte : publication, fraîcheur, scope/IDs/filtres, quatre comptes, fenêtres/référence/comparaison | Workspace partagé et fraîcheur | API implémentée ; UI à faire |
-| Magasin publié : ID, nom, ville, enseigne, région, format, actif | Recherche, sélection, classement, comparaison | API implémentée ; UI à faire |
-| Page : items et curseur ; dimensions : valeur, dimension, compte manquant | Navigation manuelle, options de filtre | API implémentée ; UI à faire |
-| Cinq mesures : valeur complète/partielle, cellules couvertes/attendues | KPI, couverture et tableau alternatif | API implémentée ; UI à faire |
-| Changements : différence, ratio, état de référence ; cohortes : inclus/exclus, cellules attendues, valeurs courante/référence et changement | Choix périmètre/cohorte et comparaison | API implémentée ; UI à faire |
-| CA/unité : courant/référence, courant/référence cohorte, effectif commun ; somme globale des contributions | KPI qualifiés et contrôle global | API implémentée ; UI à faire |
-| Points : mois courant/référence, cinq mesures et valeurs/effectifs de cohorte figée | Séries et tableau mensuel | API implémentée ; UI à faire |
-| Classement : magasin, rang, CA courant/référence complet/partiel, couverture, mois attendus, contribution, motif d’exclusion | Classement paginé | API implémentée ; UI à faire |
-| Séries magasin : objet magasin et points ; compte total dans le contexte | Comparaison, six magasins par page | API implémentée ; UI à faire |
-| Disponibilité : domaine, bornes, mois, observation présente, lignes sources/rapportées/inférées, magasins observés | Panneau de disponibilité, distinct de la couverture des mesures | API implémentée ; UI à faire |
+| Contexte : publication, fraîcheur, scope/IDs/filtres, quatre comptes, fenêtres/référence/comparaison | Workspace partagé et fraîcheur | Décodeur strict et interface implémentés ; détails exacts dépliables |
+| Magasin publié : ID, nom, ville, enseigne, région, format, actif | Recherche, sélection, classement, comparaison | Décodeur strict et interface implémentés ; détails exacts dépliables |
+| Page : items et curseur ; dimensions : valeur, dimension, compte manquant | Navigation manuelle, options de filtre | Décodeur strict et interface implémentés ; détails exacts dépliables |
+| Cinq mesures : valeur complète/partielle, cellules couvertes/attendues | KPI, couverture et tableau alternatif | Décodeur strict et interface implémentés ; détails exacts dépliables |
+| Changements : différence, ratio, état de référence ; cohortes : inclus/exclus, cellules attendues, valeurs courante/référence et changement | Choix périmètre/cohorte et comparaison | Décodeur strict et interface implémentés ; détails exacts dépliables |
+| CA/unité : courant/référence, courant/référence cohorte, effectif commun ; somme globale des contributions | KPI qualifiés et contrôle global | Décodeur strict et interface implémentés ; détails exacts dépliables |
+| Points : mois courant/référence, cinq mesures et valeurs/effectifs de cohorte figée | Séries et tableau mensuel | Décodeur strict et interface implémentés ; détails exacts dépliables |
+| Classement : magasin, rang, CA courant/référence complet/partiel, couverture, mois attendus, contribution, motif d’exclusion | Classement paginé | Décodeur strict et interface implémentés ; détails exacts dépliables |
+| Séries magasin : objet magasin et points ; compte total dans le contexte | Comparaison, six magasins par page | Décodeur strict et interface implémentés ; détails exacts dépliables |
+| Disponibilité : domaine, bornes, mois, observation présente, lignes sources/rapportées/inférées, magasins observés | Panneau de disponibilité, distinct de la couverture des mesures | Décodeur strict et interface implémentés ; détails exacts dépliables |
 
 Les erreurs de publication et de disponibilité ne deviennent pas des valeurs
-métier. Le transport et les tests frontend seront ajoutés en T24C ; la validation
-API/PostgreSQL et les limites sont suivies dans [T24](network-analysis.md).
+métier. Le transport et les tests frontend sont ajoutés en T24C.
+`analysis-contract.test.ts` réconcilie les objets décodés avec les modèles Python ;
+`FilteredAnalysis.test.tsx` et `analysis.spec.ts` couvrent les parcours et erreurs.
+Les valeurs non abrégées et champs techniques restent consultables dans les
+détails dépliables, sans lecture supplémentaire. Les preuves et limites sont
+suivies dans [T24](network-analysis.md).

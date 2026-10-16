@@ -1,3 +1,9 @@
+import { analysisParameters } from "./analysis-contract";
+import type {
+  AnalysisQuery,
+  AnalysisResult,
+  AnalysisRoute,
+} from "./analysis-contract";
 import { ApiError, ReadApi, pageQueryKey } from "./read-api";
 import type {
   Freshness,
@@ -310,6 +316,34 @@ export class ReadQueries {
       },
     );
     return { ...result, limit };
+  }
+
+  async analysis<R extends AnalysisRoute>(
+    route: R,
+    query: AnalysisQuery,
+    options: ReadOptions = {},
+  ): Promise<AnalysisResult<R>> {
+    let snapshot: AnalysisQuery;
+    let key: string;
+    try {
+      snapshot = structuredClone(query);
+      key = `analysis:${route}?${analysisParameters(route, snapshot)}`;
+    } catch {
+      throw new ApiError("invalid-request");
+    }
+    try {
+      // Discovery without a publication must revalidate, rather than cache an old identity.
+      return await this.#shared(
+        key,
+        (signal) => this.#api.analysis(route, snapshot, signal),
+        options,
+        Boolean(snapshot.publication_id),
+      );
+    } catch (error) {
+      if (error instanceof ApiError && error.code === "publication-changed")
+        this.#clear();
+      throw error;
+    }
   }
 
   async collect<T>(

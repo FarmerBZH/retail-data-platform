@@ -30,8 +30,10 @@ Les documents suivants précisent ses contrats sans répéter les arbitrages pro
    graphiques et états visuels communs.
 7. [Tâches d’implémentation](tasks.md) : fonctionnalités ordonnées, propositions
    de petits commits, tests progressifs et revues Codex Security pour les agents.
-8. [T24 — Analyses réseau filtrées](network-analysis.md) : prochain périmètre
-   préparé en trois commits PostgreSQL, API et SaaS ; contrats et réception.
+8. [T24 — Analyses réseau filtrées](network-analysis.md) : contrats des trois
+   étapes PostgreSQL, API et SaaS ; preuves et réception.
+9. [Parcours SaaS filtrés](filtered-analysis.md) : interface implémentée, publication,
+   sélection, classement, comparaison et limites.
 
 Ces documents définissent la cible ; [l'architecture](../architecture.md) décrit
 uniquement l'existant. En cas de divergence avec une capacité supposée, vérifier
@@ -46,10 +48,10 @@ initialement différés font ensuite l’objet de T24 : socle PostgreSQL, API et
 La tranche implémentée couvre la connexion personnelle, les magasins et leurs
 analyses unitaires, les données publiées et la qualité selon les droits. T23 ajoute
 les quatre vues réseau maintenant publiées : voir le [contrat réseau](../network-analytics.md).
-Classements, cohortes et agrégations multi-magasins restent indisponibles dans le SaaS ;
-leur réalisation est cadrée en T24. Le socle PostgreSQL T24A est commité ;
-l’API T24B est commitée après relecture et approbation explicite ; les parcours SaaS T24C
-restent à faire. Voir le [contrat API](../filtered-analysis-api.md).
+Le socle PostgreSQL T24A et l’API T24B sont commités après approbation explicite.
+T24C ajoute l’entrée Analyses filtrées, implémentée et vérifiée et relue localement :
+classements, cohortes et comparaison de magasins. Voir le [contrat API](../filtered-analysis-api.md)
+et le [parcours SaaS](filtered-analysis.md).
 
 - Application web en français, lecture seule, usage principal sur ordinateur.
 - Trois niveaux : réseau, sélection de magasins, fiche magasin.
@@ -71,6 +73,7 @@ restent à faire. Voir le [contrat API](../filtered-analysis-api.md).
 | Stack frontend et graphiques (retenue) | React, TypeScript, Vite ; composants MUI et graphiques MUI X Charts Community | MUI confirmé par le responsable produit ; versions verrouillées dans le package frontend, sans dépendance commerciale |
 | Volume et temps de réponse attendus | Mesures et budgets locaux T22 disponibles ; aucun engagement de production | Définir le volume et la charge cibles, puis qualifier l’environnement réel |
 
-Les extensions de l'API décrites ici sont des besoins concrets des vues demandées,
-pas des endpoints disponibles. Les synthèses réseau existantes sont intégrées
-en T23 ; les filtres réseau, cohortes et classements demandent encore ces extensions.
+Les synthèses réseau sont intégrées en T23. Les sept routes T24B fournissent
+désormais filtres, sélection, disponibilité, cohortes et classements ; T24C les
+consomme dans les analyses filtrées. Leur réception locale ne clôt pas les
+décisions métier, la recette humaine ou la qualification de production.

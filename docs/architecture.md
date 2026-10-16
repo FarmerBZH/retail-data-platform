@@ -5,8 +5,9 @@
 This document describes the implemented ingestion, analytical and authenticated
 read API boundaries of Retail Data Platform, plus an authenticated React frontend
 with store/network analyses and published data/quality inspection. Production identity
-deployment, SaaS exposure of filtered rankings, comparable cohorts and multi-store
-analytics, and multi-tenant authorization are outside the verified implementation.
+deployment and multi-tenant authorization are outside the verified implementation.
+Filtered network analyses, comparable cohorts and store comparisons use the
+dedicated published-analysis API; production qualification remains open.
 Authorized API readers have global access; store selection is a query filter.
 
 The platform turns heterogeneous tabular source bundles into a validated,
@@ -284,8 +285,7 @@ local action durations, API request counts and JSON bytes, and sampled Chromium
 JavaScript heap use. These do not establish server load capacity, a real network
 p95, complete browser memory use or production readiness. Deployed provider/API
 acceptance for all business flows, human accessibility receipt and production
-hosting remain open; SaaS exposure of filtered rankings, comparable cohorts and
-multi-store analytics remains T24C.
+hosting remain open; local T24C filtered-analysis verification is recorded separately.
 Setup and actual scripts are in the
 [frontend guide](../frontend/README.md).
 
@@ -476,6 +476,37 @@ audit is a normal mapped table. Migration lifecycle, analytical contracts,
 concurrent readers, source snapshot consistency and failure rollback are verified
 on synthetic PostgreSQL data. See [Monthly store analytics](monthly-analytics.md)
 for grains, joins, refresh operations and temporal limitations.
+
+## Filtered-analysis frontend boundary
+
+A separate Analyses filtrées workspace consumes all seven T24B routes without
+changing the native catalog or T23 global views. Explicit draft/apply state groups
+period, reference, dimensions, activity and all/selected IDs; an empty explicit
+selection cannot query the entire network. Search and dimension options use
+bounded server pages. Applied results retain full-scope totals while global ranking
+and individual series pages stay bounded to twenty and six stores respectively.
+Per-measure fixed cohorts, partial amounts, exact decimal strings and observation
+availability remain distinct. Charts use finite approximations for geometry and
+keep exact values, null gaps and coverage in tables and expandable typed details.
+
+Strict decoders check every projection against its request context, UUID publication
+and calendar, rejecting malformed, duplicate or truncated responses. Analysis
+requests reuse the existing authenticated transport, response cap and shared queue.
+Pinned cache keys contain endpoint, normalized parameters and publication; initial
+unpinning discovery is uncached. A 409 invalidates cache/pending work and removes
+all dependent analysis blocks until explicit context reload. Other errors stay
+local. Context changes abort old consumers; generation changes clear all memory
+state through the existing session boundary. Tokens and business data remain absent
+from browser persistence, navigation URLs and logs.
+
+Store detail opens explicitly with the applied period and an ordinary live store
+lookup. The analysis context stays in component/workspace memory. A boolean-only
+history marker supports browser/button return and restores focus; no business
+payload enters history state. Existing unit-store collections do not acquire the
+new publication guarantee, and the UI states that distinction. Synthetic browser
+scenarios and the disposable real OIDC/API/PostgreSQL runner exercise these paths.
+See [Filtered SaaS analyses](saas/filtered-analysis.md) for semantics, validation
+and outstanding human/production acceptance.
 
 ## Authenticated read API boundary
 

@@ -113,11 +113,12 @@ La présence du code ne prouve pas que ces opérations ont été réalisées sur
 ## API analytique pour la cible complète
 
 Statut : socle T24A commité ; API T24B commitée après relecture et approbation explicite ;
-intégration SaaS T24C à faire. Le [contrat en trois commits](network-analysis.md) précise
+intégration SaaS T24C implémentée et vérifiée et relue localement. Le [contrat en trois commits](network-analysis.md) précise
 PostgreSQL, API et SaaS, avec limites, sécurité et tests. La présente préparation
 a conduit au socle PostgreSQL T24A puis aux sept routes T24B vérifiées localement.
 Le [contrat API](../filtered-analysis-api.md) précise publication, réponses et grants.
-Le frontend exposé reste celui de T23 ; les parcours T24C restent à faire.
+Le frontend conserve T23 et ajoute les [parcours T24C](filtered-analysis.md),
+avec transport fixe, décodeurs dédiés et précondition de publication.
 
 Les noms et chemins T24B sont figés dans l’OpenAPI authentifié avant leur
 consommation en T24C. Les routes

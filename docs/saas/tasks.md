@@ -3,7 +3,7 @@
 Statut actuel : T23 intègre les quatre vues réseau publiées, avec vérifications
 locales terminées. T23A (`02015e4`) et T23B (`24cc19b`) sont commitées.
 T24A et T24B sont commitées après relecture et approbation explicite ;
-T24C reste à faire dans le découpage PostgreSQL → API → SaaS ; voir le [contrat de réalisation](network-analysis.md).
+T24C est implémentée, vérifiée et relue localement, dans le découpage PostgreSQL → API → SaaS ; voir le [contrat de réalisation](network-analysis.md).
 Les développements T01–T22 sont commités. Les parties automatisées
 T20–T22 sont vérifiées localement ; la recette humaine T20, les headers/logs réels
 T21 et la recette intégrée API/OIDC T22 restent ouverts, cette dernière faute
@@ -818,7 +818,7 @@ les validations réelles en dépendant restent ouverts.
 | Responsive, clavier, graphiques accessibles | T02 puis chaque écran, T20 ; auto + humain |
 | Performance et livraison | T22 ; mesures sur profils déclarés et budgets convenus |
 | Synthèses réseau et variations calendaires | T23A–T23B ; couverture, pagination, comparaisons et session sur données synthétiques |
-| Classement, cohortes et comparaison multi-magasins | T24A et API T24B commitées ; SaaS T24C à faire |
+| Classement, cohortes et comparaison multi-magasins | T24A et API T24B commitées ; SaaS T24C commité après vérification, relecture et approbation explicite |
 
 ## Reprise par un agent
 
@@ -898,7 +898,7 @@ le modèle d’accès et n’autorise aucun commit, push ou déploiement automat
 
 ### T24 — Réseau filtré, classement et comparaison multi-magasins
 
-- Statut : **T24A et T24B commitées après approbation explicite** ; T24C à faire.
+- Statut : **T24A et T24B commitées après approbation explicite** ; T24C commitée après vérification, relecture et approbation explicite.
   Demande : trois commits successifs, base → API → frontend SaaS. Le [contrat détaillé](network-analysis.md) définit les vues,
   calculs, entrées/sorties, sécurité, tests et réception de chaque étape.
 - Dépendance : T23A–T23B. Réutiliser les données et vues existantes ; pas de nouvelle
@@ -975,8 +975,28 @@ le modèle d’accès et n’autorise aucun commit, push ou déploiement automat
 
 ### T24C — Réaliser les parcours SaaS
 
-- Statut : **à faire** ; dépendance T24B.
+- Statut : **commitée après vérification, relecture et approbation explicite** ;
+  dépendance T24B. Voir le [contrat SaaS](filtered-analysis.md).
+- Livraison : sept décodeurs/projections dédiés, transport partagé, contexte
+  brouillon/appliqué, options et recherche serveur, sélection explicite, synthèse/
+  cohorte, classement et séries paginées, disponibilité et détails exacts.
+  Retour fiche/bouton/navigateur avec focus, sans données métier dans l’historique.
+- Preuves : recette réelle OIDC/API/PostgreSQL synthétique A/B réussie avec
+  nettoyage du realm, des comptes et du schéma ; baseline Python 264 réussis,
+  un callback OIDC opt-in ignoré, aucun PostgreSQL ignoré. `npm run check` réussi :
+  format, lint, typage, build, **646 tests unitaires/contrat** et **183 scénarios
+  Chromium** à 360/768/1440 px. Scan Security T24C scellé sans vulnérabilité retenue ;
+  relecture cumulative des 51 fichiers T24A–C sans problème identifié. Le scan
+  cumulatif scellé reste indisponible, l’outil refusant une base historique avec
+  patch local ; voir les [limites de vérification](filtered-analysis.md#vérification-et-limites).
+  Commit explicitement approuvé par le propriétaire ; aucun push effectué.
 - Commit proposé : `Add filtered network and store comparisons`.
+- Relecture technique terminée : le workflow frontend surveille les modèles/routes
+  `api/analysis*` sur push et pull request, pour exécuter les tests de contrat même
+  lors d’un changement backend seul. Son plafond passe à 30 minutes : la seule
+  suite Chromium complète a pris 16,7 minutes localement, au-delà de l’ancien
+  plafond de 15 minutes. YAML et chemins vérifiés localement ; exécution hébergée
+  non observée. Les 34 tests T24C ciblés repassent après relecture.
 - Livrer : transport typé, contexte partagé de période/filtres/référence/sélection,
   recherche serveur, totaux et séries qualifiés, choix cohorte, contributions et
   classement paginés, comparaison de six séries à la fois avec total complet.

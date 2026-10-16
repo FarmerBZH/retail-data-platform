@@ -586,12 +586,13 @@ this is the maximum, with limited statistical confidence. Do not mix widths or
 profiles, omit failed samples, or call the standard two-worker suite an isolated
 benchmark. Builds and provider fixture preparation are outside the timing window.
 
-Real end-to-end API/OIDC recipe acceptance remains blocked without a defined
-synthetic environment. Earlier local identity smoke covers its recorded subset,
-not all business tabs. Human accessibility receipt, deployed CSP/TLS/cache/logs,
-hosted CI, target production volumes and concurrent-user load remain unverified.
-The full P0 product is not received: network rankings, comparable cohorts and multi-store
-server analytics are still deferred; T23 integrates the published network totals. Local results below are separate from those open boundaries.
+The T24C synthetic API/OIDC/PostgreSQL recipe now covers the filtered-analysis
+workflow documented below; it does not receive every business tab. Human
+accessibility receipt, deployed CSP/TLS/cache/logs, hosted CI, target production
+volumes and concurrent-user load remain unverified. T23 integrates published
+network totals and T24C adds rankings, comparable cohorts and store comparisons.
+The full P0 product is not received. The historical measurements below cover
+their recorded profiles, independently of the new filtered-analysis workflow.
 
 ### Observed local measurements
 
@@ -664,3 +665,30 @@ was not repeated after this test-only adjustment. Python baseline: 138 passed,
 36 conditional skips; no isolated PostgreSQL or real API/OIDC run in this task.
 Codex Security completed its static diff review without retained findings; subsequent
 changes were limited to test timing and documentation, outside that sealed snapshot.
+
+## Filtered network and store comparison workspace
+
+T24C adds Analyses filtrées beside the existing global Network view. It uses the
+seven T24B routes with strict full-projection decoders, a shared apply context,
+server search/options, explicit bounded selection, fixed per-metric cohorts,
+global ranking and six-store series pages. Window totals never come from a page.
+Publication conflicts invalidate all dependent blocks until explicit reload;
+session end removes selection/results and clears the shared memory cache.
+Store detail/button/browser return preserves context and restores focus using
+only a boolean history marker. Native T23 store reads retain their separate
+snapshot contract. See [the SaaS contract](../docs/saas/filtered-analysis.md).
+
+Run the existing `npm run check` for format, lint, strict types, unit/contracts,
+production build and Chromium/axe at 360/768/1440. New fixtures remain test-only;
+no screenshot, trace, video, credential state or business persistence is enabled.
+`analysis-contract.test.ts` also requires the existing project Python environment
+to reconcile the T24B response serialization models. It reads no env/source file
+and opens no database connection.
+
+The existing disposable browser identity runner now seeds and publishes a synthetic
+A/B register oracle, then checks the actual filtered UI/API/PostgreSQL result,
+cohort, ranking, comparison and store return in addition to existing login/denial
+checks. It cleans up its newly generated realm/users/schema/role. The existing
+local prerequisites and invocation above apply unchanged; production realms and
+human accounts are not altered. This local acceptance does not certify hosted CI,
+human screen-reader/native zoom behavior, production ingress or load budgets.

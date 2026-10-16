@@ -187,6 +187,54 @@ try {
       result.finished === true,
     "API pages",
   );
+  stage = "analysis";
+  await page
+    .getByRole("button", { name: "Analyses filtrées", exact: true })
+    .click();
+  await page.getByLabel("Début de l’analyse").fill("2025-02");
+  await page.getByLabel("Fin de l’analyse").fill("2025-02");
+  await page
+    .getByRole("button", { name: "Appliquer l’analyse", exact: true })
+    .click();
+  await page.getByText("CA observé — partiel", { exact: true }).waitFor();
+  await page
+    .getByText(/Somme globale des contributions sur la cohorte CA : 20/)
+    .waitFor();
+  await page.getByRole("switch", { name: /Cohorte comparable/ }).check();
+  await page
+    .getByText("CA observé — cohorte comparable", { exact: true })
+    .waitFor();
+  await page.getByRole("tab", { name: "Classement", exact: true }).click();
+  const rank = page.getByRole("region", {
+    name: "Classement filtré exact",
+    exact: true,
+  });
+  await rank
+    .getByRole("button", { name: "Synthetic store 1", exact: true })
+    .waitFor();
+  check(
+    (await rank.textContent())?.includes("20") === true,
+    "rank contribution",
+  );
+  await rank
+    .getByRole("button", { name: "Synthetic store 1", exact: true })
+    .click();
+  await page
+    .getByRole("heading", { name: "Synthetic store 1", exact: true })
+    .waitFor();
+  await page
+    .getByRole("button", { name: "Retour à l’analyse filtrée", exact: true })
+    .click();
+  check(
+    (await page.getByLabel("Début de l’analyse").inputValue()) === "2025-02",
+    "analysis period return",
+  );
+  await page
+    .getByRole("tab", { name: "Comparer les magasins", exact: true })
+    .click();
+  await page
+    .getByText(/2 magasins dans le total appliqué ; 2 séries visibles/)
+    .waitFor();
   await page
     .getByRole("button", { name: "Se déconnecter", exact: true })
     .click();

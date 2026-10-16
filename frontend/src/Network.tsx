@@ -77,8 +77,10 @@ export function Network({
       </Typography>
       <Alert severity="info">
         Les classements, contributions, cohortes comparables et totaux
-        multi-magasins ne sont pas disponibles. Les attributs actuels des
-        magasins ne définissent pas un historique économique constant.
+        multi-magasins sont accessibles dans « Analyses filtrées ». Ces
+        synthèses globales conservent leur périmètre propre. Les attributs
+        actuels des magasins ne définissent pas un historique économique
+        constant.
       </Alert>
       <Box
         component="form"

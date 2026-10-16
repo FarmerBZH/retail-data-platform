@@ -17,7 +17,7 @@ La plateforme aide à explorer et documenter une hypothèse, sans attribuer de c
 
 ## Structure commune
 
-Navigation : **Vue réseau**, **Magasins**, **Données**, **Qualité des données**. La comparaison
+Navigation : **Vue réseau**, **Analyses filtrées**, **Magasins**, **Données**, **Qualité des données**. La comparaison
 s'ouvre depuis la sélection de magasins ; la fiche depuis une ligne ou un graphique.
 Un bandeau persistant rappelle période, sélection, comparaison et fraîcheur.
 
@@ -54,8 +54,9 @@ avec base négative qualifiée et pourcentage masqué. Les champs supplémentair
 restent accessibles dans les détails dépliables et dans Données.
 Une erreur de comparaison laisse la synthèse consultable avec avertissement.
 Les années affichent le nombre réel de mois, sans présumer douze mois complets.
-Les interactions suivantes décrivent toujours la cible complète : contributions,
-classements, cohortes, courbe de référence et sélection restent hors de cette tranche.
+T24C complète cette tranche dans l’entrée **Analyses filtrées** : contributions,
+classement, cohortes, courbe de référence et sélection. Les synthèses globales T23
+gardent leurs contrats propres ; voir le [parcours implémenté](filtered-analysis.md).
 
 Ordre de lecture :
 

@@ -1,10 +1,11 @@
 # T24 — Analyses réseau filtrées et comparaison de magasins
 
 Statut : **T24A commitée après relecture et approbation explicite** ;
-T24B est commitée après relecture et approbation explicite ; T24C reste à faire.
+T24B est commitée après relecture et approbation explicite ; T24C est implémentée,
+vérifiée, relue et commitée après approbation explicite.
 Ce contrat couvre les trois étapes dépendantes. Les sept routes T24B sont
 définies dans le [contrat API livré](../filtered-analysis-api.md) ; les écrans
-T24C restent des exigences sans implémentation. Aucun commit, push ou déploiement
+T24C sont décrits dans le [parcours SaaS implémenté](filtered-analysis.md). Aucun commit, push ou déploiement
 n’est autorisé par ce document. Les limites des livraisons
 existantes restent celles de [l’architecture](../architecture.md).
 
@@ -335,6 +336,11 @@ sans vulnérabilité retenue. Relecture technique terminée et commit explicitem
 approuvé par le propriétaire. Aucun push ou déploiement T24B effectué.
 
 ## T24C — Frontend SaaS
+
+Statut : implémentée, vérifiée, relue et commitée après approbation explicite. Scan de
+sécurité du diff scellé et relecture cumulative terminés sans problème identifié ;
+le scan cumulatif scellé n’est pas pris en charge pour cette base avec patch local. Le [contrat frontend](filtered-analysis.md) précise
+les comportements effectifs, la frontière avec T23 et la navigation en mémoire.
 
 - Étendre le transport fixe existant pour les routes T24B, décodeurs stricts,
   pagination, cache en mémoire et annulation ; intégrer `publication_id` aux clés

@@ -15,7 +15,8 @@ annuelles, sur tout le calendrier et les variations M−1/N−1. Leur intégrati
 frontend est suivie en T23. Classements, contributions, cohortes comparables et
 sélections multi-magasins font désormais l’objet de la [tâche T24](network-analysis.md),
 découpée en PostgreSQL, API et SaaS. Le socle est commité et les routes T24B
-sont implémentées et vérifiées localement ; leurs parcours SaaS T24C restent à faire.
+sont commitées. Leurs parcours SaaS T24C sont implémentés et vérifiés et relus localement ;
+les [garanties et limites](filtered-analysis.md) distinguent local et production.
 
 ## 1. Problème et résultat attendu
 
@@ -132,11 +133,11 @@ les cas techniques, y compris pagination, erreurs et changement de publication.
 
 | Sujet | État et incidence sur la première version |
 | --- | --- |
-| API réseau | Synthèses réseau publiées disponibles ; recherche magasins, disponibilité par dataset, cohortes et classement global restent à développer et bloquent le P0 complet |
-| Cohérence des publications | Contrat de version/fraîcheur à définir pour les futures réponses agrégées ; ne pas promettre un snapshot entre pages actuelles |
+| API réseau | Synthèses T23 et sept routes T24B implémentées ; parcours filtré, disponibilité, cohortes et classement consommés par T24C, réception suivie dans les tâches |
+| Cohérence des publications | UUID épinglé et conflit 409 sur les routes T24B ; les anciennes collections unitaires conservent leur contrat distinct, sans snapshot inter-pages promis |
 | Connexion web | Adapter et vérifier le client OIDC autorisé, les redirections et origines ; le client CLI ne constitue pas une session navigateur |
 | Devise et HT/TTC | Inconnus ; consultation possible avec libellé explicite, présentation financière qualifiée suspendue à confirmation métier |
-| Stack et graphiques | React + TypeScript + Vite, MUI et MUI X Charts Community retenus ; versions et compatibilité à vérifier à l’installation |
+| Stack et graphiques | React + TypeScript + Vite, MUI et MUI X Charts Community installés et verrouillés ; contrôles locaux suivis dans les tâches |
 | Hébergement et charge | Environnement, capacité et budgets à décider avant mise en production ; aucune ouverture publique implicite |
 
 La fiche magasin et l’explorateur peuvent avancer avec les collections existantes.

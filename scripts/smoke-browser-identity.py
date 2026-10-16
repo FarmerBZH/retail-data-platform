@@ -17,6 +17,8 @@ import subprocess
 import sys
 import time
 import uuid
+from datetime import date
+from decimal import Decimal
 from pathlib import Path
 from types import ModuleType
 from typing import Any
@@ -29,8 +31,9 @@ from cryptography.hazmat.primitives import serialization
 from sqlalchemy import create_engine, insert, text
 from sqlalchemy.engine import make_url
 
+from retail_data_platform.analytics import refresh_analytics
 from retail_data_platform.api.database import grant_sql
-from retail_data_platform.database.models import Store
+from retail_data_platform.database.models import Product, RegisterObservation, Store
 
 ROOT = Path(__file__).resolve().parent.parent
 ORIGIN = "http://127.0.0.1:4181"
@@ -174,6 +177,40 @@ def main() -> None:
                     for index in (1, 2)
                 ],
             )
+            product_id = uuid.UUID(int=100)
+            connection.execute(
+                insert(Product).values(
+                    id=product_id,
+                    gtin="12345678",
+                    internal_code="synthetic",
+                    name="Synthetic product",
+                )
+            )
+            connection.execute(
+                insert(RegisterObservation),
+                [
+                    {
+                        "id": uuid.uuid4(),
+                        "period": date(2025, month, 1),
+                        "source_kind": "monthly",
+                        "source_store_reference": "synthetic",
+                        "store_id": uuid.UUID(int=store),
+                        "store_match_status": "matched",
+                        "store_match_method": "synthetic",
+                        "source_gtin": "12345678",
+                        "product_id": product_id,
+                        "product_match_status": "matched",
+                        "revenue_value": Decimal(amount),
+                        "units_sold": units,
+                    }
+                    for store, month, amount, units in [
+                        (1, 1, "100", 2),
+                        (2, 1, "200", 4),
+                        (1, 2, "120", 3),
+                    ]
+                ],
+            )
+        refresh_analytics(engine)
         reader_url = parsed.set(username=role, password=password).render_as_string(
             hide_password=False
         )
@@ -262,6 +299,7 @@ def main() -> None:
                 "allowed-session",
                 "denied-session",
                 "read",
+                "analysis",
                 "redirect-refusal",
                 "scope-refusal",
                 "origin-refusal",
@@ -270,6 +308,10 @@ def main() -> None:
                     print(f"Failed browser check: {label}")
             raise RuntimeError("Browser smoke failed; sensitive diagnostics suppressed")
         print("Live browser/API allow, scope/CORS/callback denial, pagination and logout passed.")
+        print(
+            "Filtered analysis PostgreSQL/API/UI A/B oracle, cohort, ranking "
+            "and store return passed."
+        )
         # Exercise the original CLI PKCE request, validator and memory vault in the same realm.
         cli = identity.user_token(**users["allowed"], approved=True)
         with httpx.Client(timeout=10) as http:

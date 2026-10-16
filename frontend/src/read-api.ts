@@ -1,3 +1,9 @@
+import { analysisParameters, decodeAnalysis } from "./analysis-contract";
+import type {
+  AnalysisQuery,
+  AnalysisResult,
+  AnalysisRoute,
+} from "./analysis-contract";
 import { readConfiguration } from "./config";
 import { Session, SessionUnavailableError } from "./session";
 import {
@@ -82,7 +88,8 @@ export type ApiErrorCode =
   | "unavailable"
   | "network"
   | "invalid-response"
-  | "cancelled";
+  | "cancelled"
+  | "publication-changed";
 export class ApiError extends Error {
   readonly code: ApiErrorCode;
   readonly status: number | undefined;
@@ -322,6 +329,25 @@ export class ReadApi {
     );
   }
 
+  async analysis<R extends AnalysisRoute>(
+    route: R,
+    query: AnalysisQuery,
+    signal?: AbortSignal,
+  ): Promise<AnalysisResult<R>> {
+    let parameters: URLSearchParams;
+    try {
+      parameters = analysisParameters(route, query);
+    } catch {
+      throw new ApiError("invalid-request");
+    }
+    return this.#read(
+      `/v1/analytics/analysis/${route}`,
+      parameters,
+      (value) => decodeAnalysis(route, value, query),
+      signal,
+    );
+  }
+
   async #read<T>(
     path: string,
     parameters: URLSearchParams,
@@ -383,6 +409,8 @@ export class ReadApi {
               }
               const codes: Record<number, ApiErrorCode> = {
                 403: "forbidden",
+                409: "publication-changed",
+                414: "too-large",
                 413: "too-large",
                 422: "invalid-request",
                 429: "rate-limited",

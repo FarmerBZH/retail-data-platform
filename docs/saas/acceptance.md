@@ -111,13 +111,15 @@ Les tests synthétiques vérifient la seconde page, un mois absent, une année �
 seul mois, les références zéro/négative, les capacités absentes, une publication
 changée et l’annulation. Tester clavier et axe à 360/768/1440 px, effacement après
 déconnexion et absence de stockage métier. Un échec du bloc de comparaison reste
-local. Les classements/cohortes/sélections de la cible restent non reçus.
+local. Les classements/cohortes/sélections sont hors réception T23 ; leur
+réception T24 est suivie ci-dessous.
 
 
 ## Réception T24 — réseau filtré et comparaison multi-magasins
 
 Statut : T24A vérifiée et commitée ; T24B vérifiée localement et commitée après
-relecture et approbation explicite, revue de sécurité terminée ; T24C à faire. Aucun résultat de T23 ne vaut validation de ces nouvelles capacités. Le [contrat T24](network-analysis.md)
+relecture et approbation explicite, revue de sécurité terminée ; T24C implémentée
+et vérifiée localement, commitée après relecture et approbation explicite. Aucun résultat de T23 ne vaut validation de ces nouvelles capacités. Le [contrat T24](network-analysis.md)
 associe chaque exigence à son commit et à ses preuves PostgreSQL/API/SaaS.
 
 - T24A : migration réversible, référentiel figé, disponibilité observée par source,
@@ -135,3 +137,9 @@ associe chaque exigence à son commit et à ses preuves PostgreSQL/API/SaaS.
 Les vues et réponses nouvelles n’entrent dans la matrice des données publiées
 qu’une fois leurs projections décidées et implémentées. Les budgets de performance
 et la recette humaine restent distincts des plafonds techniques et des tests simulés.
+
+
+La recette T24C est détaillée dans le [contrat SaaS](filtered-analysis.md) et les
+preuves dans [les tâches](tasks.md). Elle conserve les limites de recette humaine,
+de CI hébergée et de qualification de production ; les capacités T24 ne requalifient
+pas implicitement ces contrôles précédemment ouverts.

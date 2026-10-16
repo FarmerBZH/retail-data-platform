@@ -3,7 +3,8 @@
 Statut : référence visuelle cible. Le frontend applique le thème à l’entrée, aux
 magasins, aux analyses unitaires et à l’explorateur/qualité. Les graphiques des
 magasins sont implémentés et testés sur données synthétiques ; les vues réseau
-publiées sont intégrées en T23 ; les comparaisons multi-magasins restent différées. La recette humaine et
+publiées sont intégrées en T23 ; T24C ajoute les analyses filtrées et les comparaisons
+multi-magasins, vérifiés localement. La recette humaine et
 la qualification de production restent ouvertes.
 MUI, le responsive et une interface agréable et simple sont confirmés. Les valeurs
 ci-dessous fixent une base commune pour l’implémentation ; elles pourront évoluer
@@ -104,7 +105,7 @@ Le défilement horizontal de la page entière est interdit.
 
 | Élément | Règle commune |
 | --- | --- |
-| Navigation | Vue réseau, Magasins, Données, Qualité ; élément actif avec fond bleu pâle et texte explicite |
+| Navigation | Vue réseau, Analyses filtrées, Magasins, Données, Qualité ; élément actif avec fond bleu pâle et texte explicite |
 | Filtres | Libellés persistants, contrôles MUI ; sélectionner des mois, pas des jours arbitraires ; action Appliquer pour les changements coûteux |
 | Sélection magasins | Recherche si prise en charge, cases à cocher et compteur ; « Tous » explicite, jamais implicite si sélection vide |
 | Carte KPI | Titre, valeur, unité, période/comparaison et couverture ; pas de carte cliquable sans indication |

@@ -1,3 +1,5 @@
+import { FilteredAnalysis } from "./FilteredAnalysis";
+import { initialAnalysisState } from "./analysis-state";
 import { Network } from "./Network";
 import { initialNetworkContext } from "./network-data";
 import { useState } from "react";
@@ -178,6 +180,7 @@ export default function App({
 }
 
 function Workspace({ reads }: { reads: ReadQueries }) {
+  const [analysisState, setAnalysisState] = useState(initialAnalysisState);
   const [networkContext, setNetworkContext] = useState(initialNetworkContext);
   const [view, setView] = useState("stores");
   const [navigation, setNavigation] = useState(initialStoreNavigation);
@@ -190,6 +193,12 @@ function Workspace({ reads }: { reads: ReadQueries }) {
             onClick={() => setView("network")}
           >
             Vue réseau
+          </Button>
+          <Button
+            aria-current={view === "analysis" ? "page" : undefined}
+            onClick={() => setView("analysis")}
+          >
+            Analyses filtrées
           </Button>
           <Button
             aria-current={view === "stores" ? "page" : undefined}
@@ -216,6 +225,12 @@ function Workspace({ reads }: { reads: ReadQueries }) {
           reads={reads}
           context={networkContext}
           onContext={setNetworkContext}
+        />
+      ) : view === "analysis" ? (
+        <FilteredAnalysis
+          reads={reads}
+          state={analysisState}
+          onState={setAnalysisState}
         />
       ) : view === "stores" ? (
         <StoreList

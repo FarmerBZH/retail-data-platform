@@ -1,3 +1,11 @@
+export const seriesColors = [
+  "#1D4ED8",
+  "#0F766E",
+  "#7E22CE",
+  "#B45309",
+  "#BE185D",
+  "#475569",
+] as const;
 import { createTheme } from "@mui/material/styles";
 import { frFR } from "@mui/material/locale";
 

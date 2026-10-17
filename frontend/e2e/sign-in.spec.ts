@@ -1,5 +1,5 @@
-import { test, expect } from "./fixtures";
-import { installProvider } from "./provider";
+import { test, expect } from "./support/fixtures";
+import { installProvider } from "./support/provider";
 
 test("signed PKCE return clears URL and transient storage; reload requires login", async ({
   page,

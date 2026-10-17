@@ -1,9 +1,9 @@
 import AxeBuilder from "@axe-core/playwright";
-import { test, expect } from "./fixtures";
-import { installProvider } from "./provider";
-import { syntheticStore } from "../test/store-fixture";
-import { syntheticMonth } from "../test/monthly-fixture";
-import { syntheticChange } from "../test/comparison-fixture";
+import { test, expect } from "./support/fixtures";
+import { installProvider } from "./support/provider";
+import { syntheticStore } from "../test/fixtures/store-fixture";
+import { syntheticMonth } from "../test/fixtures/monthly-fixture";
+import { syntheticChange } from "../test/fixtures/comparison-fixture";
 import type { Page } from "@playwright/test";
 
 async function setup(page: Page, incomplete = false) {

@@ -1,10 +1,10 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
-import { test, expect } from "./fixtures";
-import { installProvider } from "./provider";
-import { syntheticStore } from "../test/store-fixture";
+import { test, expect } from "./support/fixtures";
+import { installProvider } from "./support/provider";
+import { syntheticStore } from "../test/fixtures/store-fixture";
 
-import { syntheticCsp as csp } from "../test/security-policy";
+import { syntheticCsp as csp } from "../test/support/security-policy";
 
 const headers = { "access-control-allow-origin": "http://127.0.0.1:4180" };
 

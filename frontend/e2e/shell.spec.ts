@@ -1,5 +1,5 @@
 import AxeBuilder from "@axe-core/playwright";
-import { test, expect } from "./fixtures";
+import { test, expect } from "./support/fixtures";
 
 test("public shell is responsive, isolated and keyboard accessible", async ({
   page,

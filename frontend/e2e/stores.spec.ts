@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
-import { test, expect } from "./fixtures";
-import { installProvider } from "./provider";
+import { test, expect } from "./support/fixtures";
+import { installProvider } from "./support/provider";
 
 const a = "00000000-0000-4000-8000-000000000001";
 const b = "00000000-0000-4000-8000-000000000002";

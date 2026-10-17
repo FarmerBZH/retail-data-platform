@@ -1,14 +1,14 @@
 import AxeBuilder from "@axe-core/playwright";
-import { test, expect as baseExpect } from "./fixtures";
+import { test, expect as baseExpect } from "./support/fixtures";
 
 // Shared transport deliberately spaces API reads; use the same bounded budget
 // as the other multi-resource browser journeys.
 const expect = baseExpect.configure({ timeout: 15000 });
 test.describe.configure({ timeout: 60000 });
-import { installProvider } from "./provider";
-import { syntheticNetwork } from "../test/network-fixture";
-import { syntheticResource } from "../test/published-fixture";
-import { resourceNames } from "../src/read-api";
+import { installProvider } from "./support/provider";
+import { syntheticNetwork } from "../test/fixtures/network-fixture";
+import { syntheticResource } from "../test/fixtures/published-fixture";
+import { resourceNames } from "../src/api/read-api";
 
 async function setup(
   page: import("@playwright/test").Page,

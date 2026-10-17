@@ -1,13 +1,13 @@
 import AxeBuilder from "@axe-core/playwright";
 import type { Page, Route } from "@playwright/test";
-import { test, expect } from "./fixtures";
-import { installProvider } from "./provider";
-import { qualityNames } from "../src/quality-data";
+import { test, expect } from "./support/fixtures";
+import { installProvider } from "./support/provider";
+import { qualityNames } from "../src/features/data-explorer/quality-data";
 import {
   syntheticId,
   syntheticResource,
   syntheticRow,
-} from "../test/published-fixture";
+} from "../test/fixtures/published-fixture";
 const headers = { "access-control-allow-origin": "http://127.0.0.1:4180" };
 async function setup(page: Page, operations = false, refused = false) {
   const provider = await installProvider(page);

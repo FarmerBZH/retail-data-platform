@@ -18,11 +18,35 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    files: ["src/**/*.{ts,tsx}"],
+    files: ["src/**/*.{ts,tsx}", "test/**/*.{ts,tsx}"],
     languageOptions: { globals: globals.browser },
-    plugins: { "react-hooks": reactHooks, "react-refresh": reactRefresh },
+    plugins: { "react-hooks": reactHooks },
     rules: {
       ...reactHooks.configs.recommended.rules,
+    },
+  },
+  {
+    files: ["src/**/*.{ts,tsx}"],
+    plugins: { "react-refresh": reactRefresh },
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: [
+                "**/test/**",
+                "**/e2e/**",
+                "vitest",
+                "@testing-library/*",
+                "@playwright/*",
+              ],
+              message:
+                "Keep test dependencies and fixtures outside application code.",
+            },
+          ],
+        },
+      ],
       "react-refresh/only-export-components": [
         "error",
         { allowConstantExport: true },

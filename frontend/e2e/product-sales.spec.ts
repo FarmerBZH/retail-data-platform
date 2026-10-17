@@ -1,16 +1,16 @@
 import AxeBuilder from "@axe-core/playwright";
-import { test, expect } from "./fixtures";
-import { installProvider } from "./provider";
-import { syntheticStore } from "../test/store-fixture";
+import { test, expect } from "./support/fixtures";
+import { installProvider } from "./support/provider";
+import { syntheticStore } from "../test/fixtures/store-fixture";
 import {
   syntheticId,
   syntheticResource,
   syntheticRow,
-} from "../test/published-fixture";
+} from "../test/fixtures/published-fixture";
 import {
   syntheticProductRows,
   observationId,
-} from "../test/product-sales-fixture";
+} from "../test/fixtures/product-sales-fixture";
 const headers = { "access-control-allow-origin": "http://127.0.0.1:4180" };
 async function setup(
   page: import("@playwright/test").Page,

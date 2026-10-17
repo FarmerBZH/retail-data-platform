@@ -1,7 +1,7 @@
 import AxeBuilder from "@axe-core/playwright";
-import { test, expect } from "./fixtures";
-import { installProvider } from "./provider";
-import { syntheticStore } from "../test/store-fixture";
+import { test, expect } from "./support/fixtures";
+import { installProvider } from "./support/provider";
+import { syntheticStore } from "../test/fixtures/store-fixture";
 
 const store = syntheticStore({
   region_name: "Région synthétique",

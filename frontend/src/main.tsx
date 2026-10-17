@@ -1,21 +1,21 @@
 import { lazy, StrictMode, Suspense } from "react";
 import { createRoot } from "react-dom/client";
 import { CssBaseline, ThemeProvider } from "@mui/material";
-import { readConfiguration } from "./config";
-import { ErrorBoundary } from "./ErrorBoundary";
-import { LoadingScreen } from "./LoadingScreen";
-import { theme } from "./theme";
+import { readConfiguration } from "./app/config";
+import { ErrorBoundary } from "./app/ErrorBoundary";
+import { LoadingScreen } from "./app/LoadingScreen";
+import { theme } from "./app/theme";
 import {
   Authentication,
   captureCallback,
   REDIRECT_KEY,
-} from "./authentication";
-import { readOidcConfiguration } from "./oidc-config";
-import { bindBrowserSession } from "./browser-session";
-import { ReadQueries } from "./read-queries";
+} from "./auth/authentication";
+import { readOidcConfiguration } from "./auth/oidc-config";
+import { bindBrowserSession } from "./auth/browser-session";
+import { ReadQueries } from "./api/read-queries";
 
 const callback = captureCallback(window.location, window.history);
-const App = lazy(() => import("./App"));
+const App = lazy(() => import("./app/App"));
 const configuration = readConfiguration(import.meta.env.VITE_API_BASE_URL);
 const oidc = readOidcConfiguration(
   {

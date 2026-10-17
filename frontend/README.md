@@ -1,5 +1,23 @@
 # Frontend
 
+## Source layout
+
+`src/main.tsx` starts the application. `src/app/` contains the application shell,
+workspace navigation, configuration and theme; `src/auth/` owns sign-in and the
+session lifecycle; `src/api/` contains the read transport and response validation.
+`src/features/` groups screens and their data transformations by business area.
+Each feature keeps its deferred screen entry beside its implementation.
+`src/shared/` contains exact-value and calendar helpers used across features.
+
+Unit and component tests live in `test/`, following the source directories.
+`test/contracts/` verifies published-data coverage, `test/fixtures/` contains only
+synthetic data, and `test/support/` contains reusable test helpers. The opt-in
+local identity runner remains `test/live-smoke.ts`. Browser scenarios live in
+`e2e/`, with their harness in `e2e/support/`. Application code must not import
+test fixtures or test libraries; ESLint checks static imports for this boundary.
+
+## Implemented behavior
+
 React, strict TypeScript, Vite and Material UI provide the French entry screen
 and shared theme from [DESIGN.md](../DESIGN.md). Public OIDC configuration enables
 personal sign-in with Authorization Code and PKCE. The authenticated store screen
@@ -24,8 +42,8 @@ to 9999-12, with a maximum interval of 120 inclusive months. Calendar arithmetic
 uses month indexes without timezone conversion. This client limit bounds reads
 and makes no claim about available months. The active synthesis tab reads the
 existing single-store monthly publication only after Apply; the other implemented
-store tabs likewise use explicit bounded reads. Network and comparison actions are unavailable because
-their server aggregations are not implemented.
+store tabs likewise use explicit bounded reads. Global network summaries and
+filtered multi-store analyses use their own server contracts, described below.
 
 The authenticated screen reads `/v1/analytics/status` once on entry and on an
 explicit “Vérifier la fraîcheur” action. It distinguishes current, stale and
@@ -90,12 +108,12 @@ explicit label and the absolute difference without interpreting the percentage.
 Reference dates and coverage remain visible. Calendar underflow does not generate
 an invalid request. Changing the reference, store, applied period or tab cancels
 pending reads and clears old results; draft months do not trigger comparison reads.
-No store-network comparison or inferred missing-as-zero value is added.
-Other analytics tabs and multi-store comparisons remain later work.
+These single-store comparisons do not infer missing values as zero. The other
+store tabs and filtered multi-store analyses are described below.
 
 The Données navigation opens a catalogue-driven explorer of business references,
 observations and monthly analyses. Public projection metadata is fixed in
-`src/published-contract.ts`; catalogue fields, keys and filters must be compatible.
+`src/features/data-explorer/published-contract.ts`; catalogue fields, keys and filters must be compatible.
 Responses remain bounded by the 2 MB transport limit. Large lists retain all
 elements and render in local pages of 50, with first/last-page controls and no
 per-element API calls. Published varchar limits and exact-value checks still apply.
@@ -274,7 +292,8 @@ after expiry. A page away at the provider cannot actively erase storage; expired
 state is never accepted when the app executes again. The access token stays only
 in memory; the ID token is never retained or sent to the API. Reload requires a new
 login. Session expiry and logout remove the authenticated screen and restore focus
-on the sign-in action. The success screen confirms OIDC validation, not API authorization.
+on the sign-in action. A valid OIDC session does not guarantee API authorization;
+each API read remains subject to the server's authorization checks.
 
 Each session has an in-memory generation and cancellation signal. Expiry, logout,
 a new login and document departure invalidate the previous generation. Pending OIDC
@@ -448,8 +467,8 @@ exercise the public shell with synthetic inputs, keyboard expansion/collapse,
 retained focus, horizontal overflow, empty browser storage and axe checks in both
 disclosure states. No backend or identity-provider credentials are needed.
 The default fixture allows only the local document and JavaScript/CSS assets;
-other requests are aborted and fail the test. Future business scenarios must
-explicitly fulfill synthetic responses. OIDC scenarios intercept only their
+other requests are aborted and fail the test. Business scenarios explicitly
+fulfill synthetic responses. OIDC scenarios intercept only their
 synthetic discovery, authorization, token, JWKS and callback routes. Keys are
 generated per fixture, and tests exercise the real library without production
 bypasses. Browser errors also fail the test. `npm run check` separately builds the
@@ -505,7 +524,7 @@ be reported as native zoom, assistive-technology acceptance or certification.
 
 ## Browser security qualification
 
-T21 applies the explicit synthetic policy in `test/security-policy.ts` as an HTTP
+T21 applies the explicit synthetic policy in `test/support/security-policy.ts` as an HTTP
 header on the e2e preview server, including the OIDC callback. All synthetic browser
 journeys therefore run under this policy. It permits same-origin scripts, the two
 explicit synthetic API/issuer connect origins and Emotion/MUI inline styles.

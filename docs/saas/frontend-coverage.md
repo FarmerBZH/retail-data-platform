@@ -1,12 +1,12 @@
 # Couverture de l’explorateur publié
 
-Le [manifeste exécutable](../../frontend/test/coverage-manifest.ts) associe chaque
+Le [manifeste exécutable](../../frontend/test/support/coverage-manifest.ts) associe chaque
 ressource, champ et chemin imbriqué à `PublishedDetail / PublishedValue` et au
 scénario synthétique correspondant dans
-[published-data.test.tsx](../../frontend/src/published-data.test.tsx).
+[published-data.test.tsx](../../frontend/test/features/data-explorer/published-data.test.tsx).
 Il contient 426 champs de premier niveau et 74 chemins enfants, sans doublons.
 
-La [projection frontend](../../frontend/src/published-contract.ts) reprend uniquement
+La [projection frontend](../../frontend/src/features/data-explorer/published-contract.ts) reprend uniquement
 les projections publiques du [registre](../../src/retail_data_platform/api/resources.json)
 et des [modèles imbriqués](../../src/retail_data_platform/api/resources.py).
 Le test compare les champs au registre et les enfants aux projections de leurs
@@ -45,7 +45,7 @@ T14 complète la consultation native de `analytics_register_product_month` avec
 le tableau et les graphiques de `ProductSales`. Son détail utilise toujours
 `PublishedDetail`, puis ouvre explicitement `register_observations` et `products`
 selon le catalogue. Les scénarios de
-[ProductSales.test.tsx](../../frontend/src/ProductSales.test.tsx) et
+[ProductSales.test.tsx](../../frontend/test/features/sales/ProductSales.test.tsx) et
 [product-sales.spec.ts](../../frontend/e2e/product-sales.spec.ts) vérifient les
 GTIN non rapprochés distincts, retours, mois absents, ambiguïtés, lectures
 incomplètes et disparition du produit vivant, sans appels automatiques par ID.
@@ -53,8 +53,8 @@ incomplètes et disparition du produit vivant, sans appels automatiques par ID.
 T15 ajoute les courbes séparées et dénominateurs de `Presence` pour
 `analytics_store_category_month`. Les collections produit de présence et linéaire
 se lisent explicitement par catégorie, avec leurs champs et identifiants dans
-`PublishedDetail`. Les tests [Presence.test.tsx](../../frontend/src/Presence.test.tsx),
-[presence-data.test.ts](../../frontend/src/presence-data.test.ts) et
+`PublishedDetail`. Les tests [Presence.test.tsx](../../frontend/test/features/presence/Presence.test.tsx),
+[presence-data.test.ts](../../frontend/test/features/presence/presence-data.test.ts) et
 [presence.spec.ts](../../frontend/e2e/presence.spec.ts) couvrent absence inférée,
 ambiguïtés, catégories inconnues, mois absents, dénominateur nul, ratios supérieurs
 à 100 %, lectures incomplètes et absence d'appels automatiques par identifiant.
@@ -63,8 +63,8 @@ Aucune moyenne de ratios ni comparaison d'unités de linéaire inconnues n'est c
 T16 ajoute les trois séries distinctes de `Activity` pour `analytics_activity_month`,
 alignées sur un contexte ventes lu indépendamment. `PublishedDetail` conserve chaque
 champ et identifiant ; les observations `store_activity_metrics` s’ouvrent une par
-une, à la demande. Les tests [Activity.test.tsx](../../frontend/src/Activity.test.tsx),
-[activity-data.test.ts](../../frontend/src/activity-data.test.ts) et
+une, à la demande. Les tests [Activity.test.tsx](../../frontend/test/features/activity/Activity.test.tsx),
+[activity-data.test.ts](../../frontend/test/features/activity/activity-data.test.ts) et
 [activity.spec.ts](../../frontend/e2e/activity.spec.ts) couvrent types/mois absents,
 zéro, ambiguïtés, preuves multiples, changement de période, erreurs locales et
 observations disparues ou incohérentes. Aucune somme intertypes ou causalité n’est
@@ -83,20 +83,20 @@ agrégats, et les nombres de lignes ne mesurent pas du CA perdu. Les audits cons
 leurs champs publics dans `PublishedDetail`, notamment les `source_run_ids`.
 Les imports sources s’ouvrent explicitement avec contrôle renouvelé du catalogue,
 de l’identité, de l’unicité et de la fraîcheur. Les tests
-[Quality.test.tsx](../../frontend/src/Quality.test.tsx),
-[SourceImports.test.tsx](../../frontend/src/SourceImports.test.tsx) et
+[Quality.test.tsx](../../frontend/test/features/data-explorer/Quality.test.tsx),
+[SourceImports.test.tsx](../../frontend/test/features/data-explorer/SourceImports.test.tsx) et
 [quality.spec.ts](../../frontend/e2e/quality.spec.ts) vérifient l’accès ordinaire/OPS,
 la révocation, les refus locaux, les secondes pages, null/zéro, le changement de
 lecteur, les champs privés exclus et l’absence de requêtes anticipées par ID.
 
 T19 réconcilie les ensembles avec les modèles publics API réellement chargés,
 leurs types sérialisés, nullabilité, clés, filtres et droits, sans connexion base.
-[coverage-contract.test.ts](../../frontend/src/coverage-contract.test.ts) compare
+[coverage-contract.test.ts](../../frontend/test/contracts/coverage-contract.test.ts) compare
 ces modèles, le registre, la projection, le manifeste et la matrice cible.
-[coverage-render.test.tsx](../../frontend/src/coverage-render.test.tsx) vérifie
+[coverage-render.test.tsx](../../frontend/test/contracts/coverage-render.test.tsx) vérifie
 chaque état admis (null, texte/liste vide, booléen), y compris les chemins enfants,
 et prouve que retirer un champ affiché fait échouer le contrôle de rendu.
-[coverage-journeys.test.tsx](../../frontend/src/coverage-journeys.test.tsx) ouvre
+[coverage-journeys.test.tsx](../../frontend/test/contracts/coverage-journeys.test.tsx) ouvre
 le détail natif de chaque collection, sous catalogue ordinaire ou OPS approprié.
 Les tests des détails spécialisés vérifient chaque valeur sous son champ, pas
 uniquement le nombre de libellés. La synthèse et les comparaisons conservent leurs

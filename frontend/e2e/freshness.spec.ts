@@ -1,6 +1,6 @@
 import AxeBuilder from "@axe-core/playwright";
-import { test, expect } from "./fixtures";
-import { installProvider } from "./provider";
+import { test, expect } from "./support/fixtures";
+import { installProvider } from "./support/provider";
 
 for (const state of ["current", "stale", "uninitialized"] as const) {
   test(`publication ${state} is qualified independently of coverage`, async ({

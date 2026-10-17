@@ -1,16 +1,16 @@
 import AxeBuilder from "@axe-core/playwright";
-import { test, expect as baseExpect } from "./fixtures";
-import { installProvider } from "./provider";
+import { test, expect as baseExpect } from "./support/fixtures";
+import { installProvider } from "./support/provider";
 import {
   analysisFixture,
   analysisStore,
   fixtureQuery,
   publication,
   syntheticId,
-} from "../test/analysis-fixture";
-import type { AnalysisRoute } from "../src/analysis-contract";
-import { syntheticMonth } from "../test/monthly-fixture";
-import { syntheticResource } from "../test/published-fixture";
+} from "../test/fixtures/analysis-fixture";
+import type { AnalysisRoute } from "../src/api/analysis-contract";
+import { syntheticMonth } from "../test/fixtures/monthly-fixture";
+import { syntheticResource } from "../test/fixtures/published-fixture";
 const expect = baseExpect.configure({ timeout: 15000 });
 test.describe.configure({ timeout: 60000 });
 async function setup(page: import("@playwright/test").Page, total = 7) {

@@ -44,18 +44,18 @@ async function prepare(page: Page) {
       // This closure is created only by the test runner; credentials never leave the page.
       Object.defineProperty(window, "liveRead", {
         value: async () => {
-          const sessionPath = "/src/session.ts";
-          const queryPath = "/src/read-queries.ts";
-          const decoderPath = "/src/api-validation.ts";
+          const sessionPath = "/src/auth/session.ts";
+          const queryPath = "/src/api/read-queries.ts";
+          const decoderPath = "/src/api/api-validation.ts";
           const { Session } = (await import(
             sessionPath
-          )) as typeof import("../src/session");
+          )) as typeof import("../src/auth/session");
           const { ReadQueries } = (await import(
             queryPath
-          )) as typeof import("../src/read-queries");
+          )) as typeof import("../src/api/read-queries");
           const { storeSummary } = (await import(
             decoderPath
-          )) as typeof import("../src/api-validation");
+          )) as typeof import("../src/api/api-validation");
           if (!token) return { code: "no-token" };
           const session = new Session();
           session.accept(session.begin(), { accessToken: token, expiresAt });

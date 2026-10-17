@@ -1,10 +1,16 @@
 import AxeBuilder from "@axe-core/playwright";
-import { test, expect } from "./fixtures";
-import { installProvider } from "./provider";
-import { syntheticStore } from "../test/store-fixture";
-import { syntheticRow, syntheticResource } from "../test/published-fixture";
-import { syntheticTypologyRows, typologyIds } from "../test/typology-fixture";
-import { typologyNames } from "../src/typology-data";
+import { test, expect } from "./support/fixtures";
+import { installProvider } from "./support/provider";
+import { syntheticStore } from "../test/fixtures/store-fixture";
+import {
+  syntheticRow,
+  syntheticResource,
+} from "../test/fixtures/published-fixture";
+import {
+  syntheticTypologyRows,
+  typologyIds,
+} from "../test/fixtures/typology-fixture";
+import { typologyNames } from "../src/features/typologies/typology-data";
 import type { Page, Route } from "@playwright/test";
 const headers = { "access-control-allow-origin": "http://127.0.0.1:4180" };
 async function setup(

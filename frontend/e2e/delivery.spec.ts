@@ -1,13 +1,16 @@
 import { arch, cpus, platform, totalmem } from "node:os";
 import type { Route } from "@playwright/test";
-import { test, expect } from "./fixtures";
-import { installProvider } from "./provider";
-import { syntheticStore } from "../test/store-fixture";
-import { syntheticResource, syntheticRow } from "../test/published-fixture";
+import { test, expect } from "./support/fixtures";
+import { installProvider } from "./support/provider";
+import { syntheticStore } from "../test/fixtures/store-fixture";
+import {
+  syntheticResource,
+  syntheticRow,
+} from "../test/fixtures/published-fixture";
 import {
   syntheticProductRows,
   observationId,
-} from "../test/product-sales-fixture";
+} from "../test/fixtures/product-sales-fixture";
 
 // Local qualification budgets selected before repeated qualification; not production SLOs.
 const budgets = {

@@ -1,9 +1,12 @@
 import AxeBuilder from "@axe-core/playwright";
 import type { Locator, Page } from "@playwright/test";
-import { test, expect } from "./fixtures";
-import { installProvider } from "./provider";
-import { syntheticStore } from "../test/store-fixture";
-import { syntheticResource, syntheticRow } from "../test/published-fixture";
+import { test, expect } from "./support/fixtures";
+import { installProvider } from "./support/provider";
+import { syntheticStore } from "../test/fixtures/store-fixture";
+import {
+  syntheticResource,
+  syntheticRow,
+} from "../test/fixtures/published-fixture";
 
 // Reach controls through the browser's tab order, without programmatic focus.
 async function reach(page: Page, target: Locator) {

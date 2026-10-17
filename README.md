@@ -5,12 +5,13 @@ tabular sources.
 
 The project provides validated data ingestion, PostgreSQL analytics and an
 authenticated read API. The React frontend provides personal OIDC login, store
-selection and detail, monthly store analyses, published network summaries, data inspection and
+selection and detail, monthly store analyses, published network summaries,
+filtered rankings, comparable cohorts, multi-store comparisons, data inspection and
 permission-gated quality audits with a shared Material UI theme. These flows are
 verified with synthetic browser scenarios; deployed identity/API acceptance,
-human accessibility receipt and production qualification remain open. Global
-rankings, comparable cohorts and multi-store analytics are deferred. Network
-month/year/calendar summaries and calendar comparisons use the published views. See the
+human accessibility receipt and production qualification remain open. Network
+month/year/calendar summaries and calendar comparisons use the published views;
+filtered analyses use dedicated read-only endpoints. See the
 [frontend setup](frontend/README.md) and
 [SaaS frontend specification](docs/saas/README.md).
 
@@ -20,10 +21,18 @@ The project requires Python 3.13 and [uv](https://docs.astral.sh/uv/).
 
 ```bash
 uv sync
+uv run ruff format --check src tests migrations
 uv run ruff check .
-uv run ruff format --check .
-uv run mypy src
+uv run mypy src tests migrations
+uv run pytest -q
 ```
+
+Backend tests are grouped by responsibility in `tests/importers/`, `tests/api/`,
+`tests/auth/`, `tests/analytics/` and `tests/scripts/`. Shared synthetic factories
+live in `tests/support/`; domain fixtures are declared in their `conftest.py`.
+PostgreSQL tests require `TEST_DATABASE_URL` pointing to a disposable local test
+database. The optional synthetic callback test also requires `TEST_AUTH_LOOPBACK=1`.
+Without these settings, the relevant tests are skipped.
 
 Start the local database and apply its migrations:
 

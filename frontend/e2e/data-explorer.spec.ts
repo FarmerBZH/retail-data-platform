@@ -1,11 +1,11 @@
 import AxeBuilder from "@axe-core/playwright";
-import { test, expect } from "./fixtures";
-import { installProvider } from "./provider";
+import { test, expect } from "./support/fixtures";
+import { installProvider } from "./support/provider";
 import {
   syntheticId,
   syntheticResource,
   syntheticRow,
-} from "../test/published-fixture";
+} from "../test/fixtures/published-fixture";
 
 const headers = { "access-control-allow-origin": "http://127.0.0.1:4180" };
 test("explores second-page products and composite details without eager evidence reads", async ({
@@ -271,7 +271,7 @@ test("keeps store navigation and fixed context while paging a large evidence lis
 }) => {
   test.setTimeout(60000);
   await installProvider(page);
-  const { syntheticStore } = await import("../test/store-fixture");
+  const { syntheticStore } = await import("../test/fixtures/store-fixture");
   const store = syntheticStore();
   const catalog = [
     syntheticResource("analytics_activity_month"),

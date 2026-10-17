@@ -17,7 +17,7 @@ La plateforme aide à explorer et documenter une hypothèse, sans attribuer de c
 
 ## Structure commune
 
-Navigation : **Vue réseau**, **Magasins**, **Données**, **Qualité des données**. La comparaison
+Navigation : **Vue réseau**, **Analyses filtrées**, **Magasins**, **Données**, **Qualité des données**. La comparaison
 s'ouvre depuis la sélection de magasins ; la fiche depuis une ligne ou un graphique.
 Un bandeau persistant rappelle période, sélection, comparaison et fraîcheur.
 
@@ -43,6 +43,20 @@ Garder ces préférences en mémoire pour cette version ; aucune donnée métier
 une URL partageable, un stockage persistant ou une télémétrie.
 
 ## Vue réseau
+
+Tranche T23 sur API existante : trois lectures explicites (tout le calendrier,
+mois, années), sans filtre magasin. Les cartes décrivent la dernière ligne publiée
+du résultat, avec sa période ; elles ne totalisent pas une fenêtre arbitraire.
+Le tableau conserve toutes les lignes lues, les valeurs exactes et leur couverture.
+La courbe représente uniquement le CA complet, avec trous ; les montants partiels
+sont nommés dans les cartes et le tableau. M−1/N−1 sont consultables en tableau,
+avec base négative qualifiée et pourcentage masqué. Les champs supplémentaires
+restent accessibles dans les détails dépliables et dans Données.
+Une erreur de comparaison laisse la synthèse consultable avec avertissement.
+Les années affichent le nombre réel de mois, sans présumer douze mois complets.
+T24C complète cette tranche dans l’entrée **Analyses filtrées** : contributions,
+classement, cohortes, courbe de référence et sélection. Les synthèses globales T23
+gardent leurs contrats propres ; voir le [parcours implémenté](filtered-analysis.md).
 
 Ordre de lecture :
 

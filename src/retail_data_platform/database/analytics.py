@@ -258,3 +258,28 @@ class NetworkMonthChanges(AnalyticsBase):
     revenue_month_change_ratio: Mapped[Decimal | None] = mapped_column(Numeric)
     revenue_year_change: Mapped[Decimal | None] = mapped_column(Numeric)
     revenue_year_change_ratio: Mapped[Decimal | None] = mapped_column(Numeric)
+
+
+class InternalAnalyticsBase(DeclarativeBase):
+    """Internal snapshots, deliberately separate from the HTTP resource metadata."""
+
+
+class StoreScope(InternalAnalyticsBase):
+    __tablename__ = "analytics_store_scope"
+    store_id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    name: Mapped[str | None] = mapped_column(String(255))
+    city: Mapped[str | None] = mapped_column(String(128))
+    retailer_name: Mapped[str | None] = mapped_column(String(128))
+    region_code: Mapped[str | None] = mapped_column(String(32))
+    store_format: Mapped[str | None] = mapped_column(String(64))
+    is_active: Mapped[bool] = mapped_column(Boolean)
+
+
+class StoreDatasetMonth(InternalAnalyticsBase):
+    __tablename__ = "analytics_store_dataset_month"
+    store_id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    period: Mapped[date] = mapped_column(Date, primary_key=True)
+    dataset: Mapped[str] = mapped_column(Text, primary_key=True)
+    source_row_count: Mapped[int] = mapped_column(BigInteger)
+    observed_row_count: Mapped[int] = mapped_column(BigInteger)
+    inferred_absence_row_count: Mapped[int] = mapped_column(BigInteger)

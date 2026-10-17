@@ -1,15 +1,22 @@
 # PRD — Plateforme d’analyse commerciale
 
-Statut : proposition de référence pour la première version, à valider avant
-implémentation. Les décisions confirmées sont distinguées des priorités proposées.
+Statut : référence cible pour la première version, distincte de la tranche
+frontend implémentée et des preuves de réception. Les décisions confirmées sont distinguées des priorités proposées.
 Ce document définit le résultat produit attendu ; il ne décrit pas une application
 déjà livrée et ne remplace pas les contrats détaillés.
 
 Décision de démarrage : différer les nouveaux endpoints analytiques et réaliser
 le frontend sur les capacités existantes. Le P0 ci-dessous reste la cible complète ;
-la première tranche (connexion, magasins, détails) ne constitue pas sa réception.
-Les vues nécessitant de nouvelles agrégations restent dépendantes d’une reprise
-ultérieure de ce périmètre backend.
+la tranche implémentée (connexion, magasins, analyses unitaires, données et qualité)
+ne constitue pas sa réception. Les [résultats locaux et limites](../../frontend/README.md#integrated-delivery-qualification)
+sont documentés séparément.
+Les quatre vues réseau publiées permettent maintenant les synthèses mensuelles,
+annuelles, sur tout le calendrier et les variations M−1/N−1. Leur intégration
+frontend est suivie en T23. Classements, contributions, cohortes comparables et
+sélections multi-magasins font désormais l’objet de la [tâche T24](network-analysis.md),
+découpée en PostgreSQL, API et SaaS. Le socle est commité et les routes T24B
+sont commitées. Leurs parcours SaaS T24C sont implémentés et vérifiés et relus localement ;
+les [garanties et limites](filtered-analysis.md) distinguent local et production.
 
 ## 1. Problème et résultat attendu
 
@@ -126,11 +133,11 @@ les cas techniques, y compris pagination, erreurs et changement de publication.
 
 | Sujet | État et incidence sur la première version |
 | --- | --- |
-| API réseau | Agrégations, recherche magasins, disponibilité des périodes et classement global à développer ; bloquent la réception des vues réseau P0 |
-| Cohérence des publications | Contrat de version/fraîcheur à définir pour les futures réponses agrégées ; ne pas promettre un snapshot entre pages actuelles |
+| API réseau | Synthèses T23 et sept routes T24B implémentées ; parcours filtré, disponibilité, cohortes et classement consommés par T24C, réception suivie dans les tâches |
+| Cohérence des publications | UUID épinglé et conflit 409 sur les routes T24B ; les anciennes collections unitaires conservent leur contrat distinct, sans snapshot inter-pages promis |
 | Connexion web | Adapter et vérifier le client OIDC autorisé, les redirections et origines ; le client CLI ne constitue pas une session navigateur |
 | Devise et HT/TTC | Inconnus ; consultation possible avec libellé explicite, présentation financière qualifiée suspendue à confirmation métier |
-| Stack et graphiques | React + TypeScript + Vite, MUI et MUI X Charts Community retenus ; versions et compatibilité à vérifier à l’installation |
+| Stack et graphiques | React + TypeScript + Vite, MUI et MUI X Charts Community installés et verrouillés ; contrôles locaux suivis dans les tâches |
 | Hébergement et charge | Environnement, capacité et budgets à décider avant mise en production ; aucune ouverture publique implicite |
 
 La fiche magasin et l’explorateur peuvent avancer avec les collections existantes.

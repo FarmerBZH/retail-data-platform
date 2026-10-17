@@ -1,7 +1,8 @@
 # Critères de réception du frontend
 
-Statut : scénarios à implémenter avec le produit. Ce fichier n'est pas un rapport
-de tests exécutés. Toutes les données et identités de test doivent être synthétiques,
+Statut : critères de la cible produit, pas un rapport de tests exécutés. Les
+preuves locales de la tranche implémentée et les validations encore ouvertes
+sont dans le [guide frontend](../../frontend/README.md#integrated-delivery-qualification). Toutes les données et identités de test doivent être synthétiques,
 y compris les maquettes, captures, réponses API et jeux de charge.
 
 ## Calculs métier
@@ -91,9 +92,54 @@ La recette exige les parcours navigateur, l'accessibilité des graphiques, les t
 des calculs et les contrats de transport/session. Mesurer temps de chargement,
 nombre de requêtes, taille des réponses et mémoire sur un volume synthétique annoncé.
 Fixer avec le responsable produit les budgets acceptables avant de qualifier la
-vue réseau pour la production ; aucun objectif de latence n'a encore été mesuré.
+vue réseau pour la production. T22 fournit des budgets et mesures locaux sur un
+petit parcours synthétique de magasin ; ils ne qualifient ni la vue réseau,
+ni le volume cible ou la charge de production.
 
 Toute évolution Python conserve les contrôles de formatage, lint, typage et tests
 du projet. Une évolution de persistence exige des tests PostgreSQL ; une évolution
 de schéma exige migration réversible et modèle aligné. Ne déclarer une frontière
 dans `docs/architecture.md` qu'après son implémentation et sa vérification.
+
+
+## Réception T23 — vues réseau publiées
+
+Vérifier overview sans bornes temporelles, mois avec pagination complète et années
+filtrées sur leurs clés de janvier sans découpage des totaux. Distinguer 0, null,
+montant partiel et couverture propre à chaque mesure ; aucun cumul de pages.
+Les tests synthétiques vérifient la seconde page, un mois absent, une année à un
+seul mois, les références zéro/négative, les capacités absentes, une publication
+changée et l’annulation. Tester clavier et axe à 360/768/1440 px, effacement après
+déconnexion et absence de stockage métier. Un échec du bloc de comparaison reste
+local. Les classements/cohortes/sélections sont hors réception T23 ; leur
+réception T24 est suivie ci-dessous.
+
+
+## Réception T24 — réseau filtré et comparaison multi-magasins
+
+Statut : T24A vérifiée et commitée ; T24B vérifiée localement et commitée après
+relecture et approbation explicite, revue de sécurité terminée ; T24C implémentée
+et vérifiée localement, commitée après relecture et approbation explicite. Aucun résultat de T23 ne vaut validation de ces nouvelles capacités. Le [contrat T24](network-analysis.md)
+associe chaque exigence à son commit et à ses preuves PostgreSQL/API/SaaS.
+
+- T24A : migration réversible, référentiel figé, disponibilité observée par source,
+  calculs exacts sur grille attendue, cohortes figées et contributions concordantes.
+- T24B : filtres et sélection bornés, recherche/options serveur, tri global et deux
+  pages, rôle SQL minimal, publication cohérente par réponse, 409 entre versions,
+  erreurs sans valeurs et compatibilité des anciennes collections.
+- T24C : même résultat que les oracles PostgreSQL/API, total indépendant de la page,
+  comparaison de sept magasins avec six visibles, conservation du contexte, retrait
+  des anciennes données en vol ou après 409, clavier/axe et effacement de session.
+- Ensemble : baseline Python, PostgreSQL réel, `npm run check`, revues de sécurité
+  par diff puis cumulative et recette OIDC/API/PostgreSQL synthétique. Les contrôles
+  conditionnels ignorés ou une recette réelle indisponible restent signalés ouverts.
+
+Les vues et réponses nouvelles n’entrent dans la matrice des données publiées
+qu’une fois leurs projections décidées et implémentées. Les budgets de performance
+et la recette humaine restent distincts des plafonds techniques et des tests simulés.
+
+
+La recette T24C est détaillée dans le [contrat SaaS](filtered-analysis.md) et les
+preuves dans [les tâches](tasks.md). Elle conserve les limites de recette humaine,
+de CI hébergée et de qualification de production ; les capacités T24 ne requalifient
+pas implicitement ces contrôles précédemment ouverts.

@@ -1,6 +1,11 @@
 # Design de la plateforme analytique
 
-Statut : référence visuelle cible, sans composants implémentés à ce stade.
+Statut : référence visuelle cible. Le frontend applique le thème à l’entrée, aux
+magasins, aux analyses unitaires et à l’explorateur/qualité. Les graphiques des
+magasins sont implémentés et testés sur données synthétiques ; les vues réseau
+publiées sont intégrées en T23 ; T24C ajoute les analyses filtrées et les comparaisons
+multi-magasins, vérifiés localement. La recette humaine et
+la qualification de production restent ouvertes.
 MUI, le responsive et une interface agréable et simple sont confirmés. Les valeurs
 ci-dessous fixent une base commune pour l’implémentation ; elles pourront évoluer
 ensemble après une revue des premiers écrans.
@@ -100,7 +105,7 @@ Le défilement horizontal de la page entière est interdit.
 
 | Élément | Règle commune |
 | --- | --- |
-| Navigation | Vue réseau, Magasins, Données, Qualité ; élément actif avec fond bleu pâle et texte explicite |
+| Navigation | Vue réseau, Analyses filtrées, Magasins, Données, Qualité ; élément actif avec fond bleu pâle et texte explicite |
 | Filtres | Libellés persistants, contrôles MUI ; sélectionner des mois, pas des jours arbitraires ; action Appliquer pour les changements coûteux |
 | Sélection magasins | Recherche si prise en charge, cases à cocher et compteur ; « Tous » explicite, jamais implicite si sélection vide |
 | Carte KPI | Titre, valeur, unité, période/comparaison et couverture ; pas de carte cliquable sans indication |
@@ -185,8 +190,11 @@ Recette minimale : 360, 768 et 1440 px, zoom navigateur à 200 %, clavier seul,
 libellés longs, valeurs négatives, listes vides, données partielles et erreurs.
 Vérifier l’absence de débordement de page, la lisibilité des axes et l’accès au texte
 complet des tableaux. Utiliser uniquement des exemples et captures synthétiques.
-Les premiers écrans permettront de vérifier ces règles en conditions réelles ;
-aucune recette d’interface n’a encore eu lieu.
+Les parcours du shell et des écrans métier ont des contrôles automatisés à
+360, 768 et 1440 px, avec navigation clavier, focus, contrastes axe et réduction
+du mouvement. Ils ne remplacent pas la recette humaine du zoom natif et des
+annonces avec lecteur d’écran, toujours ouverte en T20. Voir les
+[résultats et limites du frontend](frontend/README.md#responsive-and-accessibility-qualification).
 
 ## Références MUI
 

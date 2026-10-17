@@ -1,0 +1,9 @@
+node_modules
+dist
+dist-e2e
+coverage
+package-lock.json
+.vite
+.vitest
+test-results
+playwright-report

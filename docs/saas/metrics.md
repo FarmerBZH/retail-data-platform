@@ -17,6 +17,22 @@ Les ventes n'exposent pas de devise ni de qualification HT/TTC : afficher « uni
 monétaire à confirmer » jusqu'à validation ; interdire l'agrégation de devises
 différentes sans contrat de conversion explicite.
 
+## Contrat réseau publié
+
+Les ressources `analytics_network_month`, `analytics_network_year`,
+`analytics_network_overview` et `analytics_network_month_changes` suivent le
+[contrat réseau](../network-analytics.md). Les montants sont déjà calculés sur le
+serveur ; ne pas sommer les pages ni reconstruire un total depuis les magasins.
+Chaque mesure possède son propre `*_covered_cell_count` face à
+`expected_cell_count`. Le montant complet est privilégié, sinon `*_partial` est
+explicitement partiel ; zéro reste mesuré, null indisponible. Les diagnostics
+produit non ambigus ne remplacent aucune mesure.
+La synthèse globale couvre tout le calendrier. Les lignes annuelles couvrent
+leurs mois réellement publiés ; filtrer leurs clés de janvier ne découpe pas
+leurs calculs. Les variations réseau M−1/N−1 sont lues directement dans la vue
+serveur, avant le filtrage des mois. Aucune cohorte comparable n’est publiée.
+Les règles de sélection/cohorte ci-dessous restent des exigences pour la cible.
+
 ## Indicateurs principaux
 
 | Indicateur | Source / calcul | Condition d'affichage |
@@ -39,7 +55,7 @@ Un résultat nul reste distinct de zéro, les retours et montants négatifs sont
 ## Comparaisons temporelles
 
 Pour un magasin, `analytics_store_month_changes` fournit M-1 et N-1 calendaires.
-Pour une fenêtre ou un réseau, recalculer depuis les montants de chaque période ;
+Pour une future fenêtre agrégée, calculer côté serveur depuis les montants de chaque période ;
 ne jamais sommer ou moyenner les pourcentages de cette vue.
 
 Proposer deux lectures clairement nommées :

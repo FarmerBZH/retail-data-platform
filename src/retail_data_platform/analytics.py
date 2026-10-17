@@ -13,6 +13,8 @@ from retail_data_platform.database.session import create_database_engine
 
 # Dependencies must be refreshed before their consumers.
 ANALYTICAL_VIEWS = (
+    "analytics_store_scope",
+    "analytics_store_dataset_month",
     "analytics_register_product_month",
     "analytics_activity_month",
     "analytics_distribution_product_month",

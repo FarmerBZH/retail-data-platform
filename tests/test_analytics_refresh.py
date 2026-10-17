@@ -132,6 +132,7 @@ def test_failure_rolls_back_all_views_and_retains_generic_audit(database: Engine
     assert "PRIVATE" not in str(captured.value)
     assert stored_name(database) == "Before refresh"
     with database.connect() as c:
+        assert c.scalar(text("SELECT name FROM analytics_store_scope")) == "Before refresh"
         audit = c.execute(
             select(AnalyticsRefreshRun.status, AnalyticsRefreshRun.error_message).order_by(
                 AnalyticsRefreshRun.started_at.desc()
@@ -159,6 +160,7 @@ def test_concurrent_readers_and_source_snapshot_are_consistent(database: Engine)
         if view == ANALYTICAL_VIEWS[-1]:
             with database.connect() as c:
                 c.execute(text("SET statement_timeout = 1000"))
+                assert c.scalar(text("SELECT name FROM analytics_store_scope")) == "Before refresh"
                 assert (
                     c.scalar(text("SELECT current_store_name FROM analytics_store_month"))
                     == "Before refresh"
@@ -169,6 +171,8 @@ def test_concurrent_readers_and_source_snapshot_are_consistent(database: Engine)
     assert analytics_status(database)["state"] == "stale"
     refresh_analytics(database)
     assert stored_name(database) == "Later source"
+    with database.connect() as c:
+        assert c.scalar(text("SELECT name FROM analytics_store_scope")) == "Later source"
     assert analytics_status(database)["state"] == "current"
 
 
@@ -209,3 +213,68 @@ def test_network_publication_rolls_back_with_store_snapshot(database: Engine) ->
     with database.connect() as c:
         assert c.scalar(text("SELECT store_count FROM analytics_network_overview")) == 2
         assert c.scalar(text("SELECT count(*) FROM analytics_store_month")) == 2
+
+
+def test_internal_availability_rolls_back_with_published_dimensions(database: Engine) -> None:
+    store_id = seed(database)
+    refresh_analytics(database)
+    with database.begin() as c:
+        c.execute(update(Store).where(Store.id == store_id).values(name="Changed synthetic store"))
+        c.execute(
+            insert(TypologySnapshot).values(
+                id=uuid.uuid4(),
+                source_key="c" * 64,
+                period=date(2025, 2, 1),
+                store_id=store_id,
+                store_match_status="matched",
+                store_match_method="synthetic",
+            )
+        )
+
+    def fail_after_internal_snapshots(view: str) -> None:
+        if view == "analytics_register_product_month":
+            raise RuntimeError("synthetic failure after internal snapshots")
+
+    with pytest.raises(AnalyticsRefreshError):
+        refresh_analytics(database, progress=fail_after_internal_snapshots)
+    with database.connect() as c:
+        assert c.scalar(text("SELECT name FROM analytics_store_scope")) == "Before refresh"
+        assert c.scalar(text("SELECT count(*) FROM analytics_store_dataset_month")) == 1
+        assert c.scalar(text("SELECT month_count FROM analytics_network_overview")) == 1
+    refresh_analytics(database)
+    with database.connect() as c:
+        assert c.scalar(text("SELECT name FROM analytics_store_scope")) == "Changed synthetic store"
+        assert c.scalar(text("SELECT count(*) FROM analytics_store_dataset_month")) == 2
+        assert c.scalar(text("SELECT month_count FROM analytics_network_overview")) == 2
+
+
+def test_upgrade_existing_publication_requires_initializing_internal_views(
+    database: Engine,
+) -> None:
+    from unittest.mock import patch
+
+    with database.begin() as c:
+        config = Config("alembic.ini")
+        config.attributes["connection"] = c
+        command.downgrade(config, "20260930_14")
+    seed(database)
+    with patch("retail_data_platform.analytics.ANALYTICAL_VIEWS", ANALYTICAL_VIEWS[2:]):
+        refresh_analytics(database)
+    with database.begin() as c:
+        config = Config("alembic.ini")
+        config.attributes["connection"] = c
+        command.upgrade(config, "head")
+        command.check(config)
+    assert analytics_status(database)["state"] == "uninitialized"
+    with database.connect() as c:
+        assert c.scalar(text("SELECT store_count FROM analytics_network_overview")) == 1
+    refresh_analytics(database)
+    assert analytics_status(database)["state"] == "current"
+    with database.begin() as c:
+        assert c.scalar(text("SELECT count(*) FROM analytics_store_scope")) == 1
+        config = Config("alembic.ini")
+        config.attributes["connection"] = c
+        command.downgrade(config, "20260930_14")
+        assert c.scalar(text("SELECT store_count FROM analytics_network_overview")) == 1
+        command.upgrade(config, "head")
+        command.check(config)

@@ -3,6 +3,9 @@
 Statut : contrat cible. Les capacités existantes ci-dessous ont été vérifiées dans
 `api/app.py`, `api/query.py`, `api/resources.py`, `api/resources.json` et
 `analytics.py`. Aucun endpoint supplémentaire n'est créé par ce document.
+Le client web implémenté et ses preuves locales sont décrits dans
+[l’architecture](../architecture.md) et le [guide frontend](../../frontend/README.md).
+La compatibilité de recette API/OIDC et les contrôles d’hébergement restent ouverts.
 
 ## Frontières
 
@@ -88,20 +91,44 @@ ce dernier nécessite une extension de `expose_headers`, sinon utiliser le déla
 les KPI et explique l'absence de publication ; `current` ne signifie pas couverture
 commerciale exhaustive. Afficher séparément l'échec éventuel du dernier refresh.
 
-## Besoins API avant une vue réseau exploitable à grande échelle
+## Lectures réseau ajoutées par le backend
 
-Statut : différé par décision produit. Cette section conserve les dépendances de
-la cible complète ; elle n’autorise pas leur implémentation pendant la première
-tranche frontend, qui utilise uniquement les endpoints existants.
+Les quatre routes `analytics_network_month`, `analytics_network_year`,
+`analytics_network_overview` et `analytics_network_month_changes` sous
+`/v1/data/` sont disponibles avec `data:read`, sous réserve du catalogue autorisé.
+T23 les ajoute à la liste fixe de routes et à la projection frontend ; aucun
+endpoint, droit ni contrat d’identité supplémentaire n’est introduit.
+Le paramètre `scope` permet la lecture et le détail de l’overview ; les vues réseau
+n’acceptent aucun filtre magasin. Les bornes annuelles sont ramenées au 1er janvier
+des années choisies. Overview ne reçoit aucune borne temporelle.
+La lecture est bornée à 120 lignes, cinq pages et 120 mois sélectionnés. Une lecture
+incomplète ou une fraîcheur changée masque les résultats concernés. Les comparaisons
+échouent séparément ; la fin de session efface tout le workspace. Les objets métier
+et jetons restent en mémoire, les champs sources restent du texte inerte.
+Le détail natif expose tous les champs des quatre vues.
+Déploiement : appliquer migration, refresh analytique et grants des nouvelles vues
+selon [network-analytics.md](../network-analytics.md) avant l’API et le frontend.
+La présence du code ne prouve pas que ces opérations ont été réalisées sur la cible.
 
-Les noms et chemins de ces futures routes sont à définir lors du contrat OpenAPI.
-Il est interdit de coder le frontend comme si ces routes existaient déjà.
+## API analytique pour la cible complète
 
-| Capacité à ajouter | Entrée cible | Sortie et invariants attendus |
+Statut : socle T24A commité ; API T24B commitée après relecture et approbation explicite ;
+intégration SaaS T24C implémentée et vérifiée et relue localement. Le [contrat en trois commits](network-analysis.md) précise
+PostgreSQL, API et SaaS, avec limites, sécurité et tests. La présente préparation
+a conduit au socle PostgreSQL T24A puis aux sept routes T24B vérifiées localement.
+Le [contrat API](../filtered-analysis-api.md) précise publication, réponses et grants.
+Le frontend conserve T23 et ajoute les [parcours T24C](filtered-analysis.md),
+avec transport fixe, décodeurs dédiés et précondition de publication.
+
+Les noms et chemins T24B sont figés dans l’OpenAPI authentifié avant leur
+consommation en T24C. Les routes
+`/v1/data/*` et le catalogue natif conservent leur contrat existant.
+
+| Capacité T24B | Entrée | Sortie et invariants |
 | --- | --- | --- |
 | Disponibilité | Périmètre de magasins validé | Bornes et mois observés par dataset, absence distinguée de zéro ; pas de présomption de mois complet |
 | Recherche magasins | Texte borné, dimensions actuelles, pagination | Sélection et recherche serveur, ordre stable ; IDs inconnus signalés pour une sélection explicite |
-| Synthèse et série | Mois inclusifs, sélection explicite ou tous, dimensions, comparaison | Totaux, numérateurs/dénominateurs de couverture, cohorte et exclus selon `metrics.md` |
+| Synthèse et série filtrées / cohortes | Mois inclusifs, sélection explicite ou tous, dimensions, comparaison | Totaux, numérateurs/dénominateurs de couverture, cohorte et exclus selon `metrics.md` |
 | Classement et contributions | Même périmètre, indicateur/tri autorisés | Tri global stable, pagination, contributions cohérentes avec les totaux |
 
 Une réponse agrégée doit porter son périmètre résolu, ses périodes, son grain,

@@ -1,0 +1,1012 @@
+# Frontend SaaS — tâches d’implémentation et de validation
+
+Statut actuel : T23 intègre les quatre vues réseau publiées, avec vérifications
+locales terminées. T23A (`02015e4`) et T23B (`24cc19b`) sont commitées.
+T24A et T24B sont commitées après relecture et approbation explicite ;
+T24C est implémentée, vérifiée et relue localement, dans le découpage PostgreSQL → API → SaaS ; voir le [contrat de réalisation](network-analysis.md).
+Les développements T01–T22 sont commités. Les parties automatisées
+T20–T22 sont vérifiées localement ; la recette humaine T20, les headers/logs réels
+T21 et la recette intégrée API/OIDC T22 restent ouverts, cette dernière faute
+d’environnement défini. CI hébergée et charge de production non reçues.
+Voir le [guide frontend](../../frontend/README.md#integrated-delivery-qualification)
+pour les résultats, budgets locaux et limites.
+
+Les statuts détaillés T01–T19 retracent les validations au moment de chaque tâche,
+y compris les revues Security alors en attente. Le scan cumulatif T21 a depuis
+examiné le frontend actuel ; il ne remplace pas une revue de tous les artefacts
+backend ou du smoke T07. Aucun statut historique ne vaut réception de production.
+
+Point de départ historique : branche `feat/saas-frontend`, API de lecture et client personnel
+existants ; aucun package frontend ni pipeline frontend à ce stade.
+
+## Contrats à lire
+
+Lire le [PRD](prd.md), le [produit](product.md), les [indicateurs](metrics.md),
+l’[intégration](integration.md), la [matrice de couverture](data-coverage.md),
+la [réception](acceptance.md) et le [design](../../DESIGN.md).
+Les limites implémentées sont celles de l’[architecture](../architecture.md),
+du [contrat mensuel](../monthly-analytics.md), du
+[guide API](../api-agent-guide.md), des [opérations API](../read-api-operations.md)
+et du [contrat de sécurité API](../read-api-design.md).
+Pour la connexion, lire aussi l’[authentification personnelle](../personal-authentication.md)
+et l’[identité locale](../local-identity.md).
+
+Le [registre](../../src/retail_data_platform/api/resources.json) et les
+[projections imbriquées](../../src/retail_data_platform/api/resources.py) font
+autorité sur les champs ; le catalogue authentifié détermine les capacités du lecteur.
+La matrice recense actuellement 28 ressources, 426 champs de premier niveau et
+74 chemins enfants : vérifier les ensembles, pas seulement ces nombres.
+
+## Périmètre et règles de réalisation
+
+La tranche autorisée réalise la connexion web, la sélection de magasins, les fiches
+unitaires, l’exploration des données publiées et leur qualité sur l’API existante.
+L’application est en français, en lecture seule, pour une seule organisation avec
+accès global. Un filtre magasin n’est jamais une règle d’autorisation.
+
+T23 intègre les quatre vues réseau maintenant publiées. Les totaux multi-magasins,
+cohortes réseau, classements globaux,
+recherche serveur et disponibilité des périodes restent dépendants d’un futur
+périmètre backend. Les signaler indisponibles dans cette tranche ; ne pas simuler
+ces fonctions en téléchargeant le réseau ou en agrégeant une première page.
+La réception de cette tranche n’est ni la réception du P0 complet ni une autorisation
+de mise en production. Facturation, export, écriture, inscription publique et
+multi-tenant restent hors périmètre.
+
+Appliquer les consignes locales des agents, en particulier :
+
+- Lire état Git, diff et historique avant chaque tâche ; préserver les changements
+  préexistants. Rester sur la branche courante, sans commit ni push implicite.
+- Une tâche ci-dessous correspond à une proposition de commit cohérente, avec son
+  code, ses tests et les ajustements documentaires nécessaires. Les messages sont
+  des propositions en anglais, à l’impératif, conformes à l’historique.
+- Scinder une tâche avant implémentation si elle combine plusieurs comportements
+  indépendants, des prérequis importants ou un diff difficile à relire. Ne pas
+  livrer d’abord le comportement puis reporter ses tests à un autre commit.
+- Présenter le diff vérifié et le résultat des contrôles pour approbation explicite
+  du commit. L’approbation du commit ne vaut pas approbation du push.
+- Utiliser exclusivement des fixtures, identités et captures synthétiques. Ne pas
+  copier de données privées, même anonymisées, dans les tests ou rapports publiables.
+- Conserver tokens, données métier, sélection et caches en mémoire. Seuls state,
+  nonce et vérificateur PKCE transitoires peuvent utiliser sessionStorage pendant
+  la redirection, conformément au contrat d’intégration.
+- Mettre à jour l’architecture seulement pour les frontières effectivement
+  implémentées et vérifiées. Le fichier local de consignes reste exclu des commits.
+
+## Stratégie de tests dès les premières fonctionnalités
+
+Outillage proposé à installer progressivement : Vitest pour les fonctions et
+contrats, React Testing Library pour les interactions de composants, Playwright
+pour les parcours navigateur, et axe avec Playwright pour les contrôles automatisés
+d’accessibilité. Vérifier les versions et compatibilités lors de l’installation,
+verrouiller les dépendances et conserver une seule chaîne par niveau de test.
+Références : [Vitest](https://vitest.dev/guide/),
+[Testing Library](https://testing-library.com/docs/react-testing-library/intro/),
+[Playwright et accessibilité](https://playwright.dev/docs/accessibility-testing).
+
+| Niveau | Preuve attendue | Quand |
+| --- | --- | --- |
+| Statique | Format, lint, TypeScript strict et build de production | Chaque changement frontend |
+| Unitaire | Calculs exacts, dates, filtres, erreurs et transitions de session | Avec la fonction concernée |
+| Composant / transport | Interactions utilisateur et réponses API synthétiques contrôlées | Avec chaque écran ou contrat |
+| E2E simulé | Application construite, navigateur réel, réseau synthétique déterministe | Chaque fonctionnalité visible |
+| Intégration réelle | Navigateur + fournisseur OIDC + API + PostgreSQL de test isolé | Connexion, jalons et recette finale |
+| Accessibilité / visuel | axe, clavier, focus, responsive et contrôle visuel humain | Dès le shell, puis chaque écran |
+| Sécurité | Tests négatifs et revue Codex Security du diff | Chaque changement applicatif avant commit |
+
+T01 fournit les scripts de format, lint, typage, tests et build dans le guide
+frontend et les consignes locales. T02 ajoute le harnais navigateur et la CI.
+Ne pas recopier des commandes hypothétiques dans un compte rendu.
+Les changements Python conservent format, lint, mypy et pytest du projet ; les
+changements de persistance exigent PostgreSQL réel. Toute migration future exige
+modèle aligné, upgrade à neuf, downgrade/upgrade et `alembic check`.
+
+Les tests doivent vérifier des résultats attendus indépendants de l’implémentation,
+pas seulement des snapshots ou l’absence d’exception. Les simulations doivent
+échouer sur une requête inattendue ; aucun mock ou contournement de session ne doit
+entrer dans le bundle de production. Aucun secours par données de démonstration
+lorsque l’API réelle échoue.
+
+Ne pas sauvegarder de session authentifiée avec `storageState`. Désactiver les
+traces réseau/vidéos susceptibles de contenir des credentials sur les parcours OIDC,
+même synthétiques ; produire des assertions sans valeur sensible. Les captures
+d’interface doivent être synthétiques et sans token. Les rapports générés, caches,
+bundles et configurations privées restent ignorés ; seuls les baselines synthétiques
+explicitement revus peuvent être versionnés.
+
+## Revue avec Codex Security
+
+Utiliser le plugin **Codex Security**, workflow `security-diff-scan`, sur le diff
+exact de la tâche avant demande de commit. Charger le skill installé au moment
+de la revue et suivre son préflight, son modèle de menaces, sa validation et sa
+finalisation. Le présent plan n’est pas un scan et n’atteste aucune sécurité.
+
+1. Figer le périmètre revu : base Git, fichiers nouveaux inclus, modifications et
+   suppressions. Revoir le patch local sans créer un commit pour les besoins du scan.
+2. Conserver l’identifiant du scan et son contexte ; poursuivre le même scan en cas
+   de reprise. Signaler les fichiers exclus et toute couverture incomplète.
+3. Vérifier en priorité les frontières touchées : OIDC et destinations réseau,
+   nettoyage de session, exposition des données, rendu de texte non fiable,
+   accès OPS, dépendances et configuration du build.
+4. Fournir le rapport, les constats validés, les tests de non-régression associés
+   et les limites. Les rapports bruts restent hors des fichiers publiés ; toute
+   synthèse publique doit être relue pour éviter chemins locaux et données privées.
+5. Corriger les vulnérabilités confirmées avant acceptation de la tâche, puis
+   vérifier la correction et le diff final. Une exception doit être explicitement
+   arbitrée ; aucun risque élevé/critique non résolu n’est accepté pour la livraison.
+6. Si l’outil est indisponible ou le scan incomplet, noter « sécurité non vérifiée ».
+   Les tests automatisés peuvent continuer, mais ils ne remplacent pas cette revue.
+
+Effectuer aussi un scan cumulatif depuis la base de cette tranche aux jalons J1
+et J3, pour les interactions entre fonctionnalités. Aucun audit automatique ne
+prouve l’absence de vulnérabilités ; la validation réelle OIDC et les contrôles
+de l’environnement restent nécessaires. Une modification exclusivement documentaire
+demande liens, cohérence et absence de divulgation, pas un faux audit applicatif.
+
+## Tâches ordonnées
+
+Les développements du plan sont commités. Les validations restantes sont celles
+signalées dans les statuts actuels T20–T22 : les lever exige les preuves humaines
+ou l’environnement réel correspondant. Les résultats synthétiques ne constituent
+ni la réception du P0 réseau/multi-magasins différé, ni la qualification de production.
+
+### T01 — Socle React, thème et contrôles statiques
+
+- Statut : **validée**, commit autorisé après relecture. Format, lint, typage, 21 tests et build
+  vérifiés ; contrôle navigateur local aux trois largeurs et au clavier effectué.
+  Revue Codex Security du diff terminée sans vulnérabilité identifiée ; rapport
+  conservé hors du dépôt. Authentification, CI et recette de production non couvertes.
+- Dépendances : aucune.
+- Livrer : package frontend isolé, React/TypeScript strict/Vite, composants MUI,
+  thème conforme à DESIGN, page de connexion sans données, états chargement/erreur.
+  Installer uniquement les dépendances nécessaires ; vérifier licences et lockfile.
+- Valider : lint, typage, build, un test de comportement du shell ; configuration
+  absente ou invalide expliquée sans secret. Rien de privé dans le bundle.
+- Terminé quand : lancement reproductible, scripts réels documentés, artefacts
+  ignorés, aucune régression Python induite.
+- Commit proposé : `Add frontend shell and shared theme`.
+
+### T02 — Harnais navigateur et automatisation des contrôles
+
+- Statut : **validée après relecture technique**.
+  Installation verrouillée, format, lint, typage, 21 tests
+  unitaires et 6 scénarios Chromium/axe vérifiés à 360/768/1440 px. Une requête
+  synthétique interdite a fait échouer la commande de CI ; son retrait a rétabli
+  tous les contrôles. Revue Codex Security du diff terminée sans vulnérabilité
+  identifiée, rapport conservé hors du dépôt. Job GitHub défini, exécution distante
+  non encore observée. Contrôles relancés avec succès après relecture, sans
+  modification du code revu.
+- Dépendances : T01.
+- Livrer : Playwright, fixtures synthétiques, interception réseau stricte, axe,
+  exécution automatisée des scripts existants dans la CI du dépôt. Configurer
+  l’installation verrouillée et le build testé, sans secret ni déploiement.
+- Valider : démarrage propre, erreur volontaire détectée par le pipeline, écran
+  à 360/768/1440 px, ouverture/fermeture au clavier avec focus restauré.
+- Terminé quand : tests exécutables localement et job CI défini ; distinguer
+  exécution locale vérifiée et exécution distante non encore observée sans push.
+- Commit proposé : `Automate frontend quality checks`.
+
+### T03 — Connexion OIDC et retour PKCE
+
+- Statut : **validée après relecture technique**. Parcours OIDC et tests synthétiques implémentés ;
+  formatage, lint, typage, build, 64 tests unitaires/composants et 30 scénarios
+  Chromium passent. Revue Codex Security du diff terminée sans vulnérabilité
+  relevée. Compatibilité réelle du fournisseur, du client autorisé par l’API et
+  de CORS réservée à T07 ; cycle de session et transport API relèvent de T04 et T05.
+  Commit T03 créé après validation ; aucun push de ce commit.
+- Dépendances : T01–T02.
+- Livrer : bibliothèque OIDC maintenue, configuration publique validée, bouton
+  Se connecter, code + PKCE S256, contrôle state/issuer et nonce si ID token utilisé.
+  Nettoyer l’URL du callback et les éléments de redirection au retour ou expiration.
+  Refuser refresh token, renouvellement silencieux et retour vers une URL arbitraire.
+- Valider : succès simulé, state faux/absent/rejoué, issuer incorrect, nonce incorrect,
+  échange refusé, retour expiré, refresh token inattendu ; aucun token persistant.
+- Terminé quand : le callback échoue fermé ; `prompt=login`, `max_age=0` et scopes
+  requis sont testés ; l’ID token n’est jamais envoyé comme bearer à l’API.
+- Commit proposé : `Add browser PKCE sign-in`.
+
+### T04 — Cycle de session et effacement des données
+
+- Statut : **validée après relecture technique**. Session observable, garde des composants, expiration,
+  déconnexion, annulation et protection des générations implémentées. Format, lint,
+  typage, build, 86 tests unitaires/composants et 39 scénarios Chromium passent.
+  Revue Codex Security du diff terminée sans vulnérabilité relevée ; rapport conservé
+  hors du dépôt. Aucun cache ni transport métier n’existe
+  encore ; leur raccordement à la session relève de T05/T06. La suppression du
+  contenu protégé et des états locaux est testée avec des composants synthétiques.
+  Contrôles relancés avec succès après relecture ; aucune correction applicative
+  nécessaire et aucune modification du code couvert par la revue de sécurité.
+- Dépendances : T03.
+- Livrer : session en mémoire, garde des écrans, expiration effective, déconnexion,
+  annulation et effacement des caches ; identifiant de génération de session ou
+  protection équivalente contre les retours tardifs.
+- Valider : reload, expiration pendant une requête, déconnexion, utilisateur suivant,
+  retour arrière navigateur et reprise d’un onglet suspendu ; aucun ancien contenu.
+- Terminé quand : pas de reconnexion automatique ni de renouvellement ; toutes les
+  données disparaissent à la fin de session, même si le réseau répond ensuite.
+- Commit proposé : `Clear data when browser sessions end`.
+
+### T05 — Transport API et validation des réponses
+
+- Statut : **validée après relecture technique**. Aucun défaut bloquant relevé ;
+  aucun changement du code applicatif nécessaire pendant la relecture.
+  Client GET à routes fixes, origine validée,
+  réponses JSON bornées et projections runtime, valeurs exactes/null préservées,
+  erreurs génériques et 401 lié à la génération de session. Aucun écran métier
+  ni chargement automatique n’est introduit. Format, lint, typage, 145 tests
+  unitaires/composants, build et 39 scénarios Chromium de régression passent,
+  avec une nouvelle exécution complète après relecture.
+  Revue Codex Security du diff finalisée sans constat ; rapport conservé hors du
+  dépôt. Le transport est testé avec des réponses synthétiques ; la connexion
+  navigateur/API réelle reste à vérifier en T07. Commit autorisé après relecture ;
+  aucun push demandé.
+- Dépendances : T04.
+- Livrer : client de lecture typé, origine API configurée, chemins autorisés,
+  validation runtime des enveloppes/champs utilisés, dates et décimaux en chaînes.
+  Refuser destinations ou redirections non autorisées ; erreurs sans payload privé.
+- Valider : réponse malformée, null, décimaux exacts, tentative de destination externe,
+  401 purgeant la session, 403 sans boucle, 422 sans retry et panne réseau explicite.
+- Terminé quand : aucun accès DB côté navigateur, aucun bearer en URL/log, et les
+  composants n’implémentent pas chacun leur propre transport.
+- Commit proposé : `Add validated read API transport`.
+
+### T06 — Pagination, concurrence et reprise bornée
+
+- Statut : **commitée après relecture technique et accord explicite**. File de lectures partagée, cache uniquement
+  en mémoire, déduplication, annulation, retries bornés et collections partielles
+  explicites. Rejet sans valeur du scheduler corrigé avec test de régression.
+  Format, lint, typage, 185 tests unitaires/composants, build et 39 scénarios
+  Chromium passent. La revue Codex Security précédente n'a relevé aucun candidat
+  plausible ; rapport local conservé hors dépôt. Elle précède cette dernière
+  correction : **sécurité non vérifiée sur le diff final**, plugin indisponible
+  dans cette session. Ne pas assimiler les tests à une nouvelle revue Security.
+  Le service reste à raccorder
+  aux écrans métier ; recette locale fournisseur/API/CORS réalisée par T07,
+  déploiement réel encore non vérifié.
+  Aucun push de T06 effectué.
+- Dépendances : T05.
+- Livrer : pagination par curseur opaque, annulation/déduplication, cache de session,
+  deux lectures simultanées au maximum, trois tentatives au maximum sur 429/503.
+  Gérer 413 en réduisant limit jusqu’à 1 ; définir et tester un plafond total d’essais.
+- Valider : deux pages, changement de limit, filtres conservés, curseur invalide,
+  curseur répété, 413 persistant, Retry-After lisible ou masqué par CORS, réponses
+  désordonnées et arrêt des retries après logout. Pas de boucle de pagination.
+- Terminé quand : limites de travail explicites, résultat incomplet identifié, pas
+  de chargement exhaustif automatique du réseau. Respect du budget API partagé,
+  sans prétendre connaître les requêtes des autres clients.
+- Commit proposé : `Bound paginated reads and retries`.
+
+### T07 — Connexion réelle au fournisseur et à l’API
+
+- Statut : **commitée après relecture technique, sécurité finale en attente**. Smoke local Chromium/Keycloak/API/PostgreSQL
+  réel sur realm et schéma jetables ; comptes et magasins entièrement synthétiques.
+  Connexion web, échange CORS, deux pages API, refus de scope/origine/callback,
+  refus de jetons signés mauvais client/audience/expirés et contrat CLI passent.
+  Format/lint/typage et build passent ; 185 tests frontend, 39 scénarios Chromium,
+  138 tests Python (27 ignorés faute de prérequis), puis 9 tests PostgreSQL/loopback
+  explicitement activés passent. Le smoke fournisseur réel est opt-in et a été exécuté.
+  Le client existant et la configuration API ne sont pas modifiés ; aucun
+  élargissement de la liste des clients autorisés. Nettoyage exécuté après la recette.
+  Relecture : groupes de processus nettoyés après timeout ou sortie du parent,
+  poursuite du nettoyage après un échec d’arrêt (3 tests de régression), et refus
+  CORS HTTP 400 sans origine autorisée vérifié en complément du blocage navigateur.
+  Recette reproductible dans le [guide local](../local-identity.md#browser-and-api-integration-smoke).
+  Fournisseur déployé, coffre natif et écrans métier restent non vérifiés.
+  **Sécurité non vérifiée par Codex Security**, plugin indisponible dans cette session.
+  Commit autorisé après relecture ; aucun push de T07 effectué.
+- Dépendances : T03–T06 ; configuration OIDC de test et PostgreSQL isolé disponibles.
+- Livrer : smoke test navigateur reproductible avec utilisateurs synthétiques et
+  nettoyage. Valider le client autorisé unique, redirects exacts, origines API et
+  échange de code depuis le navigateur. Préserver le contrat CLI.
+- Valider : connexion réelle et lecture API, refus sans data:read, mauvais client,
+  audience/expiration, origine non autorisée, callback non enregistré ; vérification
+  serveur des claims RS256, at+jwt, azp et auth_time selon le contrat existant.
+- Terminé quand : résultats réels établis et non-régression CLI vérifiée. Si une
+  évolution du contrôle des clients côté API est nécessaire, la proposer séparément
+  pour autorisation ; ne pas élargir silencieusement la liste des clients acceptés.
+- Commit proposé : `Verify browser sign-in against the identity provider`.
+
+### T08 — Liste des magasins et sélection en mémoire
+
+- Statut : **commitée après relecture technique, sécurité finale en attente**. Table MUI, pagination explicite (25 lignes
+  demandées initialement), sélection entre pages, tri de la page et ouverture d’un
+  résumé relu par ID. Retour conservant page/tri/sélection et restaurant le focus.
+  États vide, magasin disparu et erreur avec reprise manuelle ; doublons et curseurs
+  répétés refusés. Sélection et résultats retirés avec la session, aucun stockage
+  persistant ni identifiant métier dans l’URL de navigation. Aucune agrégation réseau.
+  Correction du contexte d’appel du `fetch` natif révélée par les scénarios navigateur.
+  Format/lint/typage/build, 196 tests unitaires et 48 scénarios Chromium passent,
+  avec axe et absence de débordement à 360/768/1440 px. La recette locale réelle
+  vérifie également ouverture/retour/sélection/déconnexion sur fixtures jetables.
+  Le référentiel complet, les périodes, les analyses et la navigation commune
+  restent les tâches suivantes ; le zoom navigateur à 200 % reste à recetter.
+  **Sécurité non vérifiée par Codex Security**, plugin indisponible dans cette session.
+  Relecture : curseurs vides refusés, retour à la page précédente maintenu pendant
+  un chargement ou une erreur, et repli du focus si la ligne de retour a disparu.
+  Trois tests de régression supplémentaires passent. Commit autorisé après relecture ;
+  aucun push de T08 effectué.
+- Dépendances : T05–T06 ; T07 nécessaire à la recette réelle, pas aux mocks.
+- Livrer : table MUI paginée depuis stores, sélection explicite, ouverture d’un
+  magasin et retour conservant le contexte ; attributs marqués actuels.
+  Pas de recherche texte ni de filtre enseigne/région/statut non pris en charge.
+- Valider : sélection à travers deux pages, sélection vide, ID inexistant, magasin
+  inactif, libellé long, reprise après erreur. Tri local nommé « Trier cette page ».
+- Terminé quand : compteur de sélection exact, aucun total réseau affiché et les
+  actions réseau/comparaison indisponibles expliquées sans lancer de requêtes.
+- Commit proposé : `Add paginated store selection`.
+
+### T09 — Fiche magasin et contexte de période
+
+- Statut : **commitée après relecture technique, sécurité finale en attente**. En-tête avec attributs actuels,
+  référentiel complet validé champ par champ et dépliable sur l’onglet actif,
+  annulation des lectures devenues inutiles et reprise manuelle des erreurs.
+  Période initialement vide, brouillon distinct des mois appliqués, conservée avec
+  l’onglet en mémoire lors des retours liste/détail. Limite frontend : 120 mois
+  inclusifs, entre 0001-01 et 9999-12, calculés sans conversion de fuseau.
+  Aucune disponibilité présumée et aucune lecture mensuelle avant les tâches suivantes.
+  Les autres onglets d’analyse restent explicitement indisponibles.
+  Format/lint/typage/build et tests automatisés vérifiés : 227 tests unitaires,
+  51 scénarios Chromium, axe et absence de débordement à 360/768/1440 px.
+  La recette locale d’identité tentée pour T09 a échoué sans diagnostic exploitable ;
+  sa réussite antérieure ne valide pas cette évolution. La vérification de l’état
+  des services Docker locaux expire également pendant la relecture.
+  Exécution CI non observée.
+  Relecture : panneau d’onglet accessible au clavier ; refus éprouvé des réponses
+  sans magasin, avec un autre ID ou avec un curseur inattendu.
+  **Revue Codex Security en attente**, plugin indisponible dans cette session.
+- Dépendances : T08.
+- Livrer : en-tête, référentiel complet dépliable, onglets, mois inclusifs explicites,
+  validation des bornes et limites de période documentées. Séparer filtres saisis et
+  appliqués ; conserver contexte en mémoire, sans identifiant métier dans l’URL.
+- Valider : intervalle inversé, changement d’année/fuseau, période sans observation,
+  Apply, aller-retour liste/détail ; seuls les besoins de l’onglet actif sont lus.
+- Terminé quand : aucune ancienne valeur sous un nouveau contexte et aucune
+  disponibilité de mois inventée ; les 12 derniers mois ne sont pas présumés connus.
+- Commit proposé : `Add store detail and month selection`.
+
+### T10 — Valeurs exactes et fraîcheur
+
+- Statut : **commitée après relecture technique, sécurité finale en attente**. Calculs décimaux en BigInt,
+  affichage français des montants/comptages et des mois, identifiants inchangés.
+  Division avec arrondi décimal à mi-distance éloigné de zéro, six décimales par
+  défaut et précision explicite de 0 à 18 ; null et dénominateur nul indisponibles.
+  Calculs bornés : entrées/sorties de 1024 caractères, exposant/échelle jusqu’à 512.
+  Bandeau de publication depuis analytics/status, vérification manuelle sans lancer
+  de refresh, états current/stale/uninitialized distincts de la couverture.
+  Dernière publication connue conservée et qualifiée si une vérification échoue ;
+  dernier refresh échoué annoncé séparément. Horodatages en UTC explicite.
+  Invalidation et relecture éprouvées lors d’un changement de publication sur deux
+  pages. Les analyses mensuelles et graphiques restent T11 et suivantes.
+  Format/lint/typage/build, 262 tests unitaires et 63 scénarios Chromium passent,
+  avec axe et absence de débordement à 360/768/1440 px.
+  Relecture : statuts current/stale sans date de publication refusés ; une ancienne
+  réussite reste compatible avec un état uninitialized, sans annoncer sa disponibilité.
+  Arrondis positifs/négatifs, précision entière et division de haute précision éprouvés.
+  Aucun changement backend ni nouvelle dépendance. Recette d’identité réelle et
+  exécution CI non revalidées pour cette tâche. Codex Security reste indisponible.
+- Dépendances : T05–T06 et T09.
+- Livrer : fonctions pures de décimaux, mois, ratios et affichage français nécessaires
+  à la fiche unitaire ; bandeau basé sur analytics/status, couverture distincte.
+- Valider : 0.1 + 0.2, null/0/négatif, ratio 0.12, dénominateur nul, précision élevée,
+  current/stale/uninitialized, échec de refresh gardant la publication antérieure.
+  Changement de fraîcheur avant/après plusieurs pages : invalidation et rechargement.
+- Terminé quand : aucune conversion binaire pour les calculs métier, aucune devise
+  ou HT/TTC inventé et aucune garantie de snapshot entre pages.
+- Commit proposé : `Preserve exact values and publication freshness`.
+
+### T11 — Synthèse mensuelle d’un magasin
+
+- Statut : **commitée après relecture technique ; sécurité finale en attente**. Lecture analytics_store_month
+  filtrée par magasin et période appliquée, seulement sur Synthèse. Initialisation
+  vérifiée avant lecture ; contrôle de publication autour des pages, annulation
+  sur départ et reprise explicite. Maximum cinq pages / 120 lignes ; aucune carte
+  ou faux mois absent si le résultat est incomplet ou la publication a changé.
+  Grille calendaire, null/zéro/négatifs distincts, sommes exactes et couverture
+  propre au CA, aux unités et à chaque activité. Rapport CA/unités seulement avec
+  les mêmes mois complets et base non nulle ; diagnostics rapportés séparés.
+  Premier graphique MUI X Charts Community (MIT), sans interpolation des trous
+  ni animation, coordonnées seules approximatives ; table accessible et valeurs
+  exactes, y compris diagnostics d’ambiguïté. Autres onglets et détails imbriqués
+  restent les tâches suivantes. Aucun nouvel endpoint ni calcul réseau.
+  Validation locale : `npm run check` réussi, **290 tests unitaires et
+  69 scénarios Chromium** sur 360/768/1440 px ; axe, clavier et réduction
+  de mouvement contrôlés sur fixtures entièrement synthétiques.
+  Relecture : validation des bornes décimales et calculs avant affichage, erreur
+  locale avec reprise si le résultat dépasse les bornes ; ambiguïté inconnue
+  jamais assimilée à zéro. Accès refusé explicite, sans reprise automatique.
+  Graphique à segments droits, couleur du thème, série partielle et couverture
+  indiquées, taille mobile et grille KPI alignées sur DESIGN.md.
+  Recette d’identité réelle et CI non revalidées ; Codex Security indisponible.
+- Dépendances : T09–T10.
+- Livrer : analytics_store_month, KPI qualifiés, premier graphique MUI X Charts
+  Community et tableau accessible ; grille des mois avec trous explicites.
+- Valider : mois absent, zéro, données ambiguës, somme partielle, pagination inachevée,
+  négatifs, absence de multiplication par catégories/produits ; graphique et table
+  concordants, valeurs exactes dans les libellés et détails.
+- Terminé quand : aucun KPI définitif si extraction bornée incomplète ; coordonnées
+  seules converties pour le tracé ; réduction de mouvement et clavier vérifiés.
+- Commit proposé : `Show store monthly sales with coverage`.
+
+### T12 — Comparaisons calendaires du magasin
+
+- Statut : **commitée après relecture technique ; sécurité finale en attente**. Comparaisons du CA d’un
+  magasin à la demande, depuis analytics_store_month_changes pour M-1/N-1 et
+  le courant ; fenêtre de référence depuis analytics_store_month (k mois
+  précédents ou décalage de douze mois). Aucun ratio publié sommé ou moyenné.
+  Dates, couvertures et univers observé explicités ; fenêtres complètes requises.
+  Différences exactes, divisions à six décimales ; base nulle/manquante indisponible,
+  base négative qualifiée avec différence absolue et pourcentage non interprété.
+  Deux collections bornées chacune à cinq pages / 120 lignes ; initialisation
+  et fraîcheur contrôlées autour du lot, aucun résultat si lecture incomplète ou
+  publication changée. Annulation et effacement sur changement de référence,
+  magasin, période appliquée ou onglet ; aucun appel lors de l’édition des mois.
+  Références hors calendrier prises en charge sans requête invalide. Tableau
+  exact accessible, défilement local, aucune comparaison réseau ajoutée.
+  Relecture : montants des mois communs et références M-1/N-1 déjà lus comparés
+  exactement, y compris fenêtres chevauchantes. Contradictions rejetées avec
+  erreur locale et reprise ; décimaux équivalents acceptés, null distinct de zéro.
+  Validation locale : `npm run check` réussi, **321 tests unitaires et
+  75 scénarios Chromium** sur 360/768/1440 px ; axe, clavier, absence de
+  débordement et effacement des données à la déconnexion vérifiés.
+  Recette d’identité réelle et CI non revalidées ; Codex Security indisponible.
+- Dépendances : T11.
+- Livrer : lecture analytics_store_month_changes pour M-1/N-1 ; comparaisons de
+  fenêtres uniquement depuis les montants complets du magasin, jamais une moyenne
+  des pourcentages ; montrer les périodes et les limites de couverture.
+- Valider : mois intermédiaire absent, k mois précédents, décalage de 12 mois,
+  référence zéro/null/négative, fenêtre incomplète et variation absolue exacte.
+- Terminé quand : aucune comparaison multi-magasins ajoutée ; base négative signalée,
+  pas de flèche positive interprétée automatiquement comme une amélioration.
+- Commit proposé : `Add calendar comparisons for store sales`.
+
+### T13 — Explorateur de collections et détails complets
+
+- Statut : **commitée après relecture technique, sécurité finale en attente**. Navigation Données,
+  catalogue métier autorisé, référentiels/observations/analyses mensuelles, filtres
+  appliqués depuis les seules capacités du catalogue et pages manuelles de 25 lignes.
+  Fiche relue à clé complète, y compris toutes les composantes et les deux bornes
+  exactes du mois. Doublons intra-page, curseurs incohérents, clés et filtres visibles
+  contradictoires rejetés ; aucune agrégation réseau ou lecture automatique par ID.
+  Fraîcheur avant/après, analyses non initialisées indisponibles, erreurs locales,
+  annulation et effacement au changement de collection/fiche/navigation/session.
+  Détail récursif partagé avec le référentiel magasin : libellés français et noms
+  techniques, décimaux exacts, null/zéro/texte vide/listes vides distincts, HTML inerte.
+  Collections du magasin à la demande ; filtre store_id uniquement si autorisé,
+  référentiels globaux explicitement qualifiés. Code explorateur chargé à la demande.
+  [Manifeste de couverture](frontend-coverage.md) : 325 champs et 74 chemins enfants
+  associés au composant et à leur test synthétique. Les deux routes opérationnelles
+  sont exclues de cet explorateur ; leur écran habilité reste T20.
+  Relecture : sélection, page/tri, magasin ouvert et mois brouillon/appliqués
+  conservés lors du passage par Données ; écrans métier démontés et lectures annulées.
+  Filtre du magasin fixe, reprise depuis la première page sur curseur refusé, focus
+  restauré par identité plutôt que par position et mois non calendaires rejetés.
+  Grandes listes conservées intégralement et paginées localement par 50 éléments,
+  sans appels supplémentaires ; suppression des plafonds arbitraires de liste/texte.
+  Les lectures restent bornées à 2 MB par le transport ; limites varchar et valeurs
+  exactes validées. Les pages/fiches ne constituent pas un instantané garanti.
+  Types, nullabilité, longueurs, clés et filtres des 24 ressources publiques
+  confrontés aux modèles API. Qualification de charge restante en T21 ;
+  le build signale encore un chunk applicatif supérieur à 500 kB malgré le chargement
+  différé de l’explorateur. Workers Vitest bornés à deux après une expiration de
+  fixture courte sous forte concurrence ; aucune limite de session produit modifiée.
+  Validation finale : `npm run check` réussi, **364 tests unitaires et 84 scénarios
+  Chromium** sur 360/768/1440 px ; clavier, axe, zoom, stockage vide et
+  effacement après déconnexion vérifiés. Liens locaux, cohérence et divulgation contrôlés.
+  Codex Security indisponible ; recette d’identité réelle et CI non revalidées.
+- Dépendances : T06, T08 et T10.
+- Livrer : Données → référentiels/observations/analyses, catalogue selon droits,
+  liste paginée et fiche de ligne à clé complète, rendu récursif des objets/listes
+  autorisés avec libellés français. Réutiliser ce détail pour les liens magasin.
+- Valider : clés composites, deuxième page, listes vides/multiples, texte HTML inerte,
+  produit sans vente, observation non rapprochée, règle inutilisée ; aucun appel
+  automatique par élément des listes d’observation_ids.
+- Terminé quand : tous les champs d’une ligne sont consultables ; filtres limités
+  au catalogue et aucun champ DB non publié exposé. Le manifeste de couverture
+  commencé ici associe ressource/champ/chemin à un composant et un test.
+- Commit proposé : `Add published data explorer`.
+
+### T14 — Ventes et produits du magasin
+
+- Statut : **commitée après relecture technique, sécurité finale en attente**.
+  Onglet actif chargé à la demande, catalogue validé avant la lecture magasin/mois.
+  Collection bornée à cinq pages et 500 cellules ; lecture incomplète sans tableau
+  ni graphique, reprise manuelle ou consultation native dans Données.
+  Tableau exact paginé localement par 25 cellules ; barres sur un mois explicite
+  et un sous-ensemble nommé de 20 cellules, courbe du GTIN source sélectionné
+  avec calendrier complet et trous distincts de zéro. Retours négatifs conservés,
+  GTIN non rapprochés distincts, volumes au grain cellule uniquement.
+  Détail complet partagé, produit actuel et observations ouvertes individuellement
+  selon le catalogue, sans appels automatiques par ID. Identités et grain des
+  preuves vérifiés ; sources vivantes pouvant changer/disparaître, sans promesse
+  de preuve historique immuable. Fraîcheur avant/après, refus locaux et annulations.
+  Aucun filtre catégorie, total magasin ou total de volumes hétérogènes ajouté.
+  Relecture : lien produit explicitement daté à la publication ; lien nul distinct
+  de lignes non rapprochées ou contradictoires. Barres partielles qualifiées,
+  restauration du focus par identité ou vers le tableau après pagination.
+  Identifiants d’observation uniques, compteurs de sources/mesures et attribution
+  produit contrôlés selon le grain publié. Limite de réponse explicitement signalée.
+  `npm run check` réussi : **395 tests unitaires et 90 scénarios Chromium**
+  à 360/768/1440 px. Clavier, axe, zoom 200 %, stockage vide et déconnexion
+  vérifiés sur données synthétiques ; liens, cohérence et divulgation contrôlés.
+  Codex Security indisponible ; recette d’identité réelle et CI non revalidées.
+  L’avertissement de chunk applicatif supérieur à 500 kB reste suivi en T21.
+- Dépendances : T11 et T13.
+- Livrer : analytics_register_product_month, tableau par GTIN source/mois, barres
+  sur périmètre explicite, courbe d’un produit sélectionné et preuves à la demande.
+- Valider : plusieurs GTIN avec product_id null restant distincts, ambiguïtés,
+  retours, volumes non comparables, produit disparu du référentiel vivant.
+- Terminé quand : aucune catégorie filtrable inventée pour les ventes, aucune
+  somme des volumes hétérogènes ni confusion entre observation et total magasin.
+- Commit proposé : `Add store product sales details`.
+
+### T15 — Présence et linéaire par catégorie
+
+- Statut : **commitée après relecture technique et sécurité**.
+  Synthèse magasin/mois et deux courbes séparées par catégorie, calendrier complet,
+  valeurs exactes et dénominateurs publiés. Codes inconnus conservés sans libellé
+  inventé ; absences inférées, clés non rapprochées et ambiguïtés explicites.
+  Linéaire sans unité physique présumée, sans plafonnement à 100 %, sans somme
+  entre catégories ni moyenne de ratios. Dénominateur nul distinct de zéro déclaré.
+  Collections de présence et linéaire ouvertes à la demande avec filtre catégorie ;
+  lecture complète bornée à cinq pages et 500 cellules, pagination locale par 25,
+  champs et identifiants source consultables sans appels automatiques par ID.
+  Catalogue, grain, fraîcheur avant/après, refus locaux et annulation vérifiés
+  par tests synthétiques. `npm run check` réussi : **440 tests unitaires et
+  96 scénarios Chromium** à 360/768/1440 px, avec clavier, axe, zoom 200 %,
+  stockage vide et déconnexion. Un délai de pagination de l’explorateur existant
+  a échoué lors du premier passage ; deux répétitions ciblées puis la nouvelle
+  suite complète passent sans modification. Recette réelle et CI hébergée
+  non revalidées ; avertissement de chunk supérieur à 500 kB suivi en T21.
+  Relecture : rejet exact des taux de présence hors de 0–1, valeurs de linéaire
+  négatives, comptes d’absences fractionnaires, clés produit incohérentes et
+  présences positives avec absence inférée. Régressions ajoutées pour ces
+  invariants, la pagination locale avec retour de focus et le filtre catégorie vide.
+  Nouvelle suite complète réussie après corrections.
+  Revue Codex Security du diff T15 finalisée après corrections, sans vulnérabilité
+  signalée sur les douze fichiers modifiés ;
+  les tâches précédentes et la configuration déployée restent hors de ce scan.
+- Dépendances : T11 et T13.
+- Livrer : analytics_store_category_month, analytics_distribution_product_month et
+  analytics_shelf_category_month, courbes séparées et dénominateurs consultables.
+- Valider : absence inférée, produit ambigu, catégorie inconnue, ratio supérieur à
+  100 %, dénominateur nul, unités inconnues et catégories non comparables.
+- Terminé quand : aucun plafonnement ou moyenne de ratios, aucune assimilation de
+  présence à la distribution réseau ou à la conformité d’assortiment.
+- Commit proposé : `Add store presence and shelf share views`.
+
+### T16 — Activité commerciale par type
+
+- Statut : **commitée après relecture technique et sécurité**.
+  Onglet chargé à la demande, trois séries séparées appels/terrain/participatif
+  et grille mensuelle exacte. Type absent, zéro et ambiguïté restent distincts.
+  Collection magasin/mois complète, bornée à cinq pages/360 cellules, catalogue
+  et fraîcheur avant/après vérifiés. Contexte CA lu indépendamment, même calendrier,
+  cinq pages/120 mois, sans jointure, addition intertypes, score causal ou ROI.
+  Planification du référentiel actuel séparée de l’activité observée.
+  Tous les champs et identifiants restent consultables ; preuves vivantes lues
+  une par une à la demande, avec contrôle ID/magasin/mois/type/attribution et
+  valeur à source unique. Preuve absente ou changée indisponible sans retirer la
+  cellule publiée. Listes paginées localement par 50, focus rendu à la fermeture.
+  Erreurs et reprises locales, annulation au changement de période/onglet/session.
+  Relecture : une publication non initialisée bloque désormais la preuve vivante
+  avant sa requête, évitant une qualification de fraîcheur incorrecte. Sept tests
+  supplémentaires couvrent cet état, le changement de fraîcheur, les réponses
+  multiples/avec curseur, la preuve tardive annulée et le focus après pagination.
+  `npm run check` réussi : **479 tests unitaires et 105 scénarios Chromium**,
+  dont neuf nouveaux scénarios T16 à 360/768/1440 px (clavier, axe, zoom 200 %,
+  stockage vide, déconnexion et réponse tardive). Build sans avertissement de
+  chunk supérieur à 500 kB dans cette exécution ; qualification T21 toujours requise.
+  Revue Codex Security du diff applicatif T16 finalisée sans vulnérabilité signalée
+  sur les douze fichiers revus. Le présent suivi est actualisé après le scan ;
+  déploiement réel, CI hébergée et tâches précédentes hors de cette revue.
+- Dépendances : T11 et T13.
+- Livrer : analytics_activity_month et observations liées, trois séries distinctes
+  appels/terrain/participatif, tableau et alignement temporel avec les ventes.
+- Valider : type absent, zéro déclaré, ambiguïté, plusieurs preuves, période modifiée
+  pendant une lecture et panne limitée à ce bloc.
+- Terminé quand : aucune addition intertypes, aucun score causal ou retour sur
+  investissement ; champs de planification séparés de l’activité observée.
+- Commit proposé : `Add store activity by source type`.
+
+### T17 — Typologies et assortiments
+
+- Statut : **commitée après relecture technique et sécurité**.
+  Trois collections indépendantes magasin/mois, catalogue et fraîcheur vérifiés,
+  extraction complète bornée à cinq pages/500 lignes par bloc ; aucune valeur
+  ni absence confirmée sur un lot incomplet. Tables paginées localement par 50,
+  valeurs contradictoires conservées, mois absents explicites sans propagation.
+  Candidats exacts distincts du contexte enseigne, sans conformité ni nombre
+  présumé de produits obligatoires. Champs/listes publiés intégralement consultables.
+  Références vivantes par identifiant à la demande, avec catalogue, unicité,
+  identité, contexte connu et fraîcheur contrôlés. Snapshots, valeurs, produits,
+  assortiments et règles de rang/correspondance ; aucun appel automatique par ID.
+  Annulation lors du départ, retour du focus et erreurs/reprises locales.
+  `npm run check` réussi : **505 tests unitaires et 114 scénarios Chromium**,
+  dont 26 nouveaux tests unitaires/composants et neuf scénarios T17 aux trois
+  largeurs 360/768/1440 px ; clavier, axe, zoom 200 %, stockage vide, déconnexion.
+  Scan Codex Security du diff applicatif terminé sans vulnérabilité signalée
+  sur les dix fichiers revus. Le suivi et la documentation des frontières sont
+  actualisés après le scan ; relecture finale effectuée et commit autorisé.
+  Fournisseur/déploiement réels, CI hébergée et audit cumulatif non vérifiés.
+
+- Dépendances : T13 et T09.
+- Livrer : analytics_typology_month, analytics_assortment_candidates et
+  analytics_retailer_assortment_month ; tables mensuelles, règles/snapshots liés,
+  candidats exacts distincts du contexte enseigne. Matrice thermique avancée différée.
+- Valider : mois sans valeur, snapshots contradictoires, mapping ambigu, plusieurs
+  règles candidates, assortiment sans candidat et listes imbriquées multiples.
+- Terminé quand : aucun report de valeur entre mois, aucune conformité déduite d’une
+  absence, et nombre de lignes distinct d’un nombre de produits obligatoires.
+- Commit proposé : `Add typology and assortment inspection`.
+
+### T18 — Qualité d’attribution et audits autorisés
+
+- Statut : **commitée après relecture technique et sécurité**.
+  Écran Qualité chargé à la demande ; attribution mensuelle au grain réseau
+  dataset/mois/statut, sans sélection ni filtre magasin et sans total de page.
+  Audits d’import et de publication uniquement selon le catalogue authentifié,
+  relu à chaque ouverture ; aucune lecture OPS automatique. Connexion ordinaire
+  inchangée, connexion opérations explicite demandant `operations:read`, sans
+  confondre demande et octroi. L’API reste l’autorité d’accès.
+  Pagination serveur manuelle par 25 ; détail natif de tous les champs publics.
+  Imports sources d’une publication ouverts individuellement par ID, catalogue
+  relu, identité/unicité/fraîcheur vérifiées ; listes locales par 50.
+  Annulation au départ et à la fin de session, erreurs génériques, aucun champ
+  privé de fichier, empreinte ou diagnostic conservé dans les projections.
+  Une publication non initialisée bloque la qualité mensuelle, pas les audits
+  autorisés. Tests synthétiques ordinaires/OPS, révocation, refus, null/zéro,
+  seconde page, références sources publiées, annulation et références incohérentes.
+  Contrôle frontend complet réussi : formatage, lint, typage strict, compilation,
+  528 tests unitaires/composants et 123 scénarios Chromium/axe aux trois largeurs.
+  T18 ajoute 23 tests unitaires/composants et 9 scénarios navigateur. Deux tests
+  API existants passent ; jetons synthétiques signés vérifient aussi le catalogue
+  et les refus directs OPS, avec démarrage base isolé, sans validation PostgreSQL.
+  Scan Codex Security du diff terminé sans vulnérabilité identifiée. Le code
+  applicatif reste identique au snapshot ; corrections de fixtures, typage des
+  mocks et clavier relues séparément après ce snapshot. Le statut documentaire
+  final est mis à jour après le scan. Aucun audit cumulatif ni accord de production.
+  Relecture technique terminée sans anomalie à corriger ; code et tests inchangés
+  depuis le contrôle complet réussi. Le rapport Security conserve les limites
+  du snapshot et les corrections de tests relues séparément.
+  Fournisseur/configuration OPS réels, déploiement et CI hébergée non vérifiés.
+
+- Dépendances : T07, T10 et T13.
+- Livrer : analytics_monthly_link_quality avec périmètre réseau explicite ;
+  import_runs et analytics_refresh_runs réservés à operations:read.
+- Valider : rôles ordinaires/OPS, zéro requête OPS sans droit, accès direct refusé
+  par l’API, changement d’utilisateur, freshness stale et refresh en échec.
+- Terminé quand : aucun filtre store_id sur la qualité réseau, aucun CA perdu
+  déduit des nombres de lignes, aucun nom de fichier/hash/erreur privée révélé.
+- Commit proposé : `Add data quality and restricted audit views`.
+
+### T19 — Réconciliation exhaustive des champs et parcours
+
+- Statut : **commitée après relecture technique et sécurité**.
+  Contrôle des modèles API publics réellement chargés, du registre, des chemins
+  frontend, du manifeste et de la matrice ; types, nullabilité, clés, filtres et OPS.
+  Rendu et états vides admis par champ, contrôles négatifs d’omission/ajout/doublon.
+  Parcours natifs pour toutes les collections, détails métier spécialisés renforcés.
+  Modèles chargés depuis l’environnement Python verrouillé sans démarrage API/base ;
+  CI adaptée à ce prérequis et aux changements du contrat. R/S restent différés.
+  Validation : format, lint, types, 585 tests unitaires/composants (57 nouveaux),
+  build et 123 scénarios navigateur sur trois largeurs réussis. La phase navigateur
+  a été relancée après un refus local de port ; aucune modification entre les contrôles.
+  Revue Codex Security du diff T19 clôturée sans vulnérabilité relevée dans ce périmètre.
+  CI hébergée et fournisseur réel non vérifiés ; aucun changement runtime/backend.
+
+- Dépendances : T12–T18.
+- Livrer : contrôle automatisé registre ↔ projections ↔ manifeste frontend ↔ matrice,
+  complétant les tests existants de chaque fonctionnalité.
+- Valider : chaque champ/chemin rendu avec valeur synthétique attendue, null, liste
+  vide ou plusieurs éléments selon son type ; contrôle négatif d’un champ omis.
+  Vérifier aussi les destinations métier spécialisées, pas uniquement l’explorateur.
+- Terminé quand : aucun écart non expliqué sur les ensembles publiés ; couverture
+  OPS testée avec les deux rôles et secours Données disponible pour chaque ressource.
+- Commit proposé : `Verify complete published field coverage`.
+
+### T20 — Qualification responsive et accessibilité des parcours
+
+- Statut : **partie automatisée commitée après relecture technique et sécurité, recette humaine requise**.
+  Parcours clavier natif Tab/Entrée, contrôle des focus et libellés longs,
+  chargement/erreur/reprise, texte agrandi, contrastes axe et mouvement réduit.
+  Aucun résultat automatisé ne remplace le zoom navigateur réel ni les annonces
+  d’un lecteur d’écran. La recette humaine reste à réaliser sur données synthétiques.
+  Validation locale : `npm run check` réussi (format, lint, types, 585 tests
+  unitaires/composants, build, 132 scénarios navigateur dont 9 nouveaux).
+  15 scénarios ciblés réussis ; aucune correction runtime nécessaire.
+  Revue Codex Security du diff T20 clôturée sans vulnérabilité relevée dans ce périmètre.
+  CI hébergée, zoom natif et lecteur d’écran réel non vérifiés.
+
+- Dépendances : T19 ; les contrôles de base existent depuis T02.
+- Livrer : compléter les tests transversaux et corriger les écarts observés, sans
+  refonte générale. Références visuelles synthétiques limitées aux états importants.
+- Valider : 360/768/1440 px, zoom réel 200 %, clavier seul, focus des dialogues,
+  réduction du mouvement, contrastes rendus, libellés longs, graphiques et tables.
+- Terminé quand : pas de débordement horizontal de page, tous les champs et actions
+  accessibles ; résultats axe complétés par une recette humaine du clavier/zoom
+  et un contrôle des annonces avec lecteur d’écran. Aucun score automatique ne vaut certification.
+- Commit proposé : `Verify accessible responsive user journeys`.
+
+### T21 — Sécurité du build et contrôles navigateur transversaux
+
+- Statut : **partie automatisée commitée après relecture technique et sécurité** ;
+  tests synthétiques du build, CSP HTTP sur le serveur
+  e2e (callback inclus), libellés inertes, script/connect-src refusés et logout
+  pendant une reprise vérifiés à 360/768/1440 px. `npm run check` passe :
+  formatage, lint, types, 585 tests unitaires/composants, build et 141 tests navigateur.
+  `npm audit` ne signale aucune vulnérabilité après le correctif de dépendance de
+  développement `source-map-js` 1.2.2. Scan cumulatif du frontend et scan du diff
+  final terminés sans vulnérabilité applicative relevée dans leurs périmètres.
+  Headers du document, callback et asset vérifiés sur le seul serveur synthétique.
+  Cette qualification ne constitue pas une garantie permanente ni une recette de
+  production ; CI hébergée non observée.
+  La politique autorise les styles inline nécessaires à MUI/Emotion, pas les scripts
+  inline ni eval. Aucune configuration d’hébergement de production ajoutée.
+  Headers réels CSP/TLS/cache et logs du callback : **bloqués**, aucun environnement
+  de recette défini. Recette humaine T20 toujours requise. Voir le
+  [guide des contrôles navigateur](../../frontend/README.md#browser-security-qualification).
+
+- Dépendances : T19–T20.
+- Livrer : tests du build de production, configuration CSP compatible avec les
+  styles MUI, assets maîtrisés et destinations connect-src explicites dans un
+  environnement de recette défini. Vérifier dépendances et configuration publique.
+- Valider : libellés HTML/URL malveillants inertes, absence de secret dans assets,
+  stockage/cache/logs sans tokens ni données métier, callback nettoyé, pas de
+  service worker métier, session interrompue pendant retry et refus des origines.
+- Terminé quand : scan Codex Security cumulatif final terminé et constats traités ;
+  les headers réels du serveur de recette sont inspectés. Si aucun environnement
+  n’est défini, marquer cette partie bloquée ; ne pas inventer d’hébergeur ni déployer.
+- Commit proposé : `Verify browser security boundaries`.
+
+### T22 — Recette intégrée et limites de livraison
+
+- Statut : **partie automatisée commitée après relecture technique et sécurité**. Parcours intégré
+  connexion → pagination magasins → fiche → ventes paginées → preuve explicite →
+  qualité avec erreur récupérable → logout vérifié à 360/768/1440 px.
+  `npm run check` passe : formatage, lint, types, 585 tests unitaires/composants,
+  build et 147 scénarios navigateur. Qualification isolée : 20/20 passages,
+  dix par profil (0/300 ms de délai API), un worker à 1440 px ; plafonds locaux
+  respectés, p95 descriptifs et limites des mesures publiés dans le
+  [guide de qualification](../../frontend/README.md#integrated-delivery-qualification).
+  Le responsable a délégué les budgets locaux ; plafond de requêtes ajusté de
+  20 à 24 après exploration, avant les répétitions, pour conserver les contrôles
+  de fraîcheur/droits. Scan Security du diff terminé sans vulnérabilité relevée ;
+  scan cumulatif T21 disponible. Seuls des résultats/statuts documentaires et un
+  commentaire ont évolué après le snapshot Security, vérifiés manuellement ;
+  aucun comportement exécutable modifié. README et architecture décrivent les
+  capacités implémentées et ces limites.
+  Recette API/OIDC réelle **bloquée**, absence d’environnement confirmée.
+  Recette humaine T20, headers/logs réels T21, CI hébergée et charge de production
+  non reçus. Aucun accord de charge/production, déploiement, livraison P0 complète
+  ou nouveau backend implicite.
+
+- Dépendances : T07 et T19–T21.
+- Livrer : parcours E2E réels sur données synthétiques couvrant connexion → liste →
+  fiche → preuves → qualité → logout, et synthèse générique des résultats vérifiés.
+  Mettre à jour README et architecture uniquement sur les capacités effectivement reçues.
+- Valider : profils synthétiques reproductibles, réseau lent, erreurs partielles,
+  pagination, mémoire/requêtes/volume de réponse et temps de chargement p95.
+  Annoncer machine, profil, nombre de répétitions et limites des mesures.
+- Terminé quand : budgets de qualification explicitement convenus et comparés aux
+  mesures, tests complets et scans disponibles. Distinguer réception fonctionnelle,
+  validation de charge et préparation production ; aucun seuil arbitraire ne vaut accord.
+- Commit proposé : `Document verified frontend delivery boundaries`.
+
+## Jalons testables
+
+| Jalon | Tâches | Démonstration attendue |
+| --- | --- | --- |
+| J0 — Socle contrôlé | T01–T02 | Shell responsive, build et tests reproductibles |
+| J1 — Première tranche utilisable | T03–T11 | Connexion réelle, magasin, période, graphique/table, fraîcheur, logout ; revue Security cumulative |
+| J2 — Investigation complète | T12–T19 | Comparaisons unitaires, onglets, preuves, explorateur exhaustif et audits selon droits |
+| J3 — Tranche qualifiée | T20–T22 | Recette intégrée, accessibilité, mesures et sécurité ; limites de production explicites |
+
+Chaque jalon inclut les tests des tâches précédentes. Une tâche avec seulement
+des mocks validés reste signalée comme telle ; les tests ignorés ne comptent pas
+comme réussis. Le frontend peut progresser pendant un blocage OIDC, mais J1 et
+les validations réelles en dépendant restent ouverts.
+
+## Traçabilité de la réception
+
+| Contrat / risque | Tâches et preuves principales |
+| --- | --- |
+| Connexion, expiration, confidentialité | T03–T07, T21 ; tests négatifs, smoke réel et Security |
+| Pagination, limites, concurrence, données périmées | T05–T06, T10 ; transport et E2E |
+| Exactitude, null/zéro, ambiguïtés, mois et ratios | T10–T12, T14–T17 ; oracles synthétiques |
+| Couverture de tous les champs et lignes isolées | T13–T19 ; registre, manifeste et rendu réel |
+| Droits OPS et qualité réseau | T18 ; absence d’appel et refus serveur |
+| Responsive, clavier, graphiques accessibles | T02 puis chaque écran, T20 ; auto + humain |
+| Performance et livraison | T22 ; mesures sur profils déclarés et budgets convenus |
+| Synthèses réseau et variations calendaires | T23A–T23B ; couverture, pagination, comparaisons et session sur données synthétiques |
+| Classement, cohortes et comparaison multi-magasins | T24A et API T24B commitées ; SaaS T24C commité après vérification, relecture et approbation explicite |
+
+## Reprise par un agent
+
+Choisir une seule tâche pour commencer. Dans son compte rendu, fournir son ID,
+le périmètre réalisé, les fichiers modifiés, les commandes réellement exécutées,
+les résultats et contrôles non effectués, le scan Security applicable, les limites
+restantes et le message de commit proposé. Mettre à jour le statut seulement à
+partir de ces preuves ; conserver les résultats sensibles hors des fichiers publics.
+
+États utiles : **à faire**, **en cours**, **bloqué** (cause précise), **à relire**
+(tests faits, commit non approuvé), **validé**, **commité** (après accord explicite).
+Ne pas confondre code implémenté, fonctionnalité vérifiée et commit approuvé.
+
+La préparation du prochain périmètre backend est détaillée en T24A–T24C.
+Cette préparation documentaire ne démarre pas les développements, ne change pas
+le modèle d’accès et n’autorise aucun commit, push ou déploiement automatique.
+
+
+### T23A — Accepter et explorer les ressources réseau publiées
+
+- Statut : **commitée**, `02015e4`, après approbation explicite.
+- Vérification isolée : format, lint, TypeScript strict, 597 tests unitaires et
+  composants, build et neuf parcours navigateur de l’explorateur réussis aux
+  trois largeurs. La suite navigateur complète n’a pas été rejouée sur ce sous-ensemble.
+- Dépendance : merge des quatre vues réseau du backend.
+- Livrer : liste fixe des quatre routes, paramètre `scope`, projection des
+  101 champs supplémentaires, libellés français et détails natifs dans Données.
+  La matrice et le manifeste couvrent 28 ressources, 426 champs et 74 chemins enfants.
+- Tests : réconciliation des modèles API, du registre, des projections et de la
+  matrice ; rendu exhaustif et parcours des détails sous catalogue autorisé.
+  Les tests et fixtures existants sont étendus automatiquement aux quatre vues.
+- Sécurité : transport authentifié existant, projection stricte, rendu texte et
+  cache en mémoire conservés ; aucun accès OPS supplémentaire. Le diff applicatif
+  appartient au périmètre de la revue de sécurité T23, sans vulnérabilité retenue.
+- Suite : la vue réseau dédiée, ses lectures métier, tests et documentation
+  d’usage appartiennent à T23B et ne sont pas livrés par ce premier commit.
+- Commit proposé : `Support published network resources in the data explorer`.
+
+### T23B — Intégrer les synthèses réseau publiées
+
+- Statut : **commitée**, `24cc19b`, après approbation explicite. T23B complète
+  T23A avec l’écran réseau, ses lectures métier, ses tests et sa documentation.
+- Résultats du 15 octobre 2026 : format, lint, TypeScript strict, build et 612 tests
+  frontend réussis. La commande `npm run check` a validé 147 parcours navigateur
+  existants, mais ses 15 nouveaux scénarios ont échoué sur leur attente de 5 s,
+  trop courte pour les lectures espacées du transport. Après passage à 15 s
+  (sans modifier l’application), les 15 scénarios réseau ont été rejoués et réussis
+  à 360/768/1440 px avec axe et clavier. Le pipeline complet n’a pas été rejoué
+  après ce seul réglage de test ; format/lint/typage ont été revérifiés.
+- Baseline Python : format, lint, mypy et 138 tests réussis ; 36 tests conditionnels
+  ignorés. PostgreSQL isolé et recette API/OIDC n’ont pas été exécutés dans cette
+  vérification. Aucun changement Python ou de persistance dans T23.
+- Revue Codex Security du diff terminée sans vulnérabilité retenue ; rapport
+  conservé hors du dépôt. Après le scan, seuls les délais du harnais navigateur
+  et la documentation ont été ajustés : le code applicatif revu est inchangé.
+  La revue statique ne certifie ni le déploiement ni l’absence de vulnérabilités.
+- Dépendances : T23A (`02015e4`), T05/T06, T19–T22.
+- Analyse du merge : agrégations serveur complètes/partielles mensuelles, annuelles
+  et overview, variations calendaires ; aucune sélection multi-magasins, cohorte,
+  contribution ni classement. Aucun nouveau backend n’est requis pour cette tranche.
+- Livrer : entrée Vue réseau, lectures explicites, couverture indépendante des cinq
+  mesures, CA/unité, courbe mensuelle et tables exactes, M−1/N−1, détail de tous les
+  champs ; catalogue et explorateur étendus de 24 à 28 ressources.
+- Sécurité : transport authentifié existant, routes fixes, projection validée,
+  lectures bornées/annulables, aucune persistance navigateur, erreurs sans payload,
+  effacement à la fin de session et aucun appel OPS.
+- Valider : null/zéro/partiel/négatif, exactitude des chaînes, pagination complète,
+  limites de lecture, fraîcheur changée, capacités absentes, année partielle,
+  filtres brouillons/appliqués, annulation, session, clavier, axe et trois largeurs.
+- Documentation : PRD, produit, indicateurs, intégration, matrice, couverture,
+  réception et guide frontend alignés sur les capacités réellement livrées.
+- Limites : recette API/OIDC réelle, grants et refresh sur l’environnement cible,
+  revue humaine et performance au volume cible restent ouverts. Le P0 complet
+  ne peut pas être déclaré reçu.
+- Commit proposé : `Integrate published network analytics`.
+
+
+### T24 — Réseau filtré, classement et comparaison multi-magasins
+
+- Statut : **T24A et T24B commitées après approbation explicite** ; T24C commitée après vérification, relecture et approbation explicite.
+  Demande : trois commits successifs, base → API → frontend SaaS. Le [contrat détaillé](network-analysis.md) définit les vues,
+  calculs, entrées/sorties, sécurité, tests et réception de chaque étape.
+- Dépendance : T23A–T23B. Réutiliser les données et vues existantes ; pas de nouvelle
+  source, dépendance commerciale, identité ou modèle multi-tenant.
+- Périmètre : filtres actuels à la publication, recherche et sélection explicite,
+  disponibilité par source, totaux de fenêtre, séries, cohortes, contributions,
+  classement global paginé et comparaison de magasins.
+- Ordre : réaliser et vérifier un commit entier avant de passer au suivant.
+  Chaque proposition inclut ses tests, sa documentation et sa revue de sécurité.
+  La préparation de T24 n’est ni une autorisation de commit ni une recette P0.
+
+### T24A — Préparer les vues et calculs PostgreSQL
+
+- Statut : **commitée après relecture et approbation explicite** ; dépendance T23.
+  Revue de sécurité finale terminée sans vulnérabilité retenue.
+- Preuves locales : format Ruff, lint, mypy strict et **218 tests réussis** avec
+  `TEST_DATABASE_URL` vers PostgreSQL 18 isolé. Aucun test PostgreSQL ignoré ; seul
+  le callback OIDC opt-in est désactivé. Les deux tests de contrat frontend passent,
+  sans modification de l’application web ni du catalogue à 28 ressources.
+- Migration vérifiée : upgrade à neuf, cycle downgrade/upgrade vers
+  `20260930_14`, `alembic check`, colonnes/types/grains des modèles alignés,
+  initialisation depuis une publication existante et maintien des vues publiques.
+- Publication : rollback des deux nouvelles vues et des anciennes ensemble,
+  lecteurs concurrents, référentiel figé et disponibilité rapportée/inférée testés.
+- Calculs : oracles A/B, absence/zéro/négatif, cohortes figées par mesure,
+  intersection CA/unités, fenêtres chevauchantes/hors calendrier, contribution
+  globale exacte, tris avec égalités/nulls et pages bornées. Recherche/dimensions/
+  bornes utilisables avant choix de période ; calcul sans fenêtre refusé.
+- Profil synthétique : 300 magasins × 24 mois (7 200 observations), fenêtres de
+  deux mois et plans EXPLAIN ANALYZE sur synthèses réseau/filtrée et classement.
+  Aucun index supplémentaire non unique justifié sur ce profil ; aucune mesure
+  p95 de production ou qualification de charge n’est revendiquée.
+- Migration : `20261015_15`, après `20260930_14`. Vues internes seulement :
+  `analytics_store_scope` et `analytics_store_dataset_month`.
+- Commit proposé : `Add filtered network analytics foundations`.
+- Livrer : migration réversible après `20260930_14`, mappings SQLAlchemy,
+  vues magasin publié et observations par source/mois, indexes justifiés,
+  refresh/audit atomiques et module SQL paramétré de calculs par périmètre.
+- Réutiliser `analytics_store_month` ; aucune vue par combinaison d’IDs, de dates
+  ou de filtres. Aucun nouvel endpoint ou ajout au catalogue natif dans ce commit.
+- Valider : PostgreSQL réel, migration à neuf, downgrade/upgrade, `alembic check`,
+  oracles exacts, absence/zéro, cohortes figées, classement et refresh concurrent.
+  Exécuter format/lint/mypy/pytest du projet et revue Security du diff.
+- Terminé quand : calculs testés sans API, ancienne API et frontend toujours
+  compatibles ; contrat backend et architecture alignés sur les preuves.
+
+### T24B — Exposer les analyses dans l’API
+
+- Statut : **commitée après relecture et approbation explicite** ; dépendance
+  T24A. [Contrat API](../filtered-analysis-api.md). Revue de sécurité finale
+  terminée sans vulnérabilité retenue.
+- Vérifications : format Ruff, lint et mypy strict ; **264 tests Python réussis**
+  sur PostgreSQL 18 isolé, un callback OIDC opt-in désactivé et aucun test
+  PostgreSQL ignoré. Oracles exacts, sept routes, classements sur deux pages,
+  séries de sept magasins, refresh pendant réponse, 409, stale/échec/initialisation,
+  droits minimaux et démarrage refusé, timeout et annulation SQL, 413/429/503.
+  Le profil synthétique ajoute 300 magasins × 24 mois à l’oracle ; pas de p95
+  ni de charge de production revendiqués. Les deux tests de contrat frontend
+  passent ; aucun code frontend modifié.
+- Commit proposé : `Expose filtered network analytics endpoints`.
+- Livrer : schémas dédiés/OpenAPI, recherche et dimensions paginées, disponibilité,
+  synthèse, séries, classement et séries individuelles ; réutiliser les requêtes
+  T24A sans recoder les formules. Routes figées dans l’OpenAPI et le contrat détaillé.
+- Garantir : `data:read`, accès global inchangé, SQL lié, droits SELECT explicites,
+  répétitions/tri/IDs/périodes/réponses bornés, erreurs sans valeurs ; aucun audit
+  OPS exposé. Catalogue `/v1/resources` et routes natives existantes préservés.
+- Cohérence : même transaction read-only repeatable-read pour publication et
+  résultats ; version exigée sur lectures suivantes, rejet 409 si elle change,
+  curseur lié au contexte complet. Aucun snapshot historique ni refresh HTTP.
+- Valider : baseline Python, vrais tests API/PostgreSQL, grants/démarrage,
+  cas hostiles, exactitude des cohortes et pagination ; revue Security du diff.
+- Terminé quand : contrat machine et opérations documentés, API testée avec rôle
+  de lecture minimal, ancien client toujours utilisable ; aucune UI anticipée.
+
+### T24C — Réaliser les parcours SaaS
+
+- Statut : **commitée après vérification, relecture et approbation explicite** ;
+  dépendance T24B. Voir le [contrat SaaS](filtered-analysis.md).
+- Livraison : sept décodeurs/projections dédiés, transport partagé, contexte
+  brouillon/appliqué, options et recherche serveur, sélection explicite, synthèse/
+  cohorte, classement et séries paginées, disponibilité et détails exacts.
+  Retour fiche/bouton/navigateur avec focus, sans données métier dans l’historique.
+- Preuves : recette réelle OIDC/API/PostgreSQL synthétique A/B réussie avec
+  nettoyage du realm, des comptes et du schéma ; baseline Python 264 réussis,
+  un callback OIDC opt-in ignoré, aucun PostgreSQL ignoré. `npm run check` réussi :
+  format, lint, typage, build, **646 tests unitaires/contrat** et **183 scénarios
+  Chromium** à 360/768/1440 px. Scan Security T24C scellé sans vulnérabilité retenue ;
+  relecture cumulative des 51 fichiers T24A–C sans problème identifié. Le scan
+  cumulatif scellé reste indisponible, l’outil refusant une base historique avec
+  patch local ; voir les [limites de vérification](filtered-analysis.md#vérification-et-limites).
+  Commit explicitement approuvé par le propriétaire ; aucun push effectué.
+- Commit proposé : `Add filtered network and store comparisons`.
+- Relecture technique terminée : le workflow frontend surveille les modèles/routes
+  `api/analysis*` sur push et pull request, pour exécuter les tests de contrat même
+  lors d’un changement backend seul. Son plafond passe à 30 minutes : la seule
+  suite Chromium complète a pris 16,7 minutes localement, au-delà de l’ancien
+  plafond de 15 minutes. YAML et chemins vérifiés localement ; exécution hébergée
+  non observée. Les 34 tests T24C ciblés repassent après relecture.
+- Livrer : transport typé, contexte partagé de période/filtres/référence/sélection,
+  recherche serveur, totaux et séries qualifiés, choix cohorte, contributions et
+  classement paginés, comparaison de six séries à la fois avec total complet.
+- Préserver : routes et lectures globale/annuelle T23, MUI/tokens, valeurs exactes,
+  couverture, contexte au retour magasin et effacement à la fin de session.
+  Publication changée ⇒ retirer les blocs dépendants et relire explicitement.
+- Valider : `npm run check` complet, clavier/axe à 360/768/1440, sept magasins,
+  seconde page, changements en vol, erreurs/409 et expiration ; recette intégrée
+  OIDC/API/PostgreSQL synthétique et limites humaines/charge distinguées.
+- Mettre à jour produit, matrice, intégration, réception, architecture et guide
+  frontend d’après les champs/garanties effectivement reçus, sans gonfler le bilan P0.
+- Terminé quand : résultats PostgreSQL/API/UI concordants, tests requis exécutés,
+  revue Security du diff et cumulative T24A–C terminées ; limites publiées.

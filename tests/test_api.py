@@ -241,7 +241,7 @@ def test_configuration_and_grants(settings: Settings) -> None:
         with pytest.raises(ValueError):
             replace(settings, **changes)
     sql = grant_sql("synthetic_reader", "synthetic")
-    assert sql.count("GRANT SELECT") == 28
+    assert sql.count("GRANT SELECT") == 30
     assert "error_message" not in sql
     with pytest.raises(ValueError):
         grant_sql('reader";DROP', "public")

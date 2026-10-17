@@ -1,10 +1,15 @@
 # Matrice exhaustive des données publiées vers les écrans
 
-Statut : contrat de couverture du frontend cible, pas inventaire de composants déjà livrés.
+Statut : contrat de couverture du frontend cible. La réconciliation et les
+destinations de consultation vérifiées de la tranche implémentée sont documentées
+dans le [manifeste frontend](frontend-coverage.md). Cette matrice conserve les
+capacités réseau/multi-magasins cibles : les quatre vues réseau publiées sont
+intégrées en T23 ; sélections et classements ont une API T24B vérifiée localement,
+et leurs parcours SaaS T24C sont implémentés et vérifiés et relus localement.
 Référence : [registre API](../../src/retail_data_platform/api/resources.json) et
 [projection des objets](../../src/retail_data_platform/api/resources.py).
-Périmètre vérifié : **24 ressources** (13 tables et 11 vues analytiques),
-**325 champs de premier niveau**. Une occurrence table/champ correspond à une ligne,
+Périmètre vérifié : **28 ressources** (13 tables et 15 vues analytiques),
+**426 champs de premier niveau**. Une occurrence table/champ correspond à une ligne,
 même si un nom existe dans plusieurs tables. Les chemins imbriqués sont listés séparément.
 
 ## Lecture de la matrice
@@ -655,6 +660,127 @@ jamais être additionné deux fois.
 | `typology_details[].rank_candidate_count` | M-TYP | Typologies mensuelles et rapprochement | Table et fiche de détail | Valeur publiée conservée ; null distinct de zéro. |
 | `typology_details[].mapping_issue` | M-TYP | Typologies mensuelles et rapprochement | Colonne qualité / badge et valeur détaillée | Qualifier les mesures ; absence, ambiguïté et zéro restent distincts. |
 
+### `analytics_network_month`
+
+| Champ publié | Écran | Panneau | Présentation | Règle |
+| --- | --- | --- | --- | --- |
+| `period` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `first_period` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `last_period` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `expected_cell_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `store_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `stores_with_register` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `month_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `revenue_covered_cell_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `units_covered_cell_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `calls_covered_cell_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `field_visits_covered_cell_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `crowdsourced_visits_covered_cell_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `stores_with_activity` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `stores_with_category_data` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `stores_with_typology` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `revenue` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `revenue_partial` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `units` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `units_partial` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `calls` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `calls_partial` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `field_visits` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `field_visits_partial` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `crowdsourced_visits` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `crowdsourced_visits_partial` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `revenue_per_unit` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `unambiguous_reported_revenue` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `unambiguous_reported_units` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `register_product_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `register_ambiguous_products` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `register_unmatched_product_rows` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+
+### `analytics_network_year`
+
+| Champ publié | Écran | Panneau | Présentation | Règle |
+| --- | --- | --- | --- | --- |
+| `period` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `first_period` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `last_period` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `expected_cell_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `store_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `stores_with_register` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `month_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `revenue_covered_cell_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `units_covered_cell_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `calls_covered_cell_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `field_visits_covered_cell_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `crowdsourced_visits_covered_cell_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `stores_with_activity` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `stores_with_category_data` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `stores_with_typology` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `revenue` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `revenue_partial` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `units` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `units_partial` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `calls` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `calls_partial` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `field_visits` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `field_visits_partial` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `crowdsourced_visits` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `crowdsourced_visits_partial` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `revenue_per_unit` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `unambiguous_reported_revenue` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `unambiguous_reported_units` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `register_product_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `register_ambiguous_products` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `register_unmatched_product_rows` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+
+### `analytics_network_overview`
+
+| Champ publié | Écran | Panneau | Présentation | Règle |
+| --- | --- | --- | --- | --- |
+| `scope` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `first_period` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `last_period` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `expected_cell_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `store_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `stores_with_register` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `month_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `revenue_covered_cell_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `units_covered_cell_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `calls_covered_cell_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `field_visits_covered_cell_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `crowdsourced_visits_covered_cell_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `stores_with_activity` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `stores_with_category_data` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `stores_with_typology` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `revenue` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `revenue_partial` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `units` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `units_partial` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `calls` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `calls_partial` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `field_visits` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `field_visits_partial` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `crowdsourced_visits` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `crowdsourced_visits_partial` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `revenue_per_unit` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `unambiguous_reported_revenue` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `unambiguous_reported_units` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `register_product_count` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `register_ambiguous_products` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `register_unmatched_product_rows` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+
+### `analytics_network_month_changes`
+
+| Champ publié | Écran | Panneau | Présentation | Règle |
+| --- | --- | --- | --- | --- |
+| `period` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `revenue` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `revenue_previous_month` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `revenue_previous_year` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `revenue_month_change` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `revenue_month_change_ratio` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `revenue_year_change` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+| `revenue_year_change_ratio` | R | Réseau et détail de la collection | Valeur exacte consultable | Grain et couverture selon [le contrat réseau](../network-analytics.md) ; null distinct de zéro. |
+
 ## Métadonnées hors collections
 
 Ces champs complètent la couverture métier ; ce ne sont pas des colonnes de tables.
@@ -669,7 +795,7 @@ Ces champs complètent la couverture métier ; ce ne sont pas des colonnes de ta
 
 ## Vérification de couverture à la réception
 
-Le contrôle initial compte 325 lignes de premier niveau et 74 chemins enfants.
+Le contrôle initial compte 426 lignes de premier niveau et 74 chemins enfants.
 Comparer les ensembles de couples (ressource, champ) avec le registre, puis les
 chemins enfants avec les modèles imbriqués construits par resources.py : aucun
 champ absent, ajouté implicitement ou dupliqué dans la matrice.
@@ -683,3 +809,33 @@ Inclure les secondes pages, les champs rarement renseignés, les lignes sans lie
 magasin/produit et les rôles avec/sans operations:read. Aucun écran ne doit se
 contenter des premières colonnes de sa table. Ne pas annoncer cette couverture
 comme implémentée tant que ces scénarios ne sont pas vérifiés.
+
+
+## Objets analytiques dédiés T24B
+
+Les 28 collections et leur matrice exhaustive ci-dessus restent inchangées. Les
+sept routes dédiées ont leurs propres [projections typées](../filtered-analysis-api.md)
+et n’ajoutent aucune colonne au registre natif. Leurs parcours frontend restent
+T24C ; les composants ci-dessous sont implémentés. Les vérifications finales et
+limites restent celles du [contrat SaaS](filtered-analysis.md).
+
+| Objet/champs API | Destination T24C | État de couverture |
+| --- | --- | --- |
+| Contexte : publication, fraîcheur, scope/IDs/filtres, quatre comptes, fenêtres/référence/comparaison | Workspace partagé et fraîcheur | Décodeur strict et interface implémentés ; détails exacts dépliables |
+| Magasin publié : ID, nom, ville, enseigne, région, format, actif | Recherche, sélection, classement, comparaison | Décodeur strict et interface implémentés ; détails exacts dépliables |
+| Page : items et curseur ; dimensions : valeur, dimension, compte manquant | Navigation manuelle, options de filtre | Décodeur strict et interface implémentés ; détails exacts dépliables |
+| Cinq mesures : valeur complète/partielle, cellules couvertes/attendues | KPI, couverture et tableau alternatif | Décodeur strict et interface implémentés ; détails exacts dépliables |
+| Changements : différence, ratio, état de référence ; cohortes : inclus/exclus, cellules attendues, valeurs courante/référence et changement | Choix périmètre/cohorte et comparaison | Décodeur strict et interface implémentés ; détails exacts dépliables |
+| CA/unité : courant/référence, courant/référence cohorte, effectif commun ; somme globale des contributions | KPI qualifiés et contrôle global | Décodeur strict et interface implémentés ; détails exacts dépliables |
+| Points : mois courant/référence, cinq mesures et valeurs/effectifs de cohorte figée | Séries et tableau mensuel | Décodeur strict et interface implémentés ; détails exacts dépliables |
+| Classement : magasin, rang, CA courant/référence complet/partiel, couverture, mois attendus, contribution, motif d’exclusion | Classement paginé | Décodeur strict et interface implémentés ; détails exacts dépliables |
+| Séries magasin : objet magasin et points ; compte total dans le contexte | Comparaison, six magasins par page | Décodeur strict et interface implémentés ; détails exacts dépliables |
+| Disponibilité : domaine, bornes, mois, observation présente, lignes sources/rapportées/inférées, magasins observés | Panneau de disponibilité, distinct de la couverture des mesures | Décodeur strict et interface implémentés ; détails exacts dépliables |
+
+Les erreurs de publication et de disponibilité ne deviennent pas des valeurs
+métier. Le transport et les tests frontend sont ajoutés en T24C.
+`analysis-contract.test.ts` réconcilie les objets décodés avec les modèles Python ;
+`FilteredAnalysis.test.tsx` et `analysis.spec.ts` couvrent les parcours et erreurs.
+Les valeurs non abrégées et champs techniques restent consultables dans les
+détails dépliables, sans lecture supplémentaire. Les preuves et limites sont
+suivies dans [T24](network-analysis.md).

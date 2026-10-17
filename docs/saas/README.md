@@ -1,9 +1,12 @@
 # Plateforme analytique — contrat de développement
 
-Statut : proposition de cadrage, à valider avant implémentation. Aucun frontend,
-déploiement SaaS ou nouveau mécanisme d'authentification n'est livré par ces documents.
-Le contrat existant a été inspecté dans le code de l'API et son registre de ressources.
-Aucune donnée privée n'a été nécessaire à ce cadrage.
+Statut : contrats de la cible produit. Les développements T01–T22 sont commités,
+avec qualification automatisée locale sur données synthétiques. Cela ne constitue
+ni la réception complète du P0 ni une qualification de production. Voir les
+[résultats du frontend](../../frontend/README.md#integrated-delivery-qualification),
+les [validations encore ouvertes](tasks.md#t20--qualification-responsive-et-accessibilité-des-parcours)
+et les [frontières implémentées](../architecture.md). Les exigences cible restent
+distinctes des capacités effectivement vérifiées.
 
 ## Objectif
 
@@ -25,6 +28,12 @@ Les documents suivants précisent ses contrats sans répéter les arbitrages pro
    champs publiés, objets imbriqués, destinations et droits de consultation.
 6. [Design de référence](../../DESIGN.md) : thème MUI, responsive, composants,
    graphiques et états visuels communs.
+7. [Tâches d’implémentation](tasks.md) : fonctionnalités ordonnées, propositions
+   de petits commits, tests progressifs et revues Codex Security pour les agents.
+8. [T24 — Analyses réseau filtrées](network-analysis.md) : contrats des trois
+   étapes PostgreSQL, API et SaaS ; preuves et réception.
+9. [Parcours SaaS filtrés](filtered-analysis.md) : interface implémentée, publication,
+   sélection, classement, comparaison et limites.
 
 Ces documents définissent la cible ; [l'architecture](../architecture.md) décrit
 uniquement l'existant. En cas de divergence avec une capacité supposée, vérifier
@@ -34,11 +43,15 @@ en simplifier les ambiguïtés pour satisfaire une maquette.
 
 ## Périmètre retenu pour la proposition
 
-Le démarrage porte sur le frontend consommant l’API existante. Les nouveaux
-endpoints analytiques sont explicitement différés : leurs besoins restent décrits
-comme dépendances de la cible complète, sans développement backend dans cette étape.
-Commencer par la connexion, les magasins et les détails publiés ; ne pas annoncer
-les agrégations réseau indisponibles comme livrées.
+La première tranche frontend consomme l’API existante. Les endpoints analytiques
+initialement différés font ensuite l’objet de T24 : socle PostgreSQL, API et SaaS.
+La tranche implémentée couvre la connexion personnelle, les magasins et leurs
+analyses unitaires, les données publiées et la qualité selon les droits. T23 ajoute
+les quatre vues réseau maintenant publiées : voir le [contrat réseau](../network-analytics.md).
+Le socle PostgreSQL T24A et l’API T24B sont commités après approbation explicite.
+T24C ajoute l’entrée Analyses filtrées, implémentée et vérifiée et relue localement :
+classements, cohortes et comparaison de magasins. Voir le [contrat API](../filtered-analysis-api.md)
+et le [parcours SaaS](filtered-analysis.md).
 
 - Application web en français, lecture seule, usage principal sur ordinateur.
 - Trois niveaux : réseau, sélection de magasins, fiche magasin.
@@ -56,10 +69,11 @@ les agrégations réseau indisponibles comme livrées.
 | Public autorisé (confirmé) | Une seule organisation, accès à tous les magasins | Conserver l'autorisation globale existante |
 | Devise, HT/TTC, périmètre des ventes | Information non disponible, confirmé lors du cadrage | Ne pas afficher EUR, HT ou TTC par déduction ; faire valider une métadonnée commerciale |
 | Total réseau | CA observé qualifié, jamais CA exhaustif présumé | Appliquer les règles de couverture de `metrics.md` |
-| Architecture de session web | Client navigateur avec code + PKCE proposé | Vérifier la compatibilité réelle du fournisseur et du client autorisé |
-| Stack frontend et graphiques (retenue) | React, TypeScript, Vite ; composants MUI et graphiques MUI X Charts Community | MUI confirmé par le responsable produit ; versions compatibles à verrouiller à l’installation, aucune dépendance ajoutée ici |
-| Volume et temps de réponse attendus | Pas de mesure ni de garantie | Mesurer avec des jeux synthétiques représentatifs et valider le contrat d'agrégation serveur |
+| Architecture de session web | Client navigateur avec code + PKCE implémenté | Vérifier la compatibilité réelle du fournisseur et du client autorisé |
+| Stack frontend et graphiques (retenue) | React, TypeScript, Vite ; composants MUI et graphiques MUI X Charts Community | MUI confirmé par le responsable produit ; versions verrouillées dans le package frontend, sans dépendance commerciale |
+| Volume et temps de réponse attendus | Mesures et budgets locaux T22 disponibles ; aucun engagement de production | Définir le volume et la charge cibles, puis qualifier l’environnement réel |
 
-Les extensions de l'API décrites ici sont des besoins concrets des vues demandées,
-pas des endpoints disponibles. La fiche magasin peut être développée avec les
-collections actuelles ; les totaux réseau à grande échelle dépendent des extensions.
+Les synthèses réseau sont intégrées en T23. Les sept routes T24B fournissent
+désormais filtres, sélection, disponibilité, cohortes et classements ; T24C les
+consomme dans les analyses filtrées. Leur réception locale ne clôt pas les
+décisions métier, la recette humaine ou la qualification de production.

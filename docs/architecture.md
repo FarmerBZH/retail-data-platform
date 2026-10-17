@@ -3,13 +3,304 @@
 ## Scope and status
 
 This document describes the implemented ingestion, analytical and authenticated
-read API boundaries of Retail Data Platform. A web application, production identity
-deployment and multi-tenant authorization are outside the current architecture.
+read API boundaries of Retail Data Platform, plus an authenticated React frontend
+with store/network analyses and published data/quality inspection. Production identity
+deployment and multi-tenant authorization are outside the verified implementation.
+Filtered network analyses, comparable cohorts and store comparisons use the
+dedicated published-analysis API; production qualification remains open.
 Authorized API readers have global access; store selection is a query filter.
 
 The platform turns heterogeneous tabular source bundles into a validated,
 traceable PostgreSQL dataset and exposes bounded authenticated reads without
 placing operational data in the public repository.
+
+## Frontend shell boundary
+
+The isolated `frontend/` package uses React, strict TypeScript, Vite and Material UI.
+Its French entry screen applies shared design tokens, explains unavailable sign-in
+when configuration is missing and handles loading/render failures without displaying
+exception content. A public
+API-origin setting is validated but does not initiate business requests. Configured
+personal sign-in uses `oauth4webapi` with Authorization Code, PKCE S256, state,
+nonce, mandatory callback issuer and RS256 ID-token signature/claim validation.
+Discovery, token and JWKS fetches stay on the configured issuer origin and refuse
+redirects. Top-level authorization navigation remains under provider control.
+The callback URL is replaced before exchange; its transient state is consumed once.
+Only state, nonce and verifier use sessionStorage during redirect, with a ten-minute
+acceptance deadline and cleanup on return or expired re-entry. Access tokens remain
+in memory; refresh-token fields are rejected. ID tokens are never retained as API
+credentials. A generation-bound memory session expires by timer and is checked
+again on focus, visibility and page-show. Logout, replacement and document departure
+clear credentials, cancel outstanding operations and unmount protected content.
+Late OIDC responses cannot recreate an ended session. The session work boundary
+rejects results and errors from old generations, including work that ignores cancellation.
+Page-hide clears protected content synchronously before caching; persisted restoration
+requires a new login. Intentional provider navigation preserves only transient PKCE
+state. Redirect-state removal is best-effort if browser storage throws; memory
+authority still ends and login/exchange refuse storage failures. The unauthenticated
+entry screen initiates no business reads; authenticated workspaces use the read
+transport below. No telemetry or service worker is added.
+
+The separate read transport provides fixed GET routes for the catalog, analytical
+freshness and single pages of published resources. It validates the configured
+origin, query values, JSON envelopes and consumer-supplied row projections. A store
+selection projection is available; unused row fields are discarded. Dates and exact
+decimal values remain strings, preserving null. Requests omit cookies and referrers,
+disable caching, reject redirects and have a ten-second timeout. JSON is limited to
+2,000,000 streamed bytes with strict UTF-8 decoding. Errors retain no response payload
+or credential. Current 401 responses end the session; late refusals cannot end a
+new session. A separate `ReadQueries` service deduplicates and caches reads in the
+current memory session; authenticated store screens use that service. Consumer results
+are cloned and retained state must be bound to the current generation and selection.
+Every raw read shares a session queue with two active reads, thirty-two waiting jobs,
+a thirty-second queue deadline, and sixty starts per rolling minute at one-second
+spacing. Rate history is local and does not establish the server budget consumed by
+other clients. An ignored abort cannot free a still-active transport slot.
+
+The query service caches for thirty seconds, with thirty-two entries, a 1,000,000
+serialized-character budget and 100,000 characters per retained projection. Session
+changes and disposal cancel work and clear the cache. There are thirty-two distinct
+jobs and at most sixty-four consumers per job; only the final consumer's cancellation
+aborts shared work. Eligible retries are restricted to 429/503, with three transient
+failures at most, bounded visible Retry-After or fallback waits, and no retry after
+logout. A page halves limit on 413 down to one, with ten total attempts at most.
+An explicitly requested collection is bounded to five pages, 1,000 rows and twenty-four
+total attempts including freshness checks; repeated cursors fail and partial results
+are identified. A freshness change discards the batch and invalidates the cache;
+unchanged freshness is not a snapshot guarantee. No background/exhaustive loading,
+persistent business storage or new backend endpoint is introduced.
+Synthetic transport tests verify these boundaries. An opt-in local smoke additionally
+uses Chromium with the production entry screen and a real Keycloak realm, then
+exercises the query modules against the actual API and a disposable synthetic
+PostgreSQL schema. It verifies web code exchange, two API pages, missing-scope/CORS/
+callback refusal, wrong-client/audience/expired signed-token refusal, and the original
+CLI token/vault contract with a test memory vault. Temporary identity/database objects
+are removed after the run; the existing realm and CLI configuration are preserved.
+The local smoke also renders the store list, opens a store, retains its selection
+on return and removes its rows after logout. This does not verify a deployed provider,
+native OS vault or analytical business-data flows. The [local recipe](local-identity.md#browser-and-api-integration-smoke) documents
+the prerequisites and cleanup boundary.
+
+Formatting, lint, strict typing, synthetic component/configuration tests and a
+production build have been verified. Playwright Chromium tests exercise that build
+at 360/768/1440 px, including keyboard expansion/collapse, retained focus, empty
+browser storage and axe checks. Signed synthetic OIDC scenarios cover success,
+issuer/state/nonce/signature failures, refused exchange, unexpected refresh tokens,
+orphan callback cleanup and reload. Unit tests also verify replay, expiry and
+configuration binding. Session tests cover late responses, synchronous abort handlers,
+protected component state reset, suspended timers and persisted page events. Browser
+scenarios verify expiry, logout, a second explicit login and history return; they do
+not establish that Chromium chose to use its back/forward cache. A dedicated build
+supplies public synthetic settings without reading local environment files;
+the normal production build is checked separately.
+The default harness aborts and fails unexpected requests; OIDC scenarios explicitly
+intercept their synthetic provider and callback routes. Traces, video and
+screenshots are disabled. These checks are not a complete accessibility audit.
+
+The authenticated store list requests one cursor page at a time (initial limit 25).
+Selection uses explicit IDs in component memory and survives page/detail navigation
+only within the current session. Local sorting is labelled as applying to this page;
+no network total, implicit all-store selection, unsupported filter or aggregation
+request is introduced. Opening a store rereads its header by ID and distinguishes
+an absent row from an invalid response. Duplicate IDs within a page, empty/repeated cursors and mismatched
+detail IDs fail closed. Obsolete requests are cancelled and their results cannot
+replace another view. The previous page remains reachable during a load or failure.
+Logout/expiry unmount this state. The active detailed-data tab reads the full
+published store reference only on explicit expansion, validates each field and
+discards unknown fields. Closing it, changing tabs or leaving the detail cancels
+its pending read. Null, zero, false and exact decimal strings remain distinct.
+Draft and applied inclusive calendar months survive list/detail navigation in
+session memory. The period starts empty and accepts at most 120 inclusive months
+from 0001-01 through 9999-12 without timezone conversion. This is a client bound,
+not evidence of observation coverage. Only the active store synthesis reads the
+existing monthly analytical collection after an explicit period is applied;
+other analytical tabs and shared navigation remain subsequent work.
+The authenticated screen checks analytical publication status on entry and manual
+request, without polling or starting a refresh. It distinguishes freshness from
+coverage and the last refresh attempt from a failed status read. The last known
+status survives a failed check with an explicit warning; logout/expiry remove it.
+Current/stale status without a completion timestamp is rejected; an uninitialized
+status may still report an older successful completion without implying readability.
+Completion timestamps are displayed in UTC. The live store reference remains
+independent of analytical initialization. Published decimal amounts and counts
+use French formatting; identifiers keep their exact text. Decimal arithmetic uses
+BigInt coefficients with bounded decimal scales, propagates null and treats zero
+denominators as unavailable. Division rounds half away from zero with an explicit
+0–18-place precision (default six); no business calculation uses binary numbers.
+No currency or tax basis is inferred. Collection tests verify discard and reload
+when publication changes across two pages; this is not a snapshot guarantee.
+The single-store synthesis filters `analytics_store_month` by store and inclusive
+months, checks initialization and surrounds its bounded collection with freshness
+reads. It cancels on departure, and a changed or incomplete publication exposes
+neither a total nor a false missing month. Explicit retry loads again. The full
+read is projected into the expected calendar grid; null/missing remain distinct
+from zero and negative sales. Exact sums state their own month coverage, and
+non-ambiguous reported sales remain separate partial diagnostics. Revenue per
+unit uses identical complete months and a nonzero denominator. No category or
+nested detail is joined or summed. Decimal validation and summary arithmetic run
+before the ready state; failures remain local and retryable.
+The MUI X Charts Community curve uses binary
+numbers only for finite geometry and axis span, preserves gaps with straight
+segments, labels partial coverage and disables animation; its
+exact tooltip and a keyboard-accessible scrollable table expose the source
+values. Out-of-range geometry remains available in the table with a warning.
+The read limits are five pages and 120 rows; separate pages remain separate
+snapshots. Other analytical screens are not implemented by the synthesis increment.
+An explicit single-store comparison read uses complete revenue amounts from
+`analytics_store_month_changes` for M-1/N-1 and the selected current window.
+The reference window comes from `analytics_store_month`: k immediately preceding
+months or both bounds shifted by twelve months. Each collection is bounded by
+five pages and 120 rows; initialization and freshness checks surround both reads.
+Incomplete/changed batches expose no comparison. Amounts for the same months
+across current/reference reads and known M-1/N-1 cells must agree exactly,
+including null/zero distinctions and overlapping year windows; contradictions
+produce a local retryable error. This check does not establish a snapshot.
+Window sums require every
+expected month in each period; exact subtraction and decimal division never
+aggregate published percentages. Zero/missing bases suppress percentages,
+negative bases retain absolute differences with an explicit qualifier. Calendar
+underflow avoids a reference query. Mode/context changes cancel pending reads
+and discard previous comparison results. These collections and the independently
+loaded synthesis have no cross-request snapshot guarantee.
+The published data explorer discovers authorized business collections from the
+catalogue and offers references, observations and monthly analyses. The client
+intersects catalogue capabilities with a fixed public projection snapshot;
+unknown fields, keys and filters are rejected. Operational collections are not
+exposed or requested by this explorer; their screen remains deferred.
+Pages contain at most 25 rows and are followed manually using unchanged opaque
+cursors and applied filters. Repeated/empty continuation cursors and duplicate
+keys within a page are rejected; no whole-network extraction or total is derived.
+Opening a row issues a separate request with its complete primary key (including
+both exact month bounds for composite keys). It accepts at most one matching row.
+Freshness checks surround every page/detail read, hide changed publications and
+block uninitialized analytic reads without claiming a cross-page snapshot.
+The shared PublishedDetail renderer displays every permitted field and recursively
+projects nested objects/lists. French labels retain technical names; decimal
+strings remain exact, HTML stays text, null/zero/empty strings/lists remain distinct.
+The transport bounds responses at 2 MB; list rendering uses local pages of 50
+elements, retaining every decoded element without imposing a separate list cap.
+Known varchar limits and exact-value validation remain enforced.
+Expanding lists never triggers per-element requests. Store reference inspection
+uses the same renderer; additional store collections are loaded explicitly and
+receive a fixed store_id only where the catalogue permits it. Global collections
+remain labelled as global. Store selection, page/sort, opened store and draft/applied
+months survive navigation through Données in session memory; business components
+still unmount and cancel their reads. A rejected later cursor can restart at page one.
+Leaving an explorer cancels its reads and removes its results;
+session termination unmounts the workspace and clears the transport cache.
+The coverage manifest associates 426 public fields and 74 nested paths with this
+renderer and synthetic tests. Operational routes are consulted in the
+catalogue-gated Quality screen, independently of ordinary DataExplorer. See
+[coverage manifest notes](saas/frontend-coverage.md).
+The active store product-sales tab reads only the applied store/month window
+from `analytics_register_product_month`, after checking catalogue capabilities.
+It requires a complete bounded collection (five pages, 500 cells); an incomplete
+read exposes no product table or chart. Duplicate grains, unexpected store/month
+values and contradictory ambiguity/count metadata are rejected.
+Observation IDs must be unique and agree with available source counts; reported
+measure counts and product-link attribution are checked against the published grain.
+The exact table retains unresolved source GTINs separately and paginates locally
+by 25 cells. Horizontal revenue bars show an explicitly named month/subset of at
+most 20 cells; a selected source GTIN has a calendar revenue line and exact table
+with missing months left absent. Neither chart derives store turnover, aggregates
+heterogeneous physical volumes or introduces a category filter.
+Product links are labelled as publication metadata; a null link does not assert
+that every source row was unmatched. Partially covered bar series are named as such.
+Closing a cell detail restores its identity-based trigger or the table when that
+cell is no longer on the current local page.
+Every product cell retains its complete published detail. Individual observation
+and live product lookups are explicit, catalogue-authorized and bounded; their
+identities and the observation grain are checked, with freshness before/after.
+Missing live rows remain unavailable. They are not immutable historical evidence.
+Leaving the tab, changing applied months or ending the session unmounts its data
+and cancels pending reads. The tab code is loaded on demand.
+The active store presence/shelf tab reads `analytics_store_category_month` for
+only the applied store/month window. Calendar presence and shelf-share lines are
+separate, with exact denominators and coverage; null, zero, inferred absence and
+missing cells remain distinct. Source category codes and unresolved product keys
+are rendered literally. Unknown shelf units preclude cross-category aggregation;
+ratios above 100% remain visible. No network-distribution or assortment-compliance
+claim is derived from observed presence.
+Explicit collection actions read `analytics_distribution_product_month` or
+`analytics_shelf_category_month` with the selected category filter. Each read
+requires catalogue support and a complete collection within five pages/500 cells;
+incomplete reads and freshness changes hide that block's values. Source IDs and
+all public fields remain consultable without automatic per-ID requests. Local
+pagination, detail focus restoration and cancellation preserve the existing
+session-memory boundary. The tab code is loaded on demand.
+The active activity tab reads `analytics_activity_month` for the applied store/month
+window, capped at five pages/360 cells. Calls, field visits and crowdsourced visits
+have separate calendar series and exact monthly rows. Missing types, declared zero
+and ambiguous source groups remain distinct; activities are never added across
+types. An independent, bounded `analytics_store_month` read aligns observed revenue
+on the same calendar without joining rows or claiming causality or a common snapshot.
+Each block gates catalogue support, completeness and before/after freshness;
+local failures and retries leave the other block usable. Existing shared read
+services enforce the session and transport boundaries.
+Activity detail renders every public field and source identifier. An explicit
+per-ID action reads `store_activity_metrics` after catalogue validation and checks
+its identity, store, month, type, matched attribution and single-source value.
+Changed or missing live observations cannot replace the published cell. Source
+lists paginate locally without eager reads; detail focus is restored on close.
+Tab, applied-period and session departure cancel reads and remove component data.
+The tab loads lazily; current planning fields are not treated as observed activity.
+The lazy typology/assortment tab reads three independent published collections
+for the applied store/month window, each capped at five pages/500 rows. Catalogue,
+initialized publication, scoped row identity, completeness and before/after exposed
+freshness gate each block. Monthly values and contradictory snapshots remain
+separate; absent months have no carried value. Exact candidates are distinct from
+retailer context, without compliance or required-product claims. Local tables and
+reference lists paginate by 50. Every public field remains consultable.
+Explicit ID actions inspect live values, snapshots, rules, assortments and products,
+checking catalogue, unique response, identity and available owner context. An
+assortment can expose its mapping/rank rules through one additional explicit level.
+These mutable references do not replace published rows or claim historical binding.
+Component and session departure cancel reads; labels render as inert text through
+existing published-value components. No backend or identity boundary changes.
+The lazy Quality workspace uses native server pages for network monthly attribution,
+with dataset/month/match-status filters and no store scope or inferred revenue loss.
+It exposes import/refresh audits only from the authenticated server catalogue and
+refreshes that capability contract before mounting each chosen collection. Ordinary
+login retains its original scopes; an explicit operations login requests the optional
+operations scope, without interpreting the request as a grant or decoding token roles.
+The API retains authorization authority. Audits remain readable before analytical
+initialization, while monthly analyses are gated. Publication source IDs open live
+import references individually, with renewed catalogue, exact ID, unique response
+and stable exposed freshness; no business-row lineage is inferred. Lists paginate
+locally by 50 and collection pages by 25. Existing public decoders discard extra
+private fields; session generation and component cancellation govern this view.
+Frontend contract tests import the actual public API row models in an isolated
+Python process from the prepared project environment, without API/database startup.
+They reconcile schema paths, serialized types, nullability, keys, filters and
+operations flags with frontend projections and the product matrix. The executable
+manifest identifies native fallback destinations; full rendered details and
+admitted empty states are checked with synthetic values. This test-only boundary
+does not expose backend code or dependencies in the browser build.
+A GitHub workflow runs locked installation and the same local quality command;
+hosted execution has not yet been observed. An integrated synthetic browser
+journey additionally exercises login, store pagination/detail, product sales,
+explicit live evidence, recoverable quality
+failure and logout under the synthetic HTTP CSP. Test-only measurements record
+local action durations, API request counts and JSON bytes, and sampled Chromium
+JavaScript heap use. These do not establish server load capacity, a real network
+p95, complete browser memory use or production readiness. Deployed provider/API
+acceptance for all business flows, human accessibility receipt and production
+hosting remain open; local T24C filtered-analysis verification is recorded separately.
+Setup and actual scripts are in the
+[frontend guide](../frontend/README.md).
+
+The network workspace uses only the four published `analytics_network_*` views.
+Overview has no temporal filter; annual reads use January keys without trimming
+annual totals. Monthly reads are bounded to 120 months and 120 rows/five pages.
+The frontend never totals network pages or downloads individual stores to build a
+network aggregate. Complete and explicitly partial values retain metric-specific
+coverage and exact decimal labels; only chart geometry uses binary numbers.
+Catalogue validation precedes reads, freshness surrounds the complete batch, and
+incomplete results are hidden. Comparisons fail independently. Draft/applied
+network selection survives navigation in session memory; results unmount and
+requests abort on departure. No new credentials, storage, backend routes or
+operational permissions are introduced. Synthetic network scenarios exercise
+pagination, invalid responses, independent coverage, calendar bounds and logout.
 
 ## Context
 
@@ -159,14 +450,63 @@ Network month, year and whole-calendar summaries aggregate only the canonical
 store-month grain, with separate complete and partial measures and explicit
 coverage counts. Monthly comparisons propagate missing coverage and zero-base
 ratios. Their typed read resources preserve global access and existing grants;
-no frontend fan-out or arbitrary multi-store aggregation was introduced. See
+no frontend fan-out is used. These four resources retain their global scope. See
 [Network analytics](network-analytics.md) for the published contract and limits.
+
+Two internal materialized views additionally freeze published store dimensions
+and store/month/dataset observation counts. They have unique grain indexes and
+share the same atomic refresh as the fifteen public views. The filtered-analysis
+reader reuses store-month measures for parameterized window/cohort totals,
+aligned series, bounded search and globally ranked revenue contributions. Missing
+cells stay in the expected denominator and each measure has its own fixed cohort;
+revenue/unit ratios use their common complete cohort. SQL numeric arithmetic and
+null-aware keyset ordering retain exact results. This reader operates only on
+published snapshots. Seven dedicated T24B routes supply a read-only repeatable-read
+transaction for scope, publication and business reads. Related requests can require
+the returned publication UUID; pagination requires it, and a refresh invalidates
+the old context with 409. No historical snapshot is retained. Fixed typed response
+models serialize exact decimals and exclude operational audit payloads.
+Internal ORM metadata remains separate, preserving the 28-resource catalog. An
+explicit SQL permission manifest additionally grants the two internal projections;
+startup checks their column grants and rejects ownership or write privileges. See
+[Filtered analysis API](filtered-analysis-api.md) for contracts and operations.
 
 SQLAlchemy view mappings use separate metadata from the base tables. The refresh
 audit is a normal mapped table. Migration lifecycle, analytical contracts,
 concurrent readers, source snapshot consistency and failure rollback are verified
 on synthetic PostgreSQL data. See [Monthly store analytics](monthly-analytics.md)
 for grains, joins, refresh operations and temporal limitations.
+
+## Filtered-analysis frontend boundary
+
+A separate Analyses filtrées workspace consumes all seven T24B routes without
+changing the native catalog or T23 global views. Explicit draft/apply state groups
+period, reference, dimensions, activity and all/selected IDs; an empty explicit
+selection cannot query the entire network. Search and dimension options use
+bounded server pages. Applied results retain full-scope totals while global ranking
+and individual series pages stay bounded to twenty and six stores respectively.
+Per-measure fixed cohorts, partial amounts, exact decimal strings and observation
+availability remain distinct. Charts use finite approximations for geometry and
+keep exact values, null gaps and coverage in tables and expandable typed details.
+
+Strict decoders check every projection against its request context, UUID publication
+and calendar, rejecting malformed, duplicate or truncated responses. Analysis
+requests reuse the existing authenticated transport, response cap and shared queue.
+Pinned cache keys contain endpoint, normalized parameters and publication; initial
+unpinning discovery is uncached. A 409 invalidates cache/pending work and removes
+all dependent analysis blocks until explicit context reload. Other errors stay
+local. Context changes abort old consumers; generation changes clear all memory
+state through the existing session boundary. Tokens and business data remain absent
+from browser persistence, navigation URLs and logs.
+
+Store detail opens explicitly with the applied period and an ordinary live store
+lookup. The analysis context stays in component/workspace memory. A boolean-only
+history marker supports browser/button return and restores focus; no business
+payload enters history state. Existing unit-store collections do not acquire the
+new publication guarantee, and the UI states that distinction. Synthetic browser
+scenarios and the disposable real OIDC/API/PostgreSQL runner exercise these paths.
+See [Filtered SaaS analyses](saas/filtered-analysis.md) for semantics, validation
+and outstanding human/production acceptance.
 
 ## Authenticated read API boundary
 
@@ -191,7 +531,8 @@ A bounded per-process subject rate limiter
 supplements mandatory ingress limits. No HTTP writes, arbitrary SQL, joins supplied
 by clients, or refresh operations exist. Typology-value store filtering follows the
 snapshot relationship. Analytical semantics and freshness remain those documented
-in monthly-analytics.md. Separate pages are separate snapshots, not frozen exports.
+in monthly-analytics.md. Native collection pages remain separate snapshots, not frozen exports; dedicated
+analysis routes add a publication precondition as described above.
 
 A dedicated PostgreSQL login has explicit column SELECT grants. Startup checks
 role flags, memberships, ownership, schema creation, write permissions and column

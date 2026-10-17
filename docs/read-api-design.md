@@ -65,9 +65,21 @@ Large ML extracts iterate pages. Pages are separate snapshots: imports or analyt
 refreshes between pages may change results. This is not a reproducible export API;
 freeze publication externally for a consistent dataset. See monthly-analytics.md.
 
+## Dedicated filtered analysis
+
+T24B adds seven routes under `/v1/analytics/analysis` for published store discovery,
+dimensions, availability, summaries, series, rankings and individual store series.
+Their explicit models are separate from the unchanged 28-resource catalog. Each
+response uses a common read-only repeatable-read transaction; publication UUID
+preconditions prevent mixing successful refreshes between related requests/pages.
+See the [filtered analysis contract](filtered-analysis-api.md) for query bounds,
+projections, cursor semantics, errors, privileges and synchronous cancellation limits.
+The native collection/export caveat above remains unchanged.
+
 ## Database and service boundaries
 
-Use a separate PostgreSQL login with SELECT grants only on the registry's columns,
+Use a separate PostgreSQL login with SELECT grants only on the explicit resource
+and internal analysis column manifests,
 USAGE on the application schema, no ownership, no role memberships, and no elevated
 role flags. Do not reuse ingestion credentials. Validate privileges at startup.
 Provisioning grants is an explicit administrative operation, separate from schema

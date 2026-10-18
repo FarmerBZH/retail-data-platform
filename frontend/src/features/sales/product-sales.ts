@@ -31,6 +31,31 @@ export type ProductSale = PublishedRow & {
   revenue_reported_rows: number | null;
   units_reported_rows: number | null;
 };
+export function hasSupplementaryRevision(row: ProductSale) {
+  return (
+    row.ambiguous === false &&
+    row.source_row_count !== null &&
+    row.source_row_count > 1 &&
+    row.source_kinds?.includes("monthly") === true &&
+    row.source_kinds.includes("supplement")
+  );
+}
+export function hasConventionZero(
+  row: ProductSale,
+  measure: "revenue" | "units",
+) {
+  return (
+    row.ambiguous === false &&
+    row.source_row_count === 1 &&
+    row.source_kinds?.length === 1 &&
+    row.source_kinds[0] === "monthly" &&
+    row[`${measure}_reported_rows`] === 0 &&
+    (measure === "units"
+      ? row.units === 0
+      : row.revenue !== null &&
+        /^[+-]?0+(?:\.0+)?(?:[eE][+-]?\d+)?$/.test(row.revenue))
+  );
+}
 export function productSale(value: unknown): ProductSale {
   const row = decode(value) as ProductSale;
   for (const field of [
@@ -50,7 +75,10 @@ export function productSale(value: unknown): ProductSale {
   if (row.source_row_count !== null) {
     if (
       row.source_row_count < 1 ||
-      (row.ambiguous !== null && row.ambiguous !== row.source_row_count > 1)
+      (row.source_row_count === 1 && row.ambiguous === true) ||
+      (row.source_row_count > 1 &&
+        row.ambiguous === false &&
+        !hasSupplementaryRevision(row))
     )
       throw new Error("Invalid response");
     for (const field of [
@@ -66,12 +94,15 @@ export function productSale(value: unknown): ProductSale {
     )
       throw new Error("Invalid response");
     if (row.source_row_count === 1) {
-      for (const [measure, count] of [
-        [row.revenue, row.revenue_reported_rows],
-        [row.units, row.units_reported_rows],
-      ] as const)
-        if (count !== null && (measure !== null) !== (count === 1))
+      for (const measure of ["revenue", "units"] as const) {
+        const count = row[`${measure}_reported_rows`];
+        if (
+          count !== null &&
+          (row[measure] !== null) !== (count === 1) &&
+          !hasConventionZero(row, measure)
+        )
           throw new Error("Invalid response");
+      }
     }
   }
   if (

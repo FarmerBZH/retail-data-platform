@@ -361,7 +361,7 @@ def test_product_ambiguity_has_explicit_exclusion(data: Session) -> None:
     s, p = store(data), product(data)
     register(data, s, p, JAN)
     register(data, s, p, FEB)
-    register(data, s, p, FEB, kind="supplement")
+    register(data, s, p, FEB)
     publish(data)
     assert read(data).ranking()[0]["exclusion_reason"] == "ambiguous_measure"
     assert read(data).summary()["cohort_revenue_store_count"] == 0

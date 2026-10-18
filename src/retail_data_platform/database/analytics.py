@@ -21,6 +21,8 @@ class AnalyticsBase(DeclarativeBase):
 
 
 class RegisterProductMonth(AnalyticsBase):
+    """Apply supplementary revisions and monthly decline-to-zero conventions; retain evidence."""
+
     __tablename__ = "analytics_register_product_month"
     store_id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
     period: Mapped[date] = mapped_column(Date, primary_key=True)

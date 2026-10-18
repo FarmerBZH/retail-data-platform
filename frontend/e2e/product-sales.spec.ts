@@ -10,6 +10,7 @@ import {
 import {
   syntheticProductRows,
   observationId,
+  secondObservationId,
 } from "../test/fixtures/product-sales-fixture";
 const headers = { "access-control-allow-origin": "http://127.0.0.1:4180" };
 async function setup(
@@ -69,6 +70,22 @@ async function setup(
         expect(url.searchParams.has("category_code")).toBe(false);
         expect(route.request().method()).toBe("GET");
         const rows = syntheticProductRows();
+        rows[0] = {
+          ...rows[0]!,
+          source_row_count: 2,
+          source_kinds: ["monthly", "supplement"],
+          observation_ids: [observationId, secondObservationId],
+          revenue_reported_rows: 2,
+          units_reported_rows: 2,
+          unmatched_product_rows: 2,
+          volume: null,
+        };
+        rows[2] = {
+          ...rows[2]!,
+          revenue: "0",
+          revenue_reported_rows: 0,
+          units_reported_rows: 0,
+        };
         return route.fulfill({
           contentType: "application/json",
           headers,
@@ -154,6 +171,9 @@ test("product sales keep GTIN identities, plot exact returns and open live evide
     .getByRole("region", { name: "Ventes par GTIN et mois, valeurs exactes" })
     .getByRole("table");
   await expect(table).toContainText("-0,2", { timeout: 15000 });
+  await expect(table).toContainText("Révision complémentaire retenue");
+  await expect(table).toContainText("CA : zéro selon la convention");
+  await expect(table).toContainText("Unités : zéro selon la convention");
   await expect(
     table.getByText("Lien produit indisponible", { exact: true }),
   ).toHaveCount(3);

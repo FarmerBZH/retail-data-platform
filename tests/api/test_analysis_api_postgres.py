@@ -490,7 +490,7 @@ def test_measured_zero_negative_and_ambiguity_match_sql_oracle(
                 insert(RegisterObservation).values(
                     id=uuid4(),
                     period=date(2025, 2, 1),
-                    source_kind="supplement",
+                    source_kind="monthly",
                     source_store_reference="synthetic",
                     store_id=UUID(int=2),
                     store_match_status="matched",

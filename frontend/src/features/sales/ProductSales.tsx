@@ -49,6 +49,8 @@ import {
   productGrid,
   productGeometry,
   productSalesResource,
+  hasSupplementaryRevision,
+  hasConventionZero,
 } from "./product-sales";
 import type { ProductSale } from "./product-sales";
 
@@ -405,6 +407,21 @@ function ProductViews({
                   renseignées : {row.units_reported_rows ?? "Indisponible"}/
                   {row.source_row_count ?? "Indisponible"}. Non rapprochées :{" "}
                   {row.unmatched_product_rows ?? "Indisponible"}.
+                  {hasSupplementaryRevision(row) && (
+                    <Typography variant="body2">
+                      Révision complémentaire retenue ; preuves mensuelles
+                      conservées.
+                    </Typography>
+                  )}
+                  {(["revenue", "units"] as const).map((measure) =>
+                    hasConventionZero(row, measure) ? (
+                      <Typography variant="body2" key={measure}>
+                        {measure === "revenue" ? "CA" : "Unités"} : zéro selon
+                        la convention vide avec évolution −100 % ; cellule brute
+                        conservée vide.
+                      </Typography>
+                    ) : null,
+                  )}
                 </TableCell>
                 <TableCell>
                   <Button

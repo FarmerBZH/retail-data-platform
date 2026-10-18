@@ -4,13 +4,48 @@ import {
   productRows,
   productGrid,
   productGeometry,
+  hasSupplementaryRevision,
+  hasConventionZero,
 } from "../../../src/features/sales/product-sales";
 import {
   syntheticProductSale,
   syntheticProductRows,
 } from "../../fixtures/product-sales-fixture";
 import { syntheticId } from "../../fixtures/published-fixture";
+import {
+  observationId,
+  secondObservationId,
+} from "../../fixtures/product-sales-fixture";
 const period = { from: "2026-01", to: "2026-03", months: 3 };
+it("accepts a supplementary revision while retaining both observations", () => {
+  const row = productSale(
+    syntheticProductSale({
+      source_row_count: 2,
+      source_kinds: ["monthly", "supplement"],
+      observation_ids: [observationId, secondObservationId],
+      revenue_reported_rows: 2,
+      units_reported_rows: 2,
+      unmatched_product_rows: 2,
+    }),
+  );
+  expect(hasSupplementaryRevision(row)).toBe(true);
+  expect(row.revenue).toBe("0.1");
+  expect(row.observation_ids).toHaveLength(2);
+});
+it.each([["monthly"], ["supplement"]])(
+  "rejects multiple unambiguous rows without revision evidence %j",
+  (kind) => {
+    expect(() =>
+      productSale(
+        syntheticProductSale({
+          source_row_count: 2,
+          source_kinds: [kind],
+          observation_ids: [observationId, secondObservationId],
+        }),
+      ),
+    ).toThrow();
+  },
+);
 it("keeps unresolved GTINs distinct, exact returns, zero units and heterogeneous volumes", () => {
   const rows = productRows(
     syntheticProductRows().map(productSale),
@@ -39,7 +74,7 @@ it.each([
   { observation_ids: [] },
   { observation_ids: [syntheticId, syntheticId] },
   { revenue_reported_rows: 0 },
-  { units_reported_rows: 0 },
+  { units_reported_rows: 0, units: 5 },
   { product_id: syntheticId },
 ])("rejects contradictory or malformed published cells %j", (override) => {
   expect(() => productSale(syntheticProductSale(override))).toThrow();
@@ -85,3 +120,46 @@ it("omits unsafe chart geometry while retaining exact source values", () => {
     -0.1,
   ]);
 });
+
+it.each(["0", "-0.000", "0e-100"])(
+  "labels convention zero %s while retaining raw reporting counts",
+  (revenue) => {
+    const row = productSale(
+      syntheticProductSale({
+        revenue,
+        revenue_reported_rows: 0,
+        units_reported_rows: 0,
+      }),
+    );
+    expect(hasConventionZero(row, "revenue")).toBe(true);
+    expect(hasConventionZero(row, "units")).toBe(true);
+    expect(row.revenue_reported_rows).toBe(0);
+  },
+);
+it("keeps ordinary blanks and reported zero distinct from convention zero", () => {
+  const blank = productSale(
+    syntheticProductSale({ revenue: null, revenue_reported_rows: 0 }),
+  );
+  expect(hasConventionZero(blank, "revenue")).toBe(false);
+  expect(hasConventionZero(productSale(syntheticProductSale()), "units")).toBe(
+    false,
+  );
+});
+it.each([
+  { source_kinds: [] },
+  { source_kinds: ["supplement"] },
+  { source_kinds: ["monthly", "supplement"] },
+])(
+  "rejects unreported zero without unique monthly evidence %j",
+  ({ source_kinds }) => {
+    expect(() =>
+      productSale(
+        syntheticProductSale({
+          revenue: "0",
+          revenue_reported_rows: 0,
+          source_kinds,
+        }),
+      ),
+    ).toThrow();
+  },
+);

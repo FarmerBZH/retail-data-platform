@@ -102,10 +102,10 @@ def test_facts_do_not_fan_out_and_shares_remain_by_category(session: Session) ->
     assert categories["CAT-B"]["shelf_share"] is None
 
 
-def test_ambiguous_aliases_and_source_overlap_are_not_summed(session: Session) -> None:
+def test_same_source_duplicates_and_ambiguous_aliases_are_not_summed(session: Session) -> None:
     s, p = store(session), product(session)
     first = register(session, s, p)
-    second = register(session, s, p, kind="supplement")
+    second = register(session, s, p)
     activity(session, s, 2)
     activity(session, s, 2)
     distribution(session, s, p, 1)

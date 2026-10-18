@@ -65,7 +65,7 @@ def test_product_ambiguities_do_not_become_sales(session: Session) -> None:
     a = store(session)
     p, q = product(session), product(session, "1000000000002")
     register(session, a, p, revenue=Decimal("9.10"))
-    register(session, a, p, revenue=Decimal("9.10"), kind="supplement")
+    register(session, a, p, revenue=Decimal("9.10"))
     register(session, a, q, revenue=Decimal("2.20"))
     row = session.scalars(select(NetworkMonth)).one()
     assert row.revenue is None and row.revenue_partial is None

@@ -29,6 +29,9 @@ def migrated_connection() -> Iterator[Connection]:
         config.attributes["connection"] = connection
         command.upgrade(config, "head")
         command.check(config)
+        command.downgrade(config, "20261017_16")
+        command.upgrade(config, "head")
+        command.check(config)
         command.downgrade(config, "20261015_15")
         command.upgrade(config, "head")
         command.check(config)

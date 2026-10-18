@@ -109,7 +109,7 @@ def test_ambiguous_aliases_and_source_overlap_are_not_summed(session: Session) -
     activity(session, s, 2)
     activity(session, s, 2)
     distribution(session, s, p, 1)
-    distribution(session, s, p, 0)
+    distribution(session, s, p, 0, origin="reported")
     shelf(session, s, 2, 10, "CAT-A")
     shelf(session, s, 3, 10, "CAT-A")
     row = monthly(session, s)

@@ -50,6 +50,8 @@ class ActivityMonth(AnalyticsBase):
 
 
 class DistributionProductMonth(AnalyticsBase):
+    """Canonical presence; only conflicting reported values are ambiguous."""
+
     __tablename__ = "analytics_distribution_product_month"
     store_id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
     period: Mapped[date] = mapped_column(Date, primary_key=True)
@@ -77,6 +79,8 @@ class ShelfCategoryMonth(AnalyticsBase):
 
 
 class TypologyMonth(AnalyticsBase):
+    """Historical rank candidates using the importer's ASCII-normalized keys."""
+
     __tablename__ = "analytics_typology_month"
     store_id: Mapped[uuid.UUID | None] = mapped_column(Uuid)
     period: Mapped[date | None] = mapped_column(Date)
@@ -105,6 +109,8 @@ class AssortmentCandidates(AnalyticsBase):
 
 
 class RetailerAssortmentMonth(AnalyticsBase):
+    """Historical context via direct labels or a consistent validated retailer alias."""
+
     __tablename__ = "analytics_retailer_assortment_month"
     store_id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
     period: Mapped[date] = mapped_column(Date, primary_key=True)

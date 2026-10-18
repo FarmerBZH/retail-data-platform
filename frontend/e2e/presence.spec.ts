@@ -7,8 +7,13 @@ import {
   categoryCode,
   syntheticCategories,
   syntheticDistributions,
+  syntheticDistribution,
   syntheticShelf,
 } from "../test/fixtures/presence-fixture";
+import {
+  observationId,
+  secondObservationId,
+} from "../test/fixtures/product-sales-fixture";
 const headers = { "access-control-allow-origin": "http://127.0.0.1:4180" };
 async function setup(
   page: import("@playwright/test").Page,
@@ -66,7 +71,14 @@ async function setup(
             i === 0
               ? syntheticCategories()
               : i === 1
-                ? syntheticDistributions()
+                ? [
+                    syntheticDistribution({
+                      source_row_count: 2,
+                      inferred_absence_rows: 1,
+                      observation_ids: [observationId, secondObservationId],
+                    }),
+                    ...syntheticDistributions().slice(1),
+                  ]
                 : [syntheticShelf()],
           next_cursor: incomplete && i === 0 ? `synthetic-${counts[i]}` : null,
         });
@@ -136,9 +148,12 @@ test("presence and shelf keep separate ratios, unknown units and evidence reques
       exact: true,
     }),
   ).toBeFocused();
-  await page.getByText("Liste (1 éléments)", { exact: true }).click();
+  await page.getByText("Liste (2 éléments)", { exact: true }).click();
   await expect(
     page.getByText("00000000-0000-4000-8000-000000000002", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(secondObservationId, { exact: true }),
   ).toBeVisible();
   expect(fixture.counts).toEqual([1, 1, 0]);
   await page

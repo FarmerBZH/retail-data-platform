@@ -37,12 +37,17 @@ export type PresenceRow = PublishedRow & {
 function emptyMeasures(row: PublishedRow, fields: string[]) {
   if (fields.some((f) => row[f] !== null)) throw new Error("Invalid response");
 }
-function sourceGrain(row: PublishedRow, prefix = "") {
+function sourceGrain(
+  row: PublishedRow,
+  prefix = "",
+  duplicatesAreAmbiguous = true,
+) {
   const count = row[`${prefix}source_row_count`] as number | null;
   const ambiguous = row[`${prefix}ambiguous`];
   if (
     count !== null &&
-    (count < 1 || (ambiguous !== null && ambiguous !== count > 1))
+    (count < 1 ||
+      (duplicatesAreAmbiguous && ambiguous !== null && ambiguous !== count > 1))
   )
     throw new Error("Invalid response");
   const ids = row.observation_ids as readonly string[] | null | undefined;
@@ -127,19 +132,13 @@ export function presenceDecoder(name: PresenceName) {
         throw new Error("Invalid response");
       shelf(row, "shelf_");
     } else if (name === "analytics_distribution_product_month") {
-      sourceGrain(row);
+      sourceGrain(row, "", false);
       const productId = row.product_id as string | null;
       const key = row.product_key as string;
       if (
         productId === null
           ? !key.startsWith("source:")
           : key !== `product:${productId.toLowerCase()}`
-      )
-        throw new Error("Invalid response");
-      if (
-        row.presence_value === 1 &&
-        row.inferred_absence_rows !== null &&
-        row.inferred_absence_rows !== 0
       )
         throw new Error("Invalid response");
       if (row.ambiguous !== false && row.presence_value !== null)
@@ -150,6 +149,16 @@ export function presenceDecoder(name: PresenceName) {
         row.presence_value !== 1
       )
         throw new Error("Invalid response");
+      if (row.source_row_count !== null && row.inferred_absence_rows !== null) {
+        const reported =
+          (row.source_row_count as number) -
+          (row.inferred_absence_rows as number);
+        if (
+          (row.presence_value === 1 && reported === 0) ||
+          (row.ambiguous === true && (row.source_row_count as number) < 2)
+        )
+          throw new Error("Invalid response");
+      }
       if (
         row.source_row_count !== null &&
         row.inferred_absence_rows !== null &&

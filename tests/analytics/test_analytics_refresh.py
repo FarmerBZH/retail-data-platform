@@ -351,8 +351,9 @@ def test_upgrade_existing_publication_requires_initializing_internal_views(
     with database.begin() as c:
         config = Config("alembic.ini")
         config.attributes["connection"] = c
-        command.upgrade(config, "head")
-        command.check(config)
+        # Revision 15 preserves existing public results; later reconciliations
+        # deliberately recreate dependent public views and need a full refresh.
+        command.upgrade(config, "20261015_15")
     assert analytics_status(database)["state"] == "uninitialized"
     with database.connect() as c:
         assert c.scalar(text("SELECT store_count FROM analytics_network_overview")) == 1
@@ -366,3 +367,6 @@ def test_upgrade_existing_publication_requires_initializing_internal_views(
         assert c.scalar(text("SELECT store_count FROM analytics_network_overview")) == 1
         command.upgrade(config, "head")
         command.check(config)
+    assert analytics_status(database)["state"] == "uninitialized"
+    refresh_analytics(database)
+    assert analytics_status(database)["state"] == "current"

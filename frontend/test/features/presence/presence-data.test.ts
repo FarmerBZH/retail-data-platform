@@ -13,6 +13,10 @@ import {
   categoryCode,
 } from "../../fixtures/presence-fixture";
 import { syntheticId } from "../../fixtures/published-fixture";
+import {
+  observationId,
+  secondObservationId,
+} from "../../fixtures/product-sales-fixture";
 const period = { from: "2026-01", to: "2026-03", months: 3 };
 it("preserves ratios above 100%, unknown categories, inferred absence and missing calendar cells", () => {
   const rows = syntheticCategories().map(
@@ -66,6 +70,52 @@ it.each([
       syntheticDistribution(overrides),
     ),
   ).toThrow();
+});
+it.each([
+  { presence_value: 1, inferred_absence_rows: 1 },
+  { presence_value: 1, inferred_absence_rows: 0 },
+  { presence_value: 0, inferred_absence_rows: 2 },
+])(
+  "accepts reconciled product aliases and retains their evidence %j",
+  (overrides) => {
+    const row = presenceDecoders.analytics_distribution_product_month(
+      syntheticDistribution({
+        source_row_count: 2,
+        ambiguous: false,
+        observation_ids: [observationId, secondObservationId],
+        ...overrides,
+      }),
+    );
+    expect(row.presence_value).toBe(overrides.presence_value);
+    expect(row.inferred_absence_rows).toBe(overrides.inferred_absence_rows);
+    expect(row.observation_ids).toEqual([observationId, secondObservationId]);
+  },
+);
+it("rejects a claimed conflict with only one source observation", () => {
+  expect(() =>
+    presenceDecoders.analytics_distribution_product_month(
+      syntheticDistribution({
+        source_row_count: 1,
+        ambiguous: true,
+        presence_value: null,
+        inferred_absence_rows: 0,
+        observation_ids: [observationId],
+      }),
+    ),
+  ).toThrow();
+});
+it("keeps ambiguous groups from earlier publications readable during rollout", () => {
+  expect(
+    presenceDecoders.analytics_distribution_product_month(
+      syntheticDistribution({
+        source_row_count: 2,
+        ambiguous: true,
+        presence_value: null,
+        inferred_absence_rows: 2,
+        observation_ids: [observationId, secondObservationId],
+      }),
+    ).presence_value,
+  ).toBeNull();
 });
 it.each([
   { total_value: "0" },

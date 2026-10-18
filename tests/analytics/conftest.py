@@ -29,6 +29,9 @@ def migrated_connection() -> Iterator[Connection]:
         config.attributes["connection"] = connection
         command.upgrade(config, "head")
         command.check(config)
+        command.downgrade(config, "20261015_15")
+        command.upgrade(config, "head")
+        command.check(config)
         command.downgrade(config, "20260930_14")
         assert "analytics_store_scope" not in inspect(connection).get_materialized_view_names()
         command.upgrade(config, "head")

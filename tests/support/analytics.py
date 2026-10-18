@@ -92,6 +92,8 @@ def distribution(
     p: Product,
     presence: int,
     category: str = "CAT-A",
+    *,
+    origin: str | None = None,
 ) -> None:
     session.add(
         NumericDistributionObservation(
@@ -106,7 +108,7 @@ def distribution(
             product_match_status="matched",
             product_match_method="synthetic",
             presence_value=presence,
-            value_origin="reported" if presence else "inferred_absence",
+            value_origin=origin or ("reported" if presence else "inferred_absence"),
             source_category_name="Synthetic category",
             source_store_reference="synthetic",
             source_store_label="Synthetic store",

@@ -52,6 +52,18 @@ fractions : `0.12` s'affiche `12 %`. Une moyenne de ratios de magasins est inter
 Les décimaux sont calculés exactement ; l'arrondi appartient à l'affichage final.
 Un résultat nul reste distinct de zéro, les retours et montants négatifs sont conservés.
 
+Une révision issue du complément remplace la ligne mensuelle au même grain
+magasin/mois/GTIN source ; les montants ne sont jamais additionnés entre ces deux
+sources. Les preuves et comptes de lignes incluent les observations remplacées.
+Une mesure vide de la révision reste vide, et plusieurs révisions concurrentes
+restent ambiguës. Le détail des ventes signale la révision complémentaire retenue.
+
+Dans une ligne mensuelle retenue, un CA ou une quantité vide avec sa propre
+évolution exactement égale à −100 % vaut zéro selon la convention du producteur.
+Les deux mesures sont traitées indépendamment ; les autres blancs et les volumes
+restent inchangés. Le détail signale ce zéro de convention, conserve le nombre
+de valeurs brutes renseignées et permet d’ouvrir la cellule brute et son évolution.
+
 ## Comparaisons temporelles
 
 Pour un magasin, `analytics_store_month_changes` fournit M-1 et N-1 calendaires.
@@ -97,6 +109,12 @@ des unités n'est pas établie. Une agrégation future exige des mesures compati
 et une somme des numérateurs divisée par la somme des dénominateurs du même périmètre.
 Pas de total de volumes entre produits d'unités inconnues. Pas de marge, panier
 moyen, nombre de clients ou retour sur investissement : ces données manquent.
+
+La présence canonique rapproche les alias d'un produit : une valeur déclarée
+prime sur les absences générées ; des déclarations concordantes donnent une seule
+valeur, des déclarations contradictoires restent ambiguës. Toutes les preuves et
+les comptes de lignes inférées sont conservés, y compris lorsqu'une présence vaut
+1. Plusieurs preuves ne signifient donc pas systématiquement une ambiguïté.
 
 Ne jamais joindre les lignes de ventes, activité et catégorie avant agrégation.
 Une table détaillée peut expliquer un total, sans multiplier les montants du grain

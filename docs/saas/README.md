@@ -34,6 +34,8 @@ Les documents suivants précisent ses contrats sans répéter les arbitrages pro
    étapes PostgreSQL, API et SaaS ; preuves et réception.
 9. [Parcours SaaS filtrés](filtered-analysis.md) : interface implémentée, publication,
    sélection, classement, comparaison et limites.
+10. [Recette humaine](recette-humaine.md) : scénario guidé sur cinq magasins,
+    tout l'historique, contrôles par domaine et grille de suivi privée.
 
 Ces documents définissent la cible ; [l'architecture](../architecture.md) décrit
 uniquement l'existant. En cas de divergence avec une capacité supposée, vérifier

@@ -68,7 +68,7 @@ master attributes; until refresh, a source ID may be absent or have newer conten
   including its full attributes. They are not historical values. Product
   master attributes and rank/mapping rules are also current, not effective-dated.
 - `revenue` and `units` sum the observed product universe only when every product
-  group has exactly one observation and a non-null measure. They do not establish
+  group has an unambiguous retained source and a non-null measure. They do not establish
   complete store turnover or complete source delivery.
 - `unambiguous_reported_revenue` and `unambiguous_reported_units` are explicitly
   partial sums. They exclude ambiguous groups and missing measures; an empty sum
@@ -96,19 +96,45 @@ master attributes; until refresh, a source ID may be absent or have newer conten
 
 ## Ambiguities and assortment boundaries
 
-Multiple source rows at a canonical fact grain are marked ambiguous, even when
-values agree. This includes overlap between monthly and supplementary sales.
+Multiple rows within the retained sales source, or at an activity or shelf grain,
+are marked ambiguous, even when values agree.
 The measure becomes null and every observation ID remains available. No row is
 chosen by arbitrary source order, and no source is assumed additive to another.
+
+The recognized supplementary register source is an authoritative row revision.
+For the same matched store, month and source GTIN, it replaces monthly measures
+where a supplementary row exists. Several
+supplementary rows at that grain remain ambiguous; duplicate monthly rows are
+ambiguous when no supplementary revision exists. All measures come from the
+retained row: a null supplementary measure remains null rather than falling back
+to a monthly value. Observation IDs, all source kinds, original row counts and
+reported-value counts retain every source row, including superseded rows. Product
+attribution still requires agreement across all source rows. No monetary value is
+added across competing sources. The frontend labels reconciled mixed-source cells
+and keeps their evidence accessible.
+
+For a retained monthly row only, a missing revenue or units value whose own
+change ratio is exactly `-1` is published as zero under the confirmed producer
+convention. Each measure is evaluated independently. Other blanks, supplementary
+blanks and volumes remain unchanged. Raw observations and reported-value counts
+remain unchanged: a convention zero can therefore have zero reported rows. The
+product table labels these zeros and links to the original empty cell and ratio.
 
 Distribution uses a prefixed product UUID when matched, otherwise a prefixed
 source product reference. Unresolved references are not asserted to represent
 distinct real-world products or to match an existing product by label.
+For canonical presence, a reported value takes precedence over generated
+`inferred_absence` rows for aliases of the same product. Agreeing reported values
+produce one presence value; contradictory reported values remain ambiguous and
+null. An inferred-only group remains zero. Source counts, inferred counts and
+every observation ID are retained; binary presence values are never added.
 
 Typology-to-rank matching uses either direct retailer/category/value equality or
-explicit mapping rules, with case and surrounding whitespace normalized. It does
-not remove accents, use fuzzy matching, or fall back to the current store's
-retailer. Missing or multiple ranks remain visible. Invalid matching mapping
+explicit mapping rules. Comparison keys use Unicode NFKD decomposition, retain
+only ASCII letters and digits, and uppercase, consistently with import keys.
+Empty keys cannot match. No fuzzy matching or current-store retailer fallback
+is used. Normalization collisions retain all candidate ranks rather than choosing
+a winner. Missing or multiple ranks remain visible. Invalid matching mapping
 rules block exact membership even if a direct rank match exists. Contradictory
 snapshots for the same store/month/category key also block exact membership.
 Identical snapshots retain evidence without multiplying an assortment candidate.
@@ -118,8 +144,12 @@ candidate counts are assortment-row counts, not distinct product counts or a
 mandatory assortment. The retailer-level view supplies broader context for
 unsegmented or unresolved rows, without claiming store eligibility. It joins
 direct historical retailer labels or uses a unique, valid raw-to-canonical
-retailer mapping; ambiguous or erroneous mappings are excluded. Assortments
-without an observed matching historical retailer remain in the source table.
+retailer mapping. An alias needs at least one valid rule with a nonempty target,
+and all known nonempty retailer targets must agree, including targets on rules
+flagged erroneous at category level. A category error alone does not invalidate
+a consistent retailer alias, and never establishes exact category eligibility.
+Retailer labels continue to use case and surrounding whitespace normalization.
+Assortments without an observed matching historical retailer remain in the source table.
 No completeness or compliance score is inferred from absent candidate rows.
 
 ## Time comparisons
@@ -153,14 +183,32 @@ ORDER BY m.period;
 ## Installation, rollback and verification
 
 The materialization migration is `20260927_12`, followed by retailer mapping
-correction `20260927_13`. Both follow the original analytical view migration
-`20260926_11`. When explicitly deploying,
+correction `20260927_13`. Reconciliation migration `20261017_16` replaces the
+presence, typology and retailer-context definitions and their dependent views.
+When explicitly deploying,
 use the existing Alembic workflow with the locally configured `DATABASE_URL`:
 `alembic upgrade head`, then `retail-data analytics refresh`. No source import is
 needed. The migration creates unpopulated views so deployment does not perform
 an expensive calculation implicitly. Rollback to `20260926_11` restores ordinary
 views and removes the materialized snapshots and refresh audit. Rollback to
 `20260925_10` removes all analytical views. Both preserve imported tables.
+
+For upgrade or downgrade of `20261017_16`, stop API readers first: eleven
+materialized views are recreated, losing their existing object grants and stored
+results. Refresh the complete analytical publication, regenerate and apply the
+reviewed [explicit reader grants](read-api-operations.md), deploy the compatible
+frontend presence decoder, then restart the API.
+No source import is needed. Downgrade to `20261015_15` restores the previous
+reconciliation rules and requires the same refresh and grant steps. Imported
+observations, refresh audit records and unrelated views are preserved.
+
+Migration `20261018_17` installs supplementary revisions and the monthly zero
+convention, and recreates
+seven views (product sales and dependent store/network summaries). Its downgrade
+restores overlap ambiguity and unnormalized monthly blanks. Both directions require stopping API readers,
+refreshing the complete publication, restoring reviewed column grants and using
+the compatible product-sales decoder before readers restart. Imported source
+observations remain unchanged by this migration; no new API field is introduced.
 
 The SQL file under `migrations/sql/` is part of the immutable migration and must
 travel with the migration directory. Future changes require a new migration.

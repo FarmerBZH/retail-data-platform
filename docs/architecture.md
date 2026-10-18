@@ -199,6 +199,8 @@ read exposes no product table or chart. Duplicate grains, unexpected store/month
 values and contradictory ambiguity/count metadata are rejected.
 Observation IDs must be unique and agree with available source counts; reported
 measure counts and product-link attribution are checked against the published grain.
+The decoder also accepts a non-ambiguous mixed monthly/supplementary cell with all
+source evidence retained; the table labels the authoritative supplementary revision.
 The exact table retains unresolved source GTINs separately and paginates locally
 by 25 cells. Horizontal revenue bars show an explicitly named month/subset of at
 most 20 cells; a selected source GTIN has a calendar revenue line and exact table
@@ -221,6 +223,10 @@ missing cells remain distinct. Source category codes and unresolved product keys
 are rendered literally. Unknown shelf units preclude cross-category aggregation;
 ratios above 100% remain visible. No network-distribution or assortment-compliance
 claim is derived from observed presence.
+Canonical product presence retains all alias observation IDs: agreeing reported
+values take precedence over generated absences; conflicting reports remain
+ambiguous and inferred-only groups stay zero. The presence decoder accepts these
+reconciled groups without assuming that every multi-row group is ambiguous.
 Explicit collection actions read `analytics_distribution_product_month` or
 `analytics_shelf_category_month` with the selected category filter. Each read
 requires catalogue support and a complete collection within five pages/500 cells;
@@ -378,6 +384,16 @@ bundle hash, lifecycle status, row counts, timestamps and a bounded failure
 message. Domain publication and the successful status transition share a
 transaction.
 
+The register importer accepts an optional, externally supplied CSV of reviewed
+monthly source-reference to ERP mappings with inclusive month bounds. Targets
+must resolve uniquely and cannot contradict a known identity; overlapping ranges
+are rejected. The supplementary resolver is unaffected. Mapping rules and store
+identity dimensions join the source fingerprint when rules are supplied, allowing
+an audited replay with stable source observation IDs and unchanged measure parsing.
+An identical current bundle skips; a previously successful but superseded register
+bundle is rejected rather than silently considered current. Real mapping files
+remain private read-only inputs, separate from the public repository.
+
 ### Local database inspection
 
 The optional database UI is exposed only on the loopback interface. It is useful
@@ -436,6 +452,31 @@ retain product/source grain, explicit attribution failures and conservative
 assortment candidates. Ambiguous facts are not silently summed, missing measures
 remain distinct from zero, and current master attributes are labeled separately
 from observed historical attributes.
+
+The recognized supplementary register source supplies authoritative row revisions
+at the same store/month/source-GTIN grain. One supplementary row replaces monthly
+measures without field-level fallback; multiple retained rows remain ambiguous.
+All original observation IDs, source kinds and row/reporting counts are preserved,
+and product attribution still requires agreement across the source rows. Monthly
+cells without a revision keep the conservative duplicate rule. Migration
+`20261018_17` installs this guarantee with a reversible definition and requires
+publication and explicit reader-grant restoration before restarting consumers.
+
+For retained monthly register rows, missing revenue or units with their own
+change ratio exactly `-1` are normalized to zero in analytical publication under
+the confirmed producer convention. Other blanks, supplementary measures and
+volumes are unchanged. Source facts and raw reporting counts remain untouched;
+the product table labels convention zeros and preserves access to raw evidence.
+
+Historical typology comparisons use nonempty ASCII alphanumeric keys after
+Unicode NFKD decomposition and uppercasing, consistent with import normalization.
+Colliding rank candidates and invalid matching mappings still block exact
+assortment membership. Retailer-level context requires either a direct historical
+label or an alias with at least one valid rule and a single known target across
+all rules. A category-level error cannot alone suppress a consistent retailer
+alias, and a retailer alias does not establish category eligibility. These rules
+are installed by migration `20261017_16`; its refresh and reader-grant requirements
+are documented in the [monthly analytical contract](monthly-analytics.md).
 
 The analytical refresh command calculates dependencies in order from one
 repeatable-read snapshot and publishes all results and a success audit atomically.

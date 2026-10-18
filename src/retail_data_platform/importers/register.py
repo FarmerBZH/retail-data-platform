@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import hashlib
 import io
+import json
 import re
 import unicodedata
 import uuid
@@ -137,6 +138,15 @@ class StoreIdentity:
     data_sharing_code: str | None
     retail_panel_code: str | None
     legacy_store_id: str | None
+    erp_code: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class MonthlyStoreMapping:
+    source_reference: str
+    store_erp_code: str
+    valid_from: date
+    valid_to: date
 
 
 @dataclass(frozen=True, slots=True)
@@ -275,21 +285,116 @@ def discover_register_sources(source_directory: Path) -> SourceBundle:
     )
 
 
-def source_bundle_sha256(bundle: SourceBundle) -> str:
+def load_monthly_store_mappings(path: Path) -> tuple[MonthlyStoreMapping, ...]:
+    """Read reviewed, month-bounded aliases without exposing their private values."""
+    try:
+        if path.suffix.lower() != ".csv" or not 0 < path.stat().st_size <= 100_000:
+            raise RegisterSourceError("Monthly store mappings require a CSV within the size limit")
+        content = path.read_text(encoding="utf-8-sig")
+        reader = csv.reader(io.StringIO(content), strict=True)
+        if next(reader, None) != [
+            "source_store_reference",
+            "store_erp_code",
+            "valid_from",
+            "valid_to",
+        ]:
+            raise RegisterSourceError("Monthly store mappings have an unexpected header contract")
+        rules: list[MonthlyStoreMapping] = []
+        for line, row in enumerate(reader, 2):
+            if len(row) != 4 or len(rules) >= 1000:
+                raise RegisterSourceError(f"Monthly store mapping row {line} has an invalid shape")
+            reference, erp, first, last = map(clean_text, row)
+            if not normalize_key(reference) or len(reference) > 64 or not erp or len(erp) > 32:
+                raise RegisterSourceError(
+                    f"Monthly store mapping row {line} has an invalid identity"
+                )
+            try:
+                start, end = date.fromisoformat(first), date.fromisoformat(last)
+                if (
+                    start.isoformat() != first
+                    or end.isoformat() != last
+                    or start.day != 1
+                    or end.day != 1
+                    or start > end
+                ):
+                    raise ValueError
+            except ValueError:
+                raise RegisterSourceError(
+                    f"Monthly store mapping row {line} has an invalid month range"
+                ) from None
+            rule = MonthlyStoreMapping(normalize_key(reference), erp, start, end)
+            if any(
+                r.source_reference == rule.source_reference
+                and r.valid_from <= end
+                and start <= r.valid_to
+                for r in rules
+            ):
+                raise RegisterSourceError(f"Monthly store mapping row {line} overlaps another rule")
+            rules.append(rule)
+    except (UnicodeError, csv.Error):
+        raise RegisterSourceError(
+            "Monthly store mappings have invalid encoding or CSV syntax"
+        ) from None
+    except OSError:
+        raise RegisterSourceError("Monthly store mappings could not be read") from None
+    if not rules:
+        raise RegisterSourceError("Monthly store mappings must contain a reviewed rule")
+    return tuple(sorted(rules, key=lambda r: (r.source_reference, r.valid_from)))
+
+
+def source_bundle_sha256(
+    bundle: SourceBundle,
+    mappings: tuple[MonthlyStoreMapping, ...] = (),
+    stores: list[StoreIdentity] | None = None,
+) -> str:
     digest = hashlib.sha256(f"{DATASET}:{IMPORT_CONTRACT_VERSION}".encode())
     for source in (*bundle.monthly, bundle.supplement):
         digest.update(f"{source.kind}:{source.period}:{source.columns}".encode())
         with source.path.open("rb") as stream:
             while chunk := stream.read(1024 * 1024):
                 digest.update(chunk)
+    if mappings:
+        digest.update(b":reviewed-monthly-store-mappings:v1:")
+        digest.update(
+            json.dumps(
+                [
+                    (
+                        r.source_reference,
+                        r.store_erp_code,
+                        r.valid_from.isoformat(),
+                        r.valid_to.isoformat(),
+                    )
+                    for r in mappings
+                ],
+                separators=(",", ":"),
+            ).encode()
+        )
+        digest.update(
+            json.dumps(
+                sorted(
+                    (
+                        str(s.id),
+                        s.erp_code,
+                        s.data_sharing_code,
+                        s.retail_panel_code,
+                        s.legacy_store_id,
+                    )
+                    for s in (stores or [])
+                ),
+                separators=(",", ":"),
+            ).encode()
+        )
     return digest.hexdigest()
 
 
 class _StoreResolver:
-    def __init__(self, stores: list[StoreIdentity]) -> None:
+    def __init__(
+        self, stores: list[StoreIdentity], mappings: tuple[MonthlyStoreMapping, ...] = ()
+    ) -> None:
         self.sharing: dict[str, set[uuid.UUID]] = defaultdict(set)
         self.panel: dict[str, set[uuid.UUID]] = defaultdict(set)
         self.legacy: dict[str, set[uuid.UUID]] = defaultdict(set)
+        self.reviewed: dict[str, list[tuple[date, date, uuid.UUID]]] = defaultdict(list)
         for store in stores:
             for mapping, value in (
                 (self.sharing, store.data_sharing_code),
@@ -298,13 +403,36 @@ class _StoreResolver:
             ):
                 if key := normalize_key(value):
                     mapping[key].add(store.id)
+        for rule in mappings:
+            targets = {s.id for s in stores if s.erp_code == rule.store_erp_code}
+            if len(targets) != 1:
+                raise RegisterSourceError("Monthly store mapping target is absent or ambiguous")
+            self.reviewed[rule.source_reference].append(
+                (rule.valid_from, rule.valid_to, targets.pop())
+            )
 
     def resolve(
-        self, kind: str, primary: str, secondary: str | None
+        self, kind: str, primary: str, secondary: str | None, period: date | None = None
     ) -> tuple[uuid.UUID | None, str, str | None]:
         candidates: list[set[uuid.UUID]] = []
         methods: list[str] = []
         if kind == "monthly":
+            if period is not None:
+                reviewed = {
+                    target
+                    for start, end, target in self.reviewed.get(normalize_key(primary), [])
+                    if start <= period <= end
+                }
+                if len(reviewed) > 1:
+                    raise RegisterSourceError("Monthly store mapping has conflicting targets")
+                if reviewed:
+                    target = reviewed.pop()
+                    known = self.sharing.get(normalize_key(primary))
+                    if known and target not in known:
+                        raise RegisterSourceError(
+                            "Monthly store mapping contradicts a known store identity"
+                        )
+                    return target, "matched", "reviewed_monthly_mapping"
             if matches := self.sharing.get(normalize_key(primary)):
                 candidates.append(matches)
                 methods.append("data_sharing_code")
@@ -429,7 +557,7 @@ def _record_from_row(
         raise RegisterSourceError(f"Register row {line} has an invalid store reference")
     if not GTIN_PATTERN.fullmatch(gtin):
         raise RegisterSourceError(f"Register row {line} has an invalid product GTIN")
-    store_id, store_status, store_method = stores.resolve(source.kind, primary, secondary)
+    store_id, store_status, store_method = stores.resolve(source.kind, primary, secondary, period)
     product_id = products.get(gtin)
     identity = (
         f"{source.kind}|{period.isoformat()}|{normalize_key(primary)}|"
@@ -496,20 +624,16 @@ def _iter_source_records(
         yield record
 
 
-def import_register(source_directory: Path, engine: Engine | None = None) -> ImportSummary:
+def import_register(
+    source_directory: Path,
+    engine: Engine | None = None,
+    *,
+    store_mappings_file: Path | None = None,
+) -> ImportSummary:
     bundle = discover_register_sources(source_directory)
+    mappings = load_monthly_store_mappings(store_mappings_file) if store_mappings_file else ()
     database_engine = engine or create_database_engine()
-    checksum = source_bundle_sha256(bundle)
     with Session(database_engine) as session:
-        existing = session.scalar(
-            select(ImportRun.id).where(
-                ImportRun.dataset == DATASET,
-                ImportRun.source_sha256 == checksum,
-                ImportRun.status == ImportStatus.SUCCEEDED.value,
-            )
-        )
-        if existing is not None:
-            return ImportSummary(0, 0, 0, True)
         stores = [
             StoreIdentity(*row)
             for row in session.execute(
@@ -518,9 +642,34 @@ def import_register(source_directory: Path, engine: Engine | None = None) -> Imp
                     Store.data_sharing_code,
                     Store.retail_panel_code,
                     Store.legacy_store_id,
+                    Store.erp_code,
                 )
             ).all()
         ]
+        resolver = _StoreResolver(stores, mappings)
+        checksum = source_bundle_sha256(bundle, mappings, stores)
+        existing = session.scalar(
+            select(ImportRun.id).where(
+                ImportRun.dataset == DATASET,
+                ImportRun.source_sha256 == checksum,
+                ImportRun.status == ImportStatus.SUCCEEDED.value,
+            )
+        )
+        if existing is not None:
+            latest = session.scalar(
+                select(ImportRun.source_sha256)
+                .where(
+                    ImportRun.dataset == DATASET,
+                    ImportRun.status == ImportStatus.SUCCEEDED.value,
+                )
+                .order_by(ImportRun.completed_at.desc(), ImportRun.id.desc())
+                .limit(1)
+            )
+            if latest != checksum:
+                raise RegisterSourceError(
+                    "A superseded register bundle cannot replace the current publication implicitly"
+                )
+            return ImportSummary(0, 0, 0, True)
         products: dict[str, uuid.UUID] = {
             gtin: product_id
             for gtin, product_id in session.execute(select(Product.gtin, Product.id))
@@ -537,7 +686,6 @@ def import_register(source_directory: Path, engine: Engine | None = None) -> Imp
         session.flush()
         run_id = run.id
         session.commit()
-    resolver = _StoreResolver(stores)
     rows_read = 0
     rows_loaded = 0
     excluded_totals = 0

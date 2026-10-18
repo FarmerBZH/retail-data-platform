@@ -66,6 +66,23 @@ uv run retail-data import register \
   --source-dir /path/to/monthly-register-sources
 ```
 
+For a reviewed monthly store-reference conflict, the register command also accepts
+`--store-mappings-file /path/to/reviewed-monthly-store-mappings.csv`.
+The UTF-8 CSV has exactly the columns
+`source_store_reference,store_erp_code,valid_from,valid_to`, with inclusive ISO
+month-start dates. Keep real mappings outside the repository. Overlapping ranges,
+missing/ambiguous targets and contradictions with known store identities are
+rejected. Rules apply only to monthly rows inside their date range, never to the
+supplement. See the [reconciliation guarantees](docs/architecture.md#persistence).
+
+When mappings are supplied, the import fingerprint includes the normalized rules
+and store identity dimensions. Changing either therefore permits an audited,
+transactional replay of unchanged source files; observation IDs and measures keep
+their source contract. Repeating the currently published bundle skips the import.
+An older successful bundle superseded by another register publication is rejected
+rather than silently skipped or restored. Preserve the reviewed mapping file with
+the private run evidence; no private path or identifier is stored in public code.
+
 After the final import, publish the indexed analytical snapshot:
 
 ```bash

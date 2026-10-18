@@ -10,6 +10,7 @@ from retail_data_platform.importers.register import (
     MONTHLY_COLUMNS,
     MONTHLY_RECENT_COLUMNS,
     SUPPLEMENT_COLUMNS,
+    MonthlyStoreMapping,
     RegisterRecord,
     RegisterSourceError,
     StoreIdentity,
@@ -18,6 +19,8 @@ from retail_data_platform.importers.register import (
     _record_from_row,
     _StoreResolver,
     discover_register_sources,
+    load_monthly_store_mappings,
+    source_bundle_sha256,
 )
 
 
@@ -98,6 +101,94 @@ def identities() -> tuple[_StoreResolver, dict[str, uuid.UUID]]:
     )
     products = {"1000000000001": uuid.UUID(int=11)}
     return stores, products
+
+
+def mapping_csv(path: Path, rows: str) -> Path:
+    path.write_text("source_store_reference,store_erp_code,valid_from,valid_to\n" + rows)
+    return path
+
+
+def test_reviewed_mapping_only_resolves_its_monthly_window(tmp_path: Path) -> None:
+    rules = load_monthly_store_mappings(
+        mapping_csv(
+            tmp_path / "mapping.csv",
+            "S-1,ERP-A,2025-01-01,2025-02-01\nALIAS-A,ERP-A,2025-01-01,2025-02-01\n",
+        )
+    )
+    a, b = uuid.UUID(int=1), uuid.UUID(int=2)
+    resolver = _StoreResolver(
+        [
+            StoreIdentity(a, "S-1", "PANEL", "M-1", "ERP-A"),
+            StoreIdentity(b, "S-1", "PANEL", "M-2", "ERP-B"),
+        ],
+        rules,
+    )
+    assert resolver.resolve("monthly", "S-1", None, date(2025, 1, 1)) == (
+        a,
+        "matched",
+        "reviewed_monthly_mapping",
+    )
+    assert resolver.resolve("monthly", "ALIAS-A", None, date(2025, 2, 1))[0] == a
+    assert resolver.resolve("monthly", "S-1", None, date(2025, 3, 1))[1] == "conflict"
+    assert resolver.resolve("supplement", "PANEL", "M-2", date(2025, 1, 1))[0] == b
+
+
+@pytest.mark.parametrize(
+    "rows",
+    [
+        "",
+        "S-1,ERP-A,2025-01-02,2025-02-01\n",
+        "S-1,ERP-A,2025-03-01,2025-02-01\n",
+        "S-1,ERP-A,invalid,2025-02-01\n",
+        "S-1,,2025-01-01,2025-02-01\n",
+        "S-1,ERP-A,2025-01-01,2025-02-01\nS1,ERP-B,2025-02-01,2025-03-01\n",
+        "S-1,ERP-A,2025-01-01\n",
+    ],
+)
+def test_rejects_malformed_or_overlapping_mappings(tmp_path: Path, rows: str) -> None:
+    with pytest.raises(RegisterSourceError):
+        load_monthly_store_mappings(mapping_csv(tmp_path / "mapping.csv", rows))
+
+
+def test_mapping_targets_must_be_unique_and_consistent() -> None:
+    rule = MonthlyStoreMapping("S1", "ERP-A", date(2025, 1, 1), date(2025, 2, 1))
+    for stores in [
+        [],
+        [StoreIdentity(uuid.UUID(int=n), None, None, None, "ERP-A") for n in [1, 2]],
+    ]:
+        with pytest.raises(RegisterSourceError, match="absent or ambiguous"):
+            _StoreResolver(stores, (rule,))
+    resolver = _StoreResolver(
+        [
+            StoreIdentity(uuid.UUID(int=1), None, None, None, "ERP-A"),
+            StoreIdentity(uuid.UUID(int=2), "S-1", None, None, "ERP-B"),
+        ],
+        (rule,),
+    )
+    with pytest.raises(RegisterSourceError, match="contradicts"):
+        resolver.resolve("monthly", "S-1", None, date(2025, 1, 1))
+
+
+def test_mapping_and_identity_changes_are_part_of_bundle_fingerprint(tmp_path: Path) -> None:
+    bundle = discover_register_sources(make_sources(tmp_path))
+    rule = MonthlyStoreMapping("S1", "ERP-A", date(2025, 1, 1), date(2025, 2, 1))
+    stores = [StoreIdentity(uuid.UUID(int=1), "S1", None, None, "ERP-A")]
+    before = source_bundle_sha256(bundle)
+    mapped = source_bundle_sha256(bundle, (rule,), stores)
+    assert before != mapped == source_bundle_sha256(bundle, (rule,), stores)
+    assert mapped != source_bundle_sha256(
+        bundle, (rule,), [StoreIdentity(uuid.UUID(int=2), "S1", None, None, "ERP-A")]
+    )
+
+
+def test_mapping_errors_do_not_echo_private_paths_or_values(tmp_path: Path) -> None:
+    for path in [
+        tmp_path / "PRIVATE.csv",
+        mapping_csv(tmp_path / "mapping.csv", "PRIVATE,PRIVATE,bad,bad\n"),
+    ]:
+        with pytest.raises(RegisterSourceError) as error:
+            load_monthly_store_mappings(path)
+        assert "PRIVATE" not in str(error.value)
 
 
 def read_records(source: Path) -> list[RegisterRecord]:

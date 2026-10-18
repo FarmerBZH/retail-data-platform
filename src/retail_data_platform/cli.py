@@ -48,6 +48,11 @@ def main() -> int:
     shelf_share.add_argument("--aliases-file", type=Path, required=True)
     register = datasets.add_parser("register", help="Import monthly register observations")
     register.add_argument("--source-dir", type=Path, required=True)
+    register.add_argument(
+        "--store-mappings-file",
+        type=Path,
+        help="Reviewed month-bounded source-reference to store-ERP CSV",
+    )
     for dataset_parser in (
         products,
         stores,
@@ -184,7 +189,9 @@ def main() -> int:
         return _after_import(args.refresh_analytics)
 
     if args.command == "import" and args.dataset == "register":
-        register_summary = import_register(args.source_dir)
+        register_summary = import_register(
+            args.source_dir, store_mappings_file=args.store_mappings_file
+        )
         print(
             json.dumps(
                 {

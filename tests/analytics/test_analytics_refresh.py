@@ -6,6 +6,7 @@ import os
 import uuid
 from collections.abc import Iterator
 from datetime import UTC, date, datetime
+from pathlib import Path
 
 import pytest
 from alembic import command
@@ -22,9 +23,13 @@ from retail_data_platform.analytics import (
 from retail_data_platform.database.models import (
     AnalyticsRefreshRun,
     ImportRun,
+    RegisterObservation,
     Store,
     TypologySnapshot,
 )
+from retail_data_platform.importers.register import RegisterSourceError, import_register
+from tests.importers.test_register import make_sources, mapping_csv
+from tests.support.analytics import product, store
 
 
 @pytest.fixture
@@ -66,6 +71,89 @@ def seed(database: Engine) -> uuid.UUID:
             )
         )
     return store_id
+
+
+def test_reviewed_register_replay_preserves_measures_and_rolls_back_invalid_input(
+    database: Engine, tmp_path: Path
+) -> None:
+    source = make_sources(tmp_path)
+    with Session(database) as session, session.begin():
+        a, b = store(session), store(session, "second")
+        a.erp_code, b.erp_code = "ERP-A", "ERP-B"
+        a.data_sharing_code = b.data_sharing_code = "S-1"
+        a.retail_panel_code = b.retail_panel_code = "PANEL"
+        a.legacy_store_id, b.legacy_store_id = "M-1", "M-2"
+        product(session)
+        a_id = a.id
+    assert not import_register(source, database).skipped
+    with database.connect() as c:
+        before = c.execute(
+            text(
+                "SELECT id,period,source_kind,source_gtin,revenue_value,units_sold "
+                "FROM register_observations ORDER BY id"
+            )
+        ).all()
+        assert (
+            c.scalar(
+                text(
+                    "SELECT store_match_status FROM register_observations "
+                    "WHERE source_kind='monthly' AND period='2025-01-01'"
+                )
+            )
+            == "conflict"
+        )
+    mapping = mapping_csv(tmp_path / "mappings.csv", "S-1,ERP-A,2025-01-01,2025-01-01\n")
+    assert not import_register(source, database, store_mappings_file=mapping).skipped
+    assert import_register(source, database, store_mappings_file=mapping).skipped
+    with Session(database) as session:
+        corrected = session.scalar(
+            select(RegisterObservation).where(
+                RegisterObservation.source_kind == "monthly",
+                RegisterObservation.period == date(2025, 1, 1),
+            )
+        )
+        assert corrected is not None and corrected.store_id == a_id
+        assert corrected.store_match_method == "reviewed_monthly_mapping"
+    with pytest.raises(RegisterSourceError, match="superseded"):
+        import_register(source, database)
+    invalid = source / "202502_export.csv"
+    invalid.write_text(invalid.read_text().replace("3,25", "invalid-private-number"))
+    with pytest.raises(RegisterSourceError):
+        import_register(source, database, store_mappings_file=mapping)
+    with database.connect() as c:
+        after = c.execute(
+            text(
+                "SELECT id,period,source_kind,source_gtin,revenue_value,units_sold "
+                "FROM register_observations ORDER BY id"
+            )
+        ).all()
+        assert after == before
+        assert (
+            c.scalar(
+                text(
+                    "SELECT store_id FROM register_observations "
+                    "WHERE source_kind='monthly' AND period='2025-01-01'"
+                )
+            )
+            == a_id
+        )
+        assert (
+            c.scalar(
+                text(
+                    "SELECT count(*) FROM import_runs "
+                    "WHERE status='succeeded' AND dataset='register'"
+                )
+            )
+            == 2
+        )
+        assert (
+            c.scalar(
+                text(
+                    "SELECT count(*) FROM import_runs WHERE status='failed' AND dataset='register'"
+                )
+            )
+            == 1
+        )
 
 
 def import_success(database: Engine) -> None:
